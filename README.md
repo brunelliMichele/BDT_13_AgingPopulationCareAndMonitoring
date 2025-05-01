@@ -22,20 +22,20 @@ Design and prototype a big data system to assist caregivers and healthcare provi
 - Freely downloadable (GitHub)
 
   ------------------------------------------------------------------------------------------------
-3. [Cerebromicrovascular Disease in Elderly with Diabetes] (https://physionet.org/content/cded/1.0.1/Data_Description/#files-panel)
+3. [Cerebromicrovascular Disease in Elderly with Diabetes](https://physionet.org/content/cded/1.0.1/Data_Description/#files-panel)
    - Description: this database contains multimodal data from a large study investigating the effects of ischemic stroke on cerebral vasoregulation. The cross         sectional study compared 60 subjects who suffered strokes, to 60 control subjects, collecting the following data for each patient across multiple days.
    - Contains several medical parameters: age, height, mass, BMI, body composition, # glucose, # hemoglobin, etc
    - Pros: a lot of variables. Selection is needed
    - Cons: the number of patients is too low for training a ML, unless we use the dataset composition to iteravely produce synthetic data.
    - Freely downloadable (PhysioNet)
-4. [Smart Home Dataset] (https://data.mendeley.com/datasets/zgsw84b2ff/1)
+4. [Smart Home Dataset](https://data.mendeley.com/datasets/zgsw84b2ff/1)
    - Description: 29 sensors are placed on carpets, doors, lights, bed, couch, fridge, oven, tv, and wardrobes. In addition to these sensors, the dataset also     
    contains the activity column that describes what activity (eat, sleep, work, personal, other, or anomaly) being simulated.
    Another column included in the dataset is the timestamps. This captures the time the sensor was activated and aggregated accordingly during the aggregation 
    phase of the simulation process.
    - CSV data containing binary and timestamp variables
    - Freely downloadable (Mendeley data)
-6. [MQTT-Sensors linkage Github project] (https://github.com/glmorandi/mqtt-iot-sensor/tree/main)
+6. [MQTT-Sensors linkage Github project](https://github.com/glmorandi/mqtt-iot-sensor/tree/main)
    - Description: collects and visualizes simulated IoT sensor data (temperature, humidity, vibration, luminosity) with real-time monitoring, a web interface,     
      Discord webhook and MQTT.
    - Freely downloadable (GitHub)
