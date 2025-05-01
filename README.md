@@ -3,7 +3,7 @@ Design and prototype a big data system to assist caregivers and healthcare provi
 
 
 ## Potential Data Sources:
-1. (MIMIC-III Clinical Database)[https://physionet.org/content/mimiciii/1.4/]
+1. [MIMIC-III Clinical Database](https://physionet.org/content/mimiciii/1.4/)
 - ICU Dataset 
     - Contains data from 40,000+ ICU patients (2001–2012)
     - ~58,000 hospital stays
@@ -13,7 +13,7 @@ Design and prototype a big data system to assist caregivers and healthcare provi
 - Requires signing a data agreement + basic ethics training (CITI course). Free to use once approved—common process for medical data
 
 
-(2. Synthetic Patient Population Simulator)[https://github.com/synthetichealth/synthea]
+2. [Synthetic Patient Population Simulator](https://github.com/synthetichealth/synthea)
 - Open-source tool simulating *virtual patient lifespans* (birth to death) using clinical guidelines. 
 - Outputs structured data (FHIR, CSV) with demographics, diagnoses (ICD-10), meds (RxNorm), labs (LOINC), encounters, and social determinants.  
 - Generates massive datasets (millions of synthetic patients) for ML/AI training (e.g., predictive models, EHR interoperability testing) without privacy constraints
