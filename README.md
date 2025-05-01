@@ -39,3 +39,7 @@ Design and prototype a big data system to assist caregivers and healthcare provi
    - Description: collects and visualizes simulated IoT sensor data (temperature, humidity, vibration, luminosity) with real-time monitoring, a web interface,     
      Discord webhook and MQTT.
    - Freely downloadable (GitHub)
+7. [Elderly-people-Explainable-Action-Recognition](https://github.com/Xavi3398/Elderly-people-Explainable-Action-Recognition/tree/main)
+   - Description: includes training of TimeSformer, TANet and TPN networks on the human activity recognition from video task using the ETRI-Activity3D dataset,         and the generation of separated space and time explanations
+         - ETRI-Activity3D dataset: large-scale RGB-D dataset of daily activity of the elderly for human care robots. The dataset is collected by Kinect v2 sensors             and consists of three synchronized data modalities: RGB videos, depth maps, and skeleton sequences. (https://ai4robot.github.io/etri-activity3d-en/#)
+     
