@@ -42,4 +42,6 @@ Design and prototype a big data system to assist caregivers and healthcare provi
 7. [Elderly-people-Explainable-Action-Recognition](https://github.com/Xavi3398/Elderly-people-Explainable-Action-Recognition/tree/main)
    - Description: includes training of TimeSformer, TANet and TPN networks on the human activity recognition from video task using the ETRI-Activity3D dataset,         and the generation of separated space and time explanations
    - ETRI-Activity3D dataset: large-scale RGB-D dataset of daily activity of the elderly for human care robots. The dataset is collected by Kinect v2 sensors             and consists of three synchronized data modalities: RGB videos, depth maps, and skeleton sequences. (https://ai4robot.github.io/etri-activity3d-en/#)
-     
+8. [Kaggle - Healthcare Dataset](https://www.kaggle.com/datasets/prasad22/healthcare-dataset)
+   - This synthetic healthcare dataset has been created to serve as a valuable resource for data science, machine learning, and data analysis enthusiasts. It is designed to mimic real-world healthcare data, enabling users to practice, develop, and showcase their data manipulation and analysis skills in the context of the healthcare industry.
+
