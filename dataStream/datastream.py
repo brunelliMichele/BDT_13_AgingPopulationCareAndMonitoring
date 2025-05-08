@@ -30,12 +30,12 @@ def simulateDataStream(csv_path, limit = None):
             "description": row["DESCRIPTION"],
             "value": row["VALUE"],
             "units": row["UNITS"]
-        }
+        } 
         print(obs)
 
 # test code
-path_observations = "data/csv/observations.csv"
-simulateDataStream(path_observations, 20)
+path_observations = "data/csv/medical/observations.csv"
+simulateDataStream(path_observations)
 
 """ # for running with cli
 if __name__ == "__main__":
