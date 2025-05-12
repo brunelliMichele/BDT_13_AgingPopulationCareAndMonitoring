@@ -11,7 +11,7 @@ config = {
 producer = Producer(config)
 
 # load csv data
-df = pd.read_csv("smart_home_dataset.csv")
+df = pd.read_csv("../data/csv/smart_home_sensor/smart_home_dataset.csv")
 
 # convertion of column "DATE" in timestamp and sort by time
 df["DATE"] = df["DATE"].str.replace("_", ":") # modify time from 07_01_55 to 07:01:55
