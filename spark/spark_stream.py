@@ -8,7 +8,7 @@ spark = SparkSession.builder \
     .getOrCreate()
 
 # read from kafka topic
-df = spark.readStrem \
+df = spark.readStream \
     .format("kafka") \
     .option("kafka.bootstrap.servers", "kafka:9092") \
     .option("subscribe", "smart_home_sensors") \
