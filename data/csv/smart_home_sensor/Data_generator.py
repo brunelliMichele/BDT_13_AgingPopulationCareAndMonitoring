@@ -15,7 +15,7 @@ def device_type(room):
     }
     return devices_by_room.get(room, [])
 
-def get_temperature(min_temp=10.0, max_temp=30.0, anomaly_chance=0.01):
+def get_temperature(min_temp=10.0, max_temp=30.0, anomaly_chance=0.001):
     if random.random() < anomaly_chance:
         if random.choice(["low", "high"]) == "low":
             return round(random.uniform(5.0, min_temp - 0.1), 1)
@@ -24,8 +24,7 @@ def get_temperature(min_temp=10.0, max_temp=30.0, anomaly_chance=0.01):
     else:
         return round(random.uniform(min_temp, max_temp), 1)
 
-
-def get_humidity(min_humidity=40.0, max_humidity=60.0, anomaly_chance=0.01):
+def get_humidity(min_humidity=40.0, max_humidity=60.0, anomaly_chance=0.001):
     if random.random() < anomaly_chance:
         if random.choice(["low", "high"]) == "low":
             return round(random.uniform(20.0, min_humidity - 0.1), 1)
@@ -33,7 +32,6 @@ def get_humidity(min_humidity=40.0, max_humidity=60.0, anomaly_chance=0.01):
             return round(random.uniform(max_humidity + 0.1, 80.0), 1)
     else:
         return round(random.uniform(min_humidity, max_humidity), 1)
-
 
 def get_status():
     return random.choice(["On", "Off"])
@@ -50,11 +48,11 @@ def simulate_realtime():
         timestamp_str = current_time.strftime("%Y-%m-%d %H:%M:%S")
 
         snapshot = {}
-        alerts = []  
+        alerts = []
 
         for patient_id in people:
+            user_id = f"user_{str(patient_id).zfill(3)}"
             person_data = {
-                "patient_id": f"user_{str(patient_id).zfill(3)}",
                 "rooms": {}
             }
 
@@ -64,12 +62,12 @@ def simulate_realtime():
                 humidity = get_humidity()
                 appliances_data = {}
 
-                # Alerts (Temperature and Humidity)
-                alert_temp = check_temperature_alert(temperature, room, person_data["patient_id"])
+                # Alerts
+                alert_temp = check_temperature_alert(temperature, room, user_id)
                 if alert_temp:
                     alerts.append(alert_temp)
 
-                alert_humidity = check_humidity_alert(humidity, room, person_data["patient_id"])
+                alert_humidity = check_humidity_alert(humidity, room, user_id)
                 if alert_humidity:
                     alerts.append(alert_humidity)
 
@@ -92,8 +90,7 @@ def simulate_realtime():
                         "Duration": duration
                     }
 
-                    # Alert Duration appliances (min)
-                    alert_duration = check_device_duration_alert(appliance, duration, room, person_data["patient_id"])
+                    alert_duration = check_device_duration_alert(appliance, duration, room, user_id)
                     if alert_duration:
                         alerts.append(alert_duration)
 
@@ -108,14 +105,13 @@ def simulate_realtime():
                     "appliances": appliances_data
                 }
 
-            snapshot[person_data["patient_id"]] = person_data
-
-        output = {timestamp_str: snapshot}
+            snapshot[user_id] = {
+                timestamp_str: person_data
+            }
 
         with open("house_data.json", "w") as json_file:
-            json.dump(output, json_file, indent=4)
+            json.dump(snapshot, json_file, indent=4)
 
-        
         if alerts:
             with open("alerts.log", "a") as alert_file:
                 for alert in alerts:
