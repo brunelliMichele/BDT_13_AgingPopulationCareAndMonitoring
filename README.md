@@ -5,23 +5,28 @@
 ## Description 
 Design and prototype a big data system to assist caregivers and healthcare providers in supporting the elderly. Collect data from wearable health monitors, smart home sensors (motion detection, fridge usage, etc.), and medical records. Leverage real-time analytics (Spark/Flink) to detect changes in daily routines or health indicators (e.g., sudden changes in heart rate or mobility), triggering alerts for potential emergencies. Use machine learning to predict risk of falls, hospital readmissions, or medication non-adherence.
 ## Suggested timeline
-- Data Exploration & Design (Weeks 1-2)
-   -[]Identify and acquire real or synthetic data (determine sources, volume, structure).
-   -[]Define requirements (pipeline stages, potential data flow, big data tools to be used).
--Prototype & Infrastructure Setup (Weeks 3-5)
-   -[]Set up and configure the chosen technologies (Spark, Kafka, databases, etc.).
-   -[]Implement the initial data ingestion and storage components.
-   -[]Validate the basic end-to-end flow with a small sample of data.
--Core Functionality & Analytics (Weeks 6-8)
-   -[]Implement the main processing logic (batch or streaming) using Spark/Dask/Flink or a combination thereof.
-   -[]If relevant, build the analytics or machine learning models on top of the processed data.
--Integration & Demo Preparation (Weeks 9-11)
-   -[]Integrate all components into a single cohesive system (mind docker).
-   -[]Develop a real-time dashboard or a clear demonstration interface to show results.
--Refinement & Final Presentation (Weeks 12+)
-   -[]Optimize or refine any pipeline components if time allows.
-   -[]Prepare the 10-slide deck and codebase for submission.
-   -[]Conduct a live demo (real-time, if applicable) during the oral exam.
+- Data Exploration & Design (Weeks 1–2)
+   - [ ] Identify and acquire real or synthetic data (determine sources, volume, structure).
+   - [ ] Define requirements (pipeline stages, potential data flow, big data tools to be used).
+
+- Prototype & Infrastructure Setup (Weeks 3–5)
+   - [ ] Set up and configure the chosen technologies (Spark, Kafka, databases, etc.).
+   - [ ] Implement the initial data ingestion and storage components.
+   - [ ] Validate the basic end-to-end flow with a small sample of data.
+
+- Core Functionality & Analytics (Weeks 6–8)
+   - [ ] Implement the main processing logic (batch or streaming) using Spark/Dask/Flink or a combination thereof.
+   - [ ] If relevant, build the analytics or machine learning models on top of the processed data.
+
+- Integration & Demo Preparation (Weeks 9–11)
+   - [ ] Integrate all components into a single cohesive system (mind Docker).
+   - [ ] Develop a real-time dashboard or a clear demonstration interface to show results.
+
+- Refinement & Final Presentation (Weeks 12+)
+   - [ ] Optimize or refine any pipeline components if time allows.
+   - [ ] Prepare the 10-slide deck and codebase for submission.
+   - [ ] Conduct a live demo (real-time, if applicable) during the oral exam.
+
 # CARES (Caregiver Assistance and Remote Elderly Supervision)
 Design and prototype a big data system to assist caregivers and healthcare providers in supporting the elderly. Collect data from wearable health monitors, smart home sensors (motion detection, fridge usage, etc.), and medical records.
 ## Abstract
