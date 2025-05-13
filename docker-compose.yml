@@ -20,7 +20,7 @@ services:
         restart: always
 
     spark:
-        image: bitnami/spark:latest
+        build: ./spark
         depends_on:
             - kafka
         volumes:
@@ -34,7 +34,7 @@ services:
         restart: always
 
     injector:
-        image: python:3.10-slim
+        build: ./kafka
         depends_on:
             - kafka
         volumes:
