@@ -1,2 +1,2 @@
-pandas
-confluent_kafka
+pytz
+confluent-kafka

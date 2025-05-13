@@ -33,15 +33,12 @@ services:
                 /spark/spark_stream.py"
         restart: always
 
-    injector:
+    data_injector:
         build: ./kafka
         depends_on:
             - kafka
-        volumes:
-            - ./kafka:/BDT_13/kafka
-            - ./data:/BDT_13/data
-        working_dir: /BDT_13/kafka
-        command: bash -c "pip install -r requirements.txt && python3 injection.py"
+        command: python3 Data_generator.py
+        restart: always
     
     db:
         image: postgres:14.5

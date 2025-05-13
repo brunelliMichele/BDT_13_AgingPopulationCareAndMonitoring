@@ -4,6 +4,7 @@ import json
 from datetime import datetime
 from Alert_functions import *
 import pytz
+from confluent_kafka import Producer
 
 def device_type(room):
     devices_by_room = {
@@ -39,7 +40,23 @@ def get_status():
 # Patients
 people = list(range(1, 21))
 
+# error handling for kafka
+def delivery_report(err, msg):
+    if err is not None:
+        print(f"Error raised: {err}")
+    else:
+        print(f"Sended: {msg.value().decode('utf-8')}")
+
 def simulate_realtime():
+
+    # configuration of Kafka Server
+    config = {
+        "bootstrap.servers": "kafka:9092"
+    }
+
+    # open connection with Kafka Server
+    producer = Producer(config)
+
     rooms = ["Kitchen", "Living Room", "Bathroom", "Bedroom", "Laundry Room"]
     person_device_states = {patient_id: {} for patient_id in people}
 
@@ -111,6 +128,9 @@ def simulate_realtime():
 
         with open("house_data.json", "w") as json_file:
             json.dump(snapshot, json_file, indent=4)
+
+        producer.produce("smart_home_data", value = json.dumps(snapshot).encode('utf-8'), callback = delivery_report)
+        producer.flush()
 
         if alerts:
             with open("alerts.log", "a") as alert_file:
