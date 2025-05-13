@@ -6,7 +6,7 @@
 Design and prototype a big data system to assist caregivers and healthcare providers in supporting the elderly. Collect data from wearable health monitors, smart home sensors (motion detection, fridge usage, etc.), and medical records. Leverage real-time analytics (Spark/Flink) to detect changes in daily routines or health indicators (e.g., sudden changes in heart rate or mobility), triggering alerts for potential emergencies. Use machine learning to predict risk of falls, hospital readmissions, or medication non-adherence.
 ## Suggested timeline
 - Data Exploration & Design (Weeks 1–2)
-   - [ ] Identify and acquire real or synthetic data (determine sources, volume, structure).
+   - [X] Identify and acquire real or synthetic data (determine sources, volume, structure).
    - [ ] Define requirements (pipeline stages, potential data flow, big data tools to be used).
 
 - Prototype & Infrastructure Setup (Weeks 3–5)
