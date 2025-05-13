@@ -3,6 +3,7 @@ services:
         image: confluentinc/cp-zookeeper:7.4.0
         environment:
             ZOOKEEPER_CLIENT_PORT: 2181
+        restart: always
 
     kafka:
         image: confluentinc/cp-kafka:7.4.0
@@ -41,3 +42,20 @@ services:
             - ./data:/BDT_13/data
         working_dir: /BDT_13/kafka
         command: bash -c "pip install -r requirements.txt && python3 injection.py"
+    
+    db:
+        image: postgres:14.5
+        environment:
+            POSTGRES_USER: user
+            POSTGRES_PASSWORD: password
+            POSTGRES_DB: mydb
+        ports: 
+            - "5432:5432"
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+            - ./database/init:/docker-entrypoint-initdb.d
+            - ./datbase/data:/data
+        restart: always
+
+volumes:
+    pgdata:
