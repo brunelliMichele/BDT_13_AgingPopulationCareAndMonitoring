@@ -48,13 +48,13 @@ services:
         environment:
             POSTGRES_USER: user
             POSTGRES_PASSWORD: password
-            POSTGRES_DB: mydb
+            POSTGRES_DB: medicalData
         ports: 
             - "5432:5432"
         volumes:
             - pgdata:/var/lib/postgresql/data
-            - ./database/init:/docker-entrypoint-initdb.d
-            - ./datbase/data:/data
+            - ./postgres/init:/docker-entrypoint-initdb.d
+            - ./postgres/data:/data
         restart: always
 
 volumes:
