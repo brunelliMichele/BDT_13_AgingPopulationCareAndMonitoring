@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <!-- CSS -->
+        <!-- CSS sheet -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <title>CARES</title>
     </head>
@@ -11,7 +11,41 @@
         <div class="container py-4">
             <h1 class="mb-4 text-center">CARES (Caregiver Assistance and Remote Elderly Supervision)</h1>
         </div>
-    <!-- JS -->
+        <div id="smart_home_data">
+
+        </div>
+    <!-- JS script -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const socket = io();
+        socket.on('connect', () => console.log("✅ Socket connected")); // for debugging
+
+        socket.on("kafka_message", function(msg) {
+            console.log("📥 Kafka Message:", msg); // for debugging
+            const data = JSON.parse(msg.data); // recives JSON file from server
+
+            const container = document.getElementById("smart_home_data"); // get the html container
+            container.innerHTML = ""; // clean up the html container
+
+            for(const user in data) {
+                const time_stamp = Object.keys(data[user])[0];
+                const rooms = data[user][time_stamp].rooms;
+
+                container.innerHTML += "<h3>User: ${user} - ${time_stamp}</h3>";
+
+                for(const room in rooms) {
+                    const r = rooms[room];
+                    
+                    container.innerHTML += "<h4>${room}</h4><p>🌡️ Temp: ${r.temperature}°C — 💧 Humidity: ${r.humidity}%</p><ul>" + Object.entries(r.appliances).map(([app, info]) => {
+                    if (info.Status === "On") {
+                        return "<li>⚙️ ${app}: ${info.Status} (${info['Duration (min)'']} min)</li>";
+                    }
+                    return "";
+                    }).join("") + "</ul>";
+                }
+            }
+        });
+    </script>
     </body>
 </html>
