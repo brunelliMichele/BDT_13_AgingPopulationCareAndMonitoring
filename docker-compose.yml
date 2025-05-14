@@ -54,5 +54,15 @@ services:
             - ./postgres/data:/data
         restart: always
 
+    flask_web:
+        build: ./flask_app
+        ports:
+            - "8000:8000"
+        volumes:
+            - ./flask_app:/app
+        depends_on:
+            - kafka
+            - db
+        restart: always    
 volumes:
     pgdata:
