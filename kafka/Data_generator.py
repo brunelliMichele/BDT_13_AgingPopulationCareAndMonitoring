@@ -45,7 +45,7 @@ def delivery_report(err, msg):
     if err is not None:
         print(f"Error raised: {err}")
     else:
-        print(f"Sended: {msg.value().decode('utf-8')}")
+        print(f"Message sended to {msg.topic()}")
 
 def simulate_realtime():
 

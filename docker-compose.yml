@@ -1,10 +1,18 @@
 services:
-    zookeeper:
-        image: confluentinc/cp-zookeeper:7.6.0
+    db:
+        image: postgres:14.5
         environment:
-            ZOOKEEPER_CLIENT_PORT: 2181
+            POSTGRES_USER: user
+            POSTGRES_PASSWORD: password
+            POSTGRES_DB: medicalData
+        ports: 
+            - "5432:5432"
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+            - ./postgres/init:/docker-entrypoint-initdb.d
+            - ./postgres/data:/data
         restart: always
-
+    
     kafka:
         image: confluentinc/cp-kafka:7.6.0
         ports:
@@ -17,6 +25,19 @@ services:
             KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
             KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
             KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+        restart: always
+    
+    data_injector:
+        build: ./kafka
+        depends_on:
+            - kafka
+        command: python3 Data_generator.py
+        restart: always
+
+    zookeeper:
+        image: confluentinc/cp-zookeeper:7.6.0
+        environment:
+            ZOOKEEPER_CLIENT_PORT: 2181
         restart: always
 
     spark:
@@ -33,27 +54,6 @@ services:
                 /spark/spark_stream.py"
         restart: always
 
-    data_injector:
-        build: ./kafka
-        depends_on:
-            - kafka
-        command: python3 Data_generator.py
-        restart: always
-    
-    db:
-        image: postgres:14.5
-        environment:
-            POSTGRES_USER: user
-            POSTGRES_PASSWORD: password
-            POSTGRES_DB: medicalData
-        ports: 
-            - "5432:5432"
-        volumes:
-            - pgdata:/var/lib/postgresql/data
-            - ./postgres/init:/docker-entrypoint-initdb.d
-            - ./postgres/data:/data
-        restart: always
-
     flask_web:
         build: ./flask_app
         ports:
@@ -66,3 +66,7 @@ services:
         restart: always    
 volumes:
     pgdata:
+
+networks:
+    default:
+        name: bdt_network
