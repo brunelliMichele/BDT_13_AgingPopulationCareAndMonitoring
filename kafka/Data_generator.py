@@ -38,7 +38,8 @@ def get_status():
     return random.choice(["On", "Off"])
 
 # Patients
-people = list(range(1, 21))
+# people = list(range(1, 21))
+people = [1]
 
 # error handling for kafka
 def delivery_report(err, msg):
@@ -131,6 +132,7 @@ def simulate_realtime():
 
         producer.produce("smart_home_data", value = json.dumps(snapshot).encode('utf-8'), callback = delivery_report)
         producer.flush()
+        print(f"[KAFKA] - Send message {snapshot} on topic 'smart_home_data")
 
         if alerts:
             with open("alerts.log", "a") as alert_file:

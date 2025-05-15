@@ -5,8 +5,12 @@ import threading
 import json
 
 # create flask app and initialize webSocket
-app = Flask(__name__)
-socket_io = SocketIO(app)
+app = Flask(
+    __name__,
+    static_folder = "static",
+    template_folder = "templates"
+    )
+socket_io = SocketIO(app, cors_allowed_origins = "*")
 
 # Kafka Config
 kafka_config = {
@@ -29,8 +33,9 @@ def consume_kafka():
             print(f"[KAFKA] - Error: {msg.error()}")
             continue
         data = msg.value().decode("utf-8")
-        print(f"[KAFKA] - {data}") # just for debugging
+        print(f"[KAFKA] - {data}") # debugging
         socket_io.emit("kafka_message", {"data": data})
+        print(f"[SocketIO] - Emit: {data}") # debugging
     
     consumer.close()
 
@@ -39,12 +44,12 @@ def consume_kafka():
 def index():
     return render_template("index.html")
 
-@app.route('/test')
+@app.route('/test_emit')
 def test_emit():
     socket_io.emit('kafka_message', {'data': '{"test": "OK"}'})
-    return "Sent"
+    return "Message Sent"
 
 # run flask app and kafka consumer on localhost:5000
 if __name__ == "__main__":
-    threading.Thread(target = consume_kafka, daemon = True).start()
-    socket_io.run(app, host="0.0.0.0", port=8000, debug=True) # debug=True just for develop
+    socket_io.start_background_task(consume_kafka)
+    socket_io.run(app, host="0.0.0.0", port=8000, debug=True) # debug=True just for debugging
