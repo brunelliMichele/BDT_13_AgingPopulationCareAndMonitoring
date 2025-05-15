@@ -38,8 +38,7 @@ def get_status():
     return random.choice(["On", "Off"])
 
 # Patients
-# people = list(range(1, 21))
-people = [1]
+people = list(range(1, 21))
 
 # error handling for kafka
 def delivery_report(err, msg):
