@@ -61,7 +61,8 @@ Access the dashboard at `http://127.0.0.1:[OUR_PORT]`.
 
 ## Components Description
 ### UI
-XXX
+![UI-WireFrame](images/WireFrame.png)
+
 ## Database
 XXX
 ## Kafka
