@@ -61,7 +61,8 @@ Access the dashboard at `http://127.0.0.1:[OUR_PORT]`.
 
 ## Components Description
 ### UI
-XXX
+![UI-WireFrame](images/WireFrame.png)
+
 ## Database
 XXX
 ## Kafka
@@ -94,4 +95,4 @@ This project was created by group 13, consisting of:
  - Luca Frank - [@Luca-Frank](https://github.com/Luca-Frank)
  - Antonio - [@Mazza00](https://github.com/Mazza00)
  - Michele Brunelli - [@brunelliMichele](https://github.com/brunelliMichele)
- - Franco - [@Franco](https://github.com/)
+ - Francesco Danesi - [@FrancescoDanesi126](https://github.com/Francescodanesi126)
