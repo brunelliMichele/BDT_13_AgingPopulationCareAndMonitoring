@@ -4,7 +4,8 @@ eventlet.monkey_patch()
 from flask import Flask, render_template
 from flask_socketio import SocketIO
 from confluent_kafka import Consumer
-import threading
+import psycopg2
+import os
 
 # create flask app and initialize webSocket
 app = Flask(
@@ -51,15 +52,50 @@ def consume_kafka():
         print("❌ EXCEPTION in Kafka thread:")
         traceback.print_exc()
 
+# set postgres connection
+def get_db_connection():
+    return psycopg2.connect(
+        host = os.environ.get("DB_HOST", "db"),
+        port = 5432,
+        database = os.environ.get("DB_NAME", "medicalData"),
+        user = os.environ.get("DB_USER", "user"),
+        password = os.environ.get("DB_PASSWORD", "password")
+    )
+
 # set primary route
 @app.route("/")
 def index():
-    # return render_template("index.html")
-    return "Flask is running"
+    return render_template("index.html")
+
+@app.route("/patient/<string:patient_id>")
+def patient_detail(patient_id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("SELECT id, birthdate, deathdate, gender, birthplace, address, city, county FROM patients WHERE id = %s", (patient_id,))
+    patient = cur.fetchone()
+
+    cur.close()
+    conn.close()
+
+    if patient:
+        patient_data = {
+            "id": patient[0],
+            "birthdate": patient[1],
+            "deathdate": patient[2],
+            "gender": patient[3],
+            "birthplace": patient[4],
+            "address": patient[5],
+            "city": patient[6],
+            "county": patient[7]
+        }
+        return render_template("patient.html", patient = patient_data)
+    else:
+        return f"No patient with ID {patient_id}", 404
 
 # run flask app and kafka consumer on localhost:8000
 if __name__ == "__main__":
     print(f"Starting FLASK...")
-    socket_io.start_background_task(consume_kafka) # whitout this all works properly
+    # socket_io.start_background_task(consume_kafka) # whitout this all works properly
     # print(f"Started KAFKA THREAD!")
     socket_io.run(app, host="0.0.0.0", port=8000)

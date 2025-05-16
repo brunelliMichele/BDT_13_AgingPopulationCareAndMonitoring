@@ -2,3 +2,4 @@ flask
 flask-socketio
 eventlet
 confluent-kafka
+psycopg2-binary
