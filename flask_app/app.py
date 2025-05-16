@@ -62,17 +62,54 @@ def get_db_connection():
         password = os.environ.get("DB_PASSWORD", "password")
     )
 
-# set primary route
+# get all patients from postgres
+def get_all_patients():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id, first, middle, last, city, birthdate FROM patients")
+    rows = cur.fetchall()
+    patients = []
+    for row in rows:
+        patients.append({
+            "id": row[0],
+            "name": row[1],
+            "middlename": row[2],
+            "surname": row[3],
+            "city": row[4],
+            "birthdate": row[5],
+            "url": f"/patient/{row[0]}"
+        })
+    cur.close()
+    conn.close()
+    return patients
+
+# get all cities from postgres
+def get_all_cities():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT DISTINCT city FROM patients WHERE city IS NOT NULL ORDER BY city;")
+    rows = cur.fetchall()
+    cities = [row[0] for row in rows]
+
+    cur.close()
+    conn.close()
+    return cities
+
+
+# set route for main page
 @app.route("/")
 def index():
-    return render_template("index.html")
+    cities = get_all_cities()
+    patients = get_all_patients()
+    return render_template("index.html", cities=cities, patients=patients)
 
+# set route for patient detail page
 @app.route("/patient/<string:patient_id>")
 def patient_detail(patient_id):
     conn = get_db_connection()
     cur = conn.cursor()
 
-    cur.execute("SELECT id, birthdate, deathdate, gender, birthplace, address, city, county FROM patients WHERE id = %s", (patient_id,))
+    cur.execute("SELECT id, birthdate, deathdate, gender, birthplace, address, city, county, first, middle, last FROM patients WHERE id = %s", (patient_id,))
     patient = cur.fetchone()
 
     cur.close()
@@ -87,7 +124,10 @@ def patient_detail(patient_id):
             "birthplace": patient[4],
             "address": patient[5],
             "city": patient[6],
-            "county": patient[7]
+            "county": patient[7],
+            "name": patient[8],
+            "middlename": patient[9],
+            "surname": patient[10]
         }
         return render_template("patient.html", patient = patient_data)
     else:
