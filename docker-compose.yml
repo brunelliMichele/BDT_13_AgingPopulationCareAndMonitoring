@@ -63,6 +63,11 @@ services:
         depends_on:
             - kafka
             - db
+        environment:
+            - DB_HOST=db
+            - DB_NAME=medicalData
+            - DB_USER=user
+            - DB_PASSWORD=password
         restart: always    
 volumes:
     pgdata:
