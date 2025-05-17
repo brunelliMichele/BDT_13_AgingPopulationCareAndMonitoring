@@ -131,13 +131,14 @@ def simulate_realtime():
 
         producer.produce("smart_home_data", value = json.dumps(snapshot).encode('utf-8'), callback = delivery_report)
         producer.flush()
-        print(f"[KAFKA] - Send message {snapshot} on topic 'smart_home_data")
+        print(f"[KAFKA] - Send message {json.dumps(snapshot)[:100]} on topic 'smart_home_data")
 
         if alerts:
             with open("alerts.log", "a") as alert_file:
                 for alert in alerts:
                     alert_file.write(f"{timestamp_str} {alert}\n")
             print(f"[{current_time}] ALERTS TRIGGERED:\n" + "\n".join(alerts))
+            producer.produce("alert_topic", value = json.dumps(alert).encode("utf-8"), callback = delivery_report)
         else:
             print(f"[{current_time}] No alerts. System operating normally.")
 
