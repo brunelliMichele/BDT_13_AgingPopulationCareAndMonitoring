@@ -127,7 +127,7 @@ socket.on("new_alert", (data) => {
         }
 
         const li = document.createElement("li");
-        li.className = "whitespace-normal break-words leading-snug text-xs text-gray-800 w-full";
+        li.className = "bg-rose-100 text-rose-700 border border-rose-200 px-2 py-1 rounded text-xs leading-tight break-words";
         li.title = `${timestamp} — ${message}`;
         li.textContent = `${timestamp} — ${message}`;
 
@@ -160,7 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
             alertList.innerHTML = "";
             saved.forEach(({ timestamp, message }) => {
                 const li = document.createElement("li");
-                li.className = "whitespace-normal break-words leading-snug text-xs text-gray-800 w-full";
+                li.className = "bg-rose-100 text-rose-700 border border-rose-200 px-2 py-1 rounded text-xs leading-tight break-words";
                 li.title = `${timestamp} — ${message}`;
                 li.textContent = `${timestamp} — ${message}`;
                 alertList.appendChild(li);
