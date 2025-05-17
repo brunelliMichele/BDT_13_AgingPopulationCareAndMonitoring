@@ -53,6 +53,15 @@ function applyFilters() {
     renderPatients();
 }
 
+/* // for handle test alert 
+function triggerTestAlert() {
+    socket.emit("test_alert", {
+        message: "🔥 Test alert triggered manually",
+        timestamp: new Date().toLocaleTimeString()
+    });
+} */
+
+
 searchInput.addEventListener("input", applyFilters);
 document.getElementById("city-select").addEventListener("change", applyFilters);
 
@@ -72,8 +81,92 @@ nextBtn.addEventListener("click", () => {
     }
 });
 
+const socket = io();
+
+socket.on("new_alert", (data) => {
+    const alertBox = document.getElementById("alert-box");
+    const alertElement = document.getElementById("alert");
+    const alertContent = document.getElementById("alert-content");
+    const alertList = document.getElementById("alert-list");
+
+    const timestamp = data.timestamp || new Date().toLocaleTimeString();
+    const message = typeof data === "string" ? data : "⚠️ Alert received";
+    
+    // save alert in sessionStorage
+    const storedAlerts = JSON.parse(sessionStorage.getItem("alerts") || "[]");
+    storedAlerts.unshift({ timestamp, message });
+    sessionStorage.setItem("alerts", JSON.stringify(storedAlerts.slice(0, 10)));
+
+    const badge = document.getElementById("new-alert-badge");
+    if (sessionStorage.getItem("newAlerts") === "true") {
+        badge.classList.remove("hidden");
+    }
+
+    // dopo averli mostrati, rimuovi il flag
+    sessionStorage.removeItem("newAlerts");
+
+    // show pop-up
+    if (alertBox && alertElement && alertContent) {
+        alertBox.classList.remove("hidden");
+        alertElement.textContent = `${timestamp} — ${message}`;
+        alertContent.classList.remove("scale-95", "opacity-0");
+        alertContent.classList.add("scale-100", "opacity-100");
+
+        // automatically close pop-up after 10 seconds
+        setTimeout(() => {
+            alertBox.classList.add("hidden");
+            alertContent.classList.remove("scale-100", "opacity-100");
+            alertContent.classList.add("scale-95", "opacity-0");
+        }, 10000);
+    }
+
+    // populate the alert-list
+    if (alertList) {
+        if (alertList.children.length === 1 && alertList.children[0].textContent.includes("No alerts")) {
+            alertList.innerHTML = "";
+        }
+
+        const li = document.createElement("li");
+        li.className = "whitespace-normal break-words leading-snug text-xs text-gray-800";        li.title = `${timestamp} — ${message}`;
+        li.textContent = `${timestamp} — ${message}`;
+        alertList.prepend(li);
+
+        if (alertList.children.length > 10) {
+            alertList.removeChild(alertList.lastChild);
+        }
+    }
+});
+
+// manual pop-up closure
 document.getElementById("close-alert-box").addEventListener("click", () => {
     document.getElementById("alert-box").classList.add("hidden");
+});
+
+// badge and alert list handler
+document.addEventListener("DOMContentLoaded", () => {
+    const badge = document.getElementById("new-alert-badge");
+    const alertList = document.getElementById("alert-list");
+
+    // badge
+    if (badge && sessionStorage.getItem("newAlerts") === "true") {
+        badge.classList.remove("hidden");
+    }
+    sessionStorage.removeItem("newAlerts");
+
+    // alert list
+    if (alertList) {
+        const saved = JSON.parse(sessionStorage.getItem("alerts") || "[]");
+        if (saved.length > 0) {
+            alertList.innerHTML = "";
+            saved.forEach(({ timestamp, message }) => {
+                const li = document.createElement("li");
+                li.className = "truncate whitespace-nowrap overflow-hidden";
+                li.title = `${timestamp} — ${message}`;
+                li.textContent = `${timestamp} — ${message}`;
+                alertList.appendChild(li);
+            });
+        }
+    }
 });
 
 applyFilters();

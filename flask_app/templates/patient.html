@@ -50,17 +50,16 @@
             </div>
 
             <!-- Alert Modal (hidden by default) -->
-            <div id="alert-box" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                <div class="bg-white border-2 border-red-400 rounded-xl shadow-xl w-[90%] max-w-xl p-6 space-y-4 text-center relative">
+            <div id="alert-box" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 transition-all duration-300 ease-in-out">
+                <div class="bg-white border-2 border-red-400 rounded-xl shadow-xl w-[90%] max-w-xl p-6 space-y-4 text-center relative scale-95 opacity-0 transition-all duration-300 ease-in-out" id="alert-content">    
                     <!-- Close Button -->
                     <button id="close-alert-box" class="absolute top-2 right-4 text-red-400 hover:text-red-600 text-2xl font-bold leading-none">
                         &times;
                     </button>
-
                     <h3 class="text-2xl font-extrabold text-red-600">⚠️ ALERT ⚠️</h3>
-                    <ul id="alert" class="text-base text-gray-800 space-y-2">
-                        <li class="italic text-gray-500">[ The new alert will be visible here ]</li>
-                    </ul>
+                    <p id="alert" class="text-base text-gray-800 italic">
+                        [ The new alert will be visible here ]
+                    </p>
                 </div>
             </div>
         </main>
