@@ -22,45 +22,56 @@
         </header>
 
         <!-- Main -->
-        <main class="max-w-6xl mx-auto px-4 py-10 flex flex-col md:flex-row gap-6 flex-grow">            <!-- Patient card -->
-            <div class="md:w-1/2 bg-teal-50 p-8 rounded-xl shadow-md border border-teal-200">
-                <h1 class="text-2xl font-bold mb-6 text-teal-700">🩺 Patient details</h1>
-                <ul class="space-y-3">
-                    <li id="patient-id" data-id="{{ patient.id }}"><strong class="text-teal-800">ID:</strong> {{ patient.id }}</li>
-                    <li><strong class="text-teal-800">Name:</strong> {{ patient.name }}</li>
-                    <li><strong class="text-teal-800">Middle name:</strong> {{ patient.middlename }}</li>
-                    <li><strong class="text-teal-800">Surname:</strong> {{ patient.surname }}</li>
-                    <li><strong class="text-teal-800">Date of birth:</strong> {{ patient.birthdate }}</li>
-                    <li><strong class="text-teal-800">Date of death:</strong> {{ patient.deathdate }}</li>
-                    <li><strong class="text-teal-800">Gender:</strong> {{ patient.gender }}</li>
-                    <li><strong class="text-teal-800">Birth place:</strong> {{ patient.birthplace }}</li>
-                    <li><strong class="text-teal-800">Address:</strong> {{ patient.address }}</li>
-                    <li><strong class="text-teal-800">City:</strong> {{ patient.city }}</li>
-                    <li><strong class="text-teal-800">County:</strong> {{ patient.county }}</li>
-                </ul>
-            </div>
+        <main class="max-w-6xl mx-auto px-4 py-10 flex flex-col gap-6 flex-grow">     
+            <div class="flex flex-col md:flex-row gap-6">
 
-            <!-- Sensor data card -->
-            <div class="md:w-1/2 bg-white border border-gray-200 rounded-xl shadow-md p-6">
-                <h2 class="text-xl font-bold text-teal-700 mb-4">🏠 Smart Home Data</h2>
-                <p class="text-sm text-gray-600 mb-4">Latest update: <span id="sensor-timestamp">–</span></p>
-                <div id="sensor-rooms" class="space-y-4 text-sm text-gray-800">
-                <!-- Sensor data will be displayed here -->
+                <!-- Patient card -->
+                <div class="md:w-1/2 bg-teal-50 p-8 rounded-xl shadow-md border border-teal-200">
+                    <h1 class="text-2xl font-bold mb-6 text-teal-700">🩺 Patient details</h1>
+                    <ul class="space-y-3">
+                        <li id="patient-id" data-id="{{ patient.id }}"><strong class="text-teal-800">ID:</strong> {{ patient.id }}</li>
+                        <li><strong class="text-teal-800">Name:</strong> {{ patient.name }}</li>
+                        <li><strong class="text-teal-800">Middle name:</strong> {{ patient.middlename }}</li>
+                        <li><strong class="text-teal-800">Surname:</strong> {{ patient.surname }}</li>
+                        <li><strong class="text-teal-800">Date of birth:</strong> {{ patient.birthdate }}</li>
+                        <li><strong class="text-teal-800">Date of death:</strong> {{ patient.deathdate }}</li>
+                        <li><strong class="text-teal-800">Gender:</strong> {{ patient.gender }}</li>
+                        <li><strong class="text-teal-800">Birth place:</strong> {{ patient.birthplace }}</li>
+                        <li><strong class="text-teal-800">Address:</strong> {{ patient.address }}</li>
+                        <li><strong class="text-teal-800">City:</strong> {{ patient.city }}</li>
+                        <li><strong class="text-teal-800">County:</strong> {{ patient.county }}</li>
+                    </ul>
+                </div>
+
+                <!-- Sensor data card -->
+                <div class="md:w-1/2 bg-white border border-gray-200 rounded-xl shadow-md p-6 min-h-[400px] overflow-y-auto">                
+                    <h2 class="text-xl font-bold text-teal-700 mb-4">🏠 Smart Home Data</h2>
+                    <p class="text-sm text-gray-600 mb-4">Latest update: <span id="sensor-timestamp">–</span></p>
+                    <div id="sensor-rooms" class="space-y-4 text-sm text-gray-800">
+                    <!-- Sensor data will be displayed here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ECG Placeholder -->
+            <div class="w-full bg-white border border-gray-200 rounded-xl shadow-md p-6 mt-6">
+                <h2 class="text-xl font-bold text-teal-700 mb-4">❤️ Electrocardiogram (ECG)</h2>
+                <div class="h-48 flex items-center justify-center bg-teal-50 border border-dashed border-teal-300 rounded-lg">
+                    <p class="text-gray-400 italic">[ ECG graph will be displayed here ]</p>
                 </div>
             </div>
 
             <!-- Alert Modal (hidden by default) -->
-            <div id="alert-box" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                <div class="bg-white border-2 border-red-400 rounded-xl shadow-xl w-[90%] max-w-xl p-6 space-y-4 text-center relative">
+            <div id="alert-box" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 transition-all duration-300 ease-in-out">
+                <div class="bg-white border-2 border-red-400 rounded-xl shadow-xl w-[90%] max-w-xl p-6 space-y-4 text-center relative scale-95 opacity-0 transition-all duration-300 ease-in-out" id="alert-content">    
                     <!-- Close Button -->
                     <button id="close-alert-box" class="absolute top-2 right-4 text-red-400 hover:text-red-600 text-2xl font-bold leading-none">
                         &times;
                     </button>
-
                     <h3 class="text-2xl font-extrabold text-red-600">⚠️ ALERT ⚠️</h3>
-                    <ul id="alert" class="text-base text-gray-800 space-y-2">
-                        <li class="italic text-gray-500">[ The new alert will be visible here ]</li>
-                    </ul>
+                    <p id="alert" class="text-base text-gray-800 italic">
+                        [ The new alert will be visible here ]
+                    </p>
                 </div>
             </div>
         </main>

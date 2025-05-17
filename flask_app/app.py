@@ -14,52 +14,26 @@ app = Flask(
 
 socket_io = SocketIO(app, cors_allowed_origins = "*")
 
-""" # Kafka Config
-kafka_config = {
-    "bootstrap.servers": "kafka:9092", # kafka container name
-    "group.id": "smart_home", # consumer group name
-    "auto.offset.reset": "earliest", # with no offset, start from the beginning
-} 
-
-# Kafka consumer with error handling
-def consume_kafka():
-    try:
-        consumer = Consumer(kafka_config)
-        print(f"Started kafka consumer") # log
-        consumer.subscribe(["smart_home_data"])
-        print(f"Kafka subsribed on topic 'smart_home_data'") #log
-
-        while True:
-            msg = consumer.poll(1.0)
-            print(f"Polling...") # log
-            if msg is None:
-                print(f"No message recived") # log
-                continue
-            if msg.error():
-                print(f"[KAFKA] - Error: {msg.error()}") # log
-                continue
-            data = msg.value().decode("utf-8")
-            print(f"[MESSAGE DIMENSION] - {len(data)} bytes") # log
-            print(f"📤 Emitting to socket: {data[:80]}...")  # log
-            socket_io.emit('kafka_message', {'data': data})
-            # socket_io.emit('kafka_message', {'data': "test"})
-            print(f"[SocketIO] - Emit: {data[:80]}...") # log
-        
-        consumer.close()
-    except Exception as e:
-        import traceback
-        print("❌ EXCEPTION in Kafka thread:")
-        traceback.print_exc() """
-
-def kafka_consumer():
-    consumer = KafkaConsumer(
+def smart_home_consumer():
+    smart_home_consumer = KafkaConsumer(
         'smart_home_data',
         bootstrap_servers='kafka:9092',
         value_deserializer = lambda m: json.loads(m.decode('utf-8'))
     )
 
-    for message in consumer:
+    for message in smart_home_consumer:
         socket_io.emit('kafka_message', message.value)
+
+def alert_consumer():
+    alert_consumer = KafkaConsumer(
+        'alert_topic',
+        bootstrap_servers='kafka:9092',
+        value_deserializer=lambda a: json.loads(a.decode('utf-8'))
+    )
+
+    for message in alert_consumer:
+        socket_io.emit("new_alert", message.value)
+
 
 # set postgres connection
 def get_db_connection():
@@ -112,6 +86,12 @@ CITY_DATA = {
     "Paris": [48.8566, 2.3522],
     "Sydney": [-33.8688, 151.2093]
 }
+
+# for test alerts manually
+@socket_io.on("test_alert")
+def handle_test_alert(data):
+    print(f"📢 Test alert received: {data}")
+    socket_io.emit("new_alert", data)
 
 # set route for main page
 @app.route("/")
@@ -168,5 +148,6 @@ if __name__ == "__main__":
     # socket_io.start_background_task(consume_kafka) # whitout this all works properly
     # print(f"Started KAFKA THREAD!")
     import threading
-    threading.Thread(target=kafka_consumer, daemon=True).start()
+    threading.Thread(target=smart_home_consumer, daemon=True).start()
+    threading.Thread(target=alert_consumer, daemon=True).start()
     socket_io.run(app, host="0.0.0.0", port=8000, allow_unsafe_werkzeug=True) # werkzeug only for debug
