@@ -30,11 +30,11 @@ socket.on('kafka_message', function (msg) {
         const applianceContent = appliances || "<span class='text-gray-400 italic'>No devices active</span>";
 
         container.innerHTML += `
-            <div class="border border-teal-100 p-3 rounded-lg bg-teal-50 min-h-[120px] text-sm leading-relaxed space-y-1">
-                <h4 class="font-semibold text-teal-600">${room}</h4>
-                <p>🌡️ Temp: ${r.temperature}°C &nbsp;&nbsp; 💧 Humidity: ${r.humidity}%</p>
-                <p>🔌 Active: ${applianceContent}</p>
-            </div>
+        <div class="border border-teal-100 p-3 rounded-lg bg-teal-50 min-h-[120px] overflow-hidden text-sm leading-snug space-y-1">
+            <h4 class="font-semibold text-teal-600">${room}</h4>
+            <p>🌡️ Temp: ${r.temperature}°C &nbsp;&nbsp; 💧 Humidity: ${r.humidity}%</p>
+            <p>🔌 Active: ${applianceContent}</p>
+        </div>
         `;
     }
 });
