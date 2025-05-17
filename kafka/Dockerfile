@@ -6,4 +6,4 @@ COPY . .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["python3", "Data_generator.py"]
+CMD ["python3", "db_to_kafka_stream.py"]
