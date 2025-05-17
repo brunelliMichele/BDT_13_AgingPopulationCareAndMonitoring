@@ -127,9 +127,9 @@ socket.on("new_alert", (data) => {
         }
 
         const li = document.createElement("li");
-        li.className = "whitespace-normal break-words leading-snug text-xs text-gray-800";        li.title = `${timestamp} — ${message}`;
+        li.className = "whitespace-normal break-words leading-snug text-xs text-gray-800 w-full";
+        li.title = `${timestamp} — ${message}`;
         li.textContent = `${timestamp} — ${message}`;
-        alertList.prepend(li);
 
         if (alertList.children.length > 10) {
             alertList.removeChild(alertList.lastChild);
@@ -160,7 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
             alertList.innerHTML = "";
             saved.forEach(({ timestamp, message }) => {
                 const li = document.createElement("li");
-                li.className = "truncate whitespace-nowrap overflow-hidden";
+                li.className = "whitespace-normal break-words leading-snug text-xs text-gray-800 w-full";
                 li.title = `${timestamp} — ${message}`;
                 li.textContent = `${timestamp} — ${message}`;
                 alertList.appendChild(li);
