@@ -1,5 +1,5 @@
 const patientsData = JSON.parse(document.getElementById("patientsJson").textContent);
-const patientsPerPage = 5;
+const patientsPerPage = 6;
 let currentPage = 1;
 let filteredPatients = [...patientsData];
 
@@ -11,21 +11,23 @@ const pageInfo = document.getElementById("pageInfo");
 
 // function for the patients list
 function renderPatients() {
-    container.innerHTML = "";
-    const start = (currentPage - 1) * patientsPerPage;
-    const end = start + patientsPerPage;
-    const patientsToShow = filteredPatients.slice(start, end);
+        container.innerHTML = "";
+        const start = (currentPage - 1) * patientsPerPage;
+        const end = start + patientsPerPage;
+        const patientsToShow = filteredPatients.slice(start, end);
 
-    patientsToShow.forEach(p => {
+        patientsToShow.forEach(p => {
         const div = document.createElement("div");
-        div.className = "bg-white p-4 rounded-lg shadow-md";
+        div.className = "bg-teal-50 border border-teal-200 p-4 rounded-lg shadow-md";
+
         div.innerHTML = `
-            <h3 class="text-lg font-bold text-blue-700">🧓 ${p.name} ${p.middlename} ${p.surname}</h3>
-            <p><strong>ID:</strong> ${p.id}</p>
-            <p><strong>Birth:</strong> ${p.birthdate}</p>
-            <p><strong>City:</strong> ${p.city}</p>
-            <a href="${p.url}" class="text-blue-500 hover:underline">View details</a>
+            <h3 class="text-lg font-bold text-teal-700">🧓 ${p.name} ${p.middlename} ${p.surname}</h3>
+            <p class="text-gray-700 text-sm"><strong>ID:</strong> ${p.id}</p>
+            <p class="text-gray-700 text-sm"><strong>Birth:</strong> ${p.birthdate}</p>
+            <p class="text-gray-700 text-sm"><strong>City:</strong> ${p.city}</p>
+            <a href="${p.url}" class="text-teal-600 hover:text-teal-800 underline text-sm">View details</a>
         `;
+
         container.appendChild(div);
     });
 
@@ -68,6 +70,10 @@ nextBtn.addEventListener("click", () => {
         currentPage++;
         renderPatients();
     }
+});
+
+document.getElementById("close-alert-box").addEventListener("click", () => {
+    document.getElementById("alert-box").classList.add("hidden");
 });
 
 applyFilters();
