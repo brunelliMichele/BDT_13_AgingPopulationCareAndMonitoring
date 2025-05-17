@@ -11,7 +11,7 @@ spark = SparkSession.builder \
 df = spark.readStream \
     .format("kafka") \
     .option("kafka.bootstrap.servers", "kafka:9092") \
-    .option("subscribe", "smart_home_sensors") \
+    .option("subscribe", "smart_home_data") \
     .option("startingOffsets", "earliest") \
     .load()
 
