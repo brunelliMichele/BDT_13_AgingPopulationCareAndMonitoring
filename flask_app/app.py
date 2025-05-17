@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 from flask_socketio import SocketIO
 from kafka import KafkaConsumer
 import psycopg2
@@ -104,13 +104,33 @@ def get_all_cities():
     conn.close()
     return cities
 
+# Define city data
+CITY_DATA = {
+    "New York": [40.7128, -74.0060],
+    "London": [51.5074, -0.1278],
+    "Tokyo": [35.6762, 139.6503],
+    "Paris": [48.8566, 2.3522],
+    "Sydney": [-33.8688, 151.2093]
+}
 
 # set route for main page
 @app.route("/")
 def index():
-    cities = get_all_cities()
+    #cities = get_all_cities()
+    cities = {
+        "New York": [40.7128, -74.0060],
+        "London": [51.5074, -0.1278],
+        "Tokyo": [35.6762, 139.6503],
+        "Paris": [48.8566, 2.3522],
+        "Sydney": [-33.8688, 151.2093]
+    }
     patients = get_all_patients()
-    return render_template("index.html", cities=cities, patients=patients)
+    return render_template("index.html", patients=patients,cities=cities.keys(), city_data=cities)
+
+# API route that returns JSON data
+@app.route("/api/city-data")
+def city_data():
+    return jsonify(CITY_DATA)
 
 # set route for patient detail page
 @app.route("/patient/<string:patient_id>")
