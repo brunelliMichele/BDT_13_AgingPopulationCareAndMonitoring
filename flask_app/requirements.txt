@@ -1,5 +1,4 @@
 flask
 flask-socketio
-eventlet
-confluent-kafka
+kafka-python>=2.0.2
 psycopg2-binary

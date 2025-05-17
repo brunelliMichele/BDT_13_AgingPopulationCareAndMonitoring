@@ -1,11 +1,9 @@
-import eventlet
-eventlet.monkey_patch()
-
 from flask import Flask, render_template
 from flask_socketio import SocketIO
-from confluent_kafka import Consumer
+from kafka import KafkaConsumer
 import psycopg2
 import os
+import json
 
 # create flask app and initialize webSocket
 app = Flask(
@@ -13,14 +11,15 @@ app = Flask(
     static_folder = "static",
     template_folder = "templates"
     )
-socket_io = SocketIO(app, cors_allowed_origins = "*", async_mode="eventlet")
 
-# Kafka Config
+socket_io = SocketIO(app, cors_allowed_origins = "*")
+
+""" # Kafka Config
 kafka_config = {
     "bootstrap.servers": "kafka:9092", # kafka container name
     "group.id": "smart_home", # consumer group name
     "auto.offset.reset": "earliest", # with no offset, start from the beginning
-}
+} 
 
 # Kafka consumer with error handling
 def consume_kafka():
@@ -50,7 +49,17 @@ def consume_kafka():
     except Exception as e:
         import traceback
         print("❌ EXCEPTION in Kafka thread:")
-        traceback.print_exc()
+        traceback.print_exc() """
+
+def kafka_consumer():
+    consumer = KafkaConsumer(
+        'smart_home_data',
+        bootstrap_servers='kafka:9092',
+        value_deserializer = lambda m: json.loads(m.decode('utf-8'))
+    )
+
+    for message in consumer:
+        socket_io.emit('kafka_message', message.value)
 
 # set postgres connection
 def get_db_connection():
@@ -138,4 +147,6 @@ if __name__ == "__main__":
     print(f"Starting FLASK...")
     # socket_io.start_background_task(consume_kafka) # whitout this all works properly
     # print(f"Started KAFKA THREAD!")
-    socket_io.run(app, host="0.0.0.0", port=8000)
+    import threading
+    threading.Thread(target=kafka_consumer, daemon=True).start()
+    socket_io.run(app, host="0.0.0.0", port=8000, allow_unsafe_werkzeug=True) # werkzeug only for debug
