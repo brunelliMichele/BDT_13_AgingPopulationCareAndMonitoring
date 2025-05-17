@@ -62,8 +62,13 @@
 
                 <!-- Alerts Panel -->
                 <div id="alert-panel" class="md:w-1/5 bg-teal-100 border border-teal-300 rounded-lg shadow p-2 h-[400px] overflow-y-auto">
-                    <h3 class="text-base font-semibold text-teal-700 mb-2">⚠️ Recent Alerts ⚠️</h3>
-                    <ul id="alert-list" class="space-y-1 text-xs text-gray-800">
+                    <h3 class="text-base font-semibold text-teal-700 mb-2">
+                        ⚠️ Recent Alerts ⚠️
+                        <span id="new-alert-badge" class="text-xs bg-red-500 text-white rounded-full px-2 py-0.5 hidden">
+                            New
+                        </span>
+                    </h3>
+                    <ul id="alert-list" class="space-y-2 text-xs text-gray-800 w-full">
                         <li class="italic text-gray-500">No alerts yet</li>
                     </ul>
                 </div>
@@ -92,19 +97,21 @@
             </section>
 
             <!-- Alert Modal (hidden by default) -->
-            <div id="alert-box" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                <div class="bg-white border-2 border-red-400 rounded-xl shadow-xl w-[90%] max-w-xl p-6 space-y-4 text-center relative">
-                    
+            <div id="alert-box" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 transition-all duration-300 ease-in-out">
+                <div class="bg-white border-2 border-red-400 rounded-xl shadow-xl w-[90%] max-w-xl p-6 space-y-4 text-center relative scale-95 opacity-0 transition-all duration-300 ease-in-out" id="alert-content">    
                     <!-- Close Button -->
                     <button id="close-alert-box" class="absolute top-2 right-4 text-red-400 hover:text-red-600 text-2xl font-bold leading-none">
                         &times;
                     </button>
                     <h3 class="text-2xl font-extrabold text-red-600">⚠️ ALERT ⚠️</h3>
-                    <ul id="alert" class="text-base text-gray-800 space-y-2">
-                        <li class="italic text-gray-500">[ The new alert will be visible here ]</li>
-                    </ul>
+                    <p id="alert" class="text-base text-gray-800 italic">
+                        [ The new alert will be visible here ]
+                    </p>
                 </div>
             </div>
+            <!-- <button onclick="triggerTestAlert()" class="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow hover:bg-red-600 z-50">
+                Test Alert
+            </button> -->
         </main>
 
         <!-- Footer -->
@@ -140,19 +147,6 @@
             {{ patients | tojson }}
         </script>
         <script src="{{ url_for('static', filename='js/patients.js') }}"></script>
-        
-
-        <!-- Make sure you put this AFTER Leaflet's CSS -->
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-        crossorigin=""></script>
-        <!-- map.js -->
-        <script src="{{ url_for('static', filename='js/map.js') }}"></script>
-
-        <script>
-        const cityCoords = {{ city_data | tojson | safe }};
-        </script>
-
         <!-- <script>
             const socket = io();
             socket.on('connect', () => console.log("✅ Socket connected")); // for debugging
