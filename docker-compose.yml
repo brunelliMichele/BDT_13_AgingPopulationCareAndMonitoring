@@ -29,14 +29,6 @@ services:
             KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
         restart: always
 
-    
-    data_injector:
-        build: ./kafka
-        depends_on:
-            - kafka
-        command: python3 Data_generator.py
-        restart: always
-
     zookeeper:
         image: confluentinc/cp-zookeeper:7.6.0
         environment:
