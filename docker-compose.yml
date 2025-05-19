@@ -72,6 +72,13 @@ services:
             - DB_USER=user
             - DB_PASSWORD=password
         restart: always
+    data_generator:
+        build: ./kafka
+        command: python data_generator.py
+        depends_on:
+            - kafka
+        volumes:
+            - ./kafka:/app
     dbstream:
         build:
             context: ./kafka
