@@ -1,0 +1,11 @@
+2025-05-19 15:15:18 [ALERT]  user_005: Humidity in Living Room is 29.6%
+2025-05-19 15:15:28 [ALERT]  user_009: Temperature in Bedroom is 30.7°C
+2025-05-19 15:16:08 [ALERT]  user_010: Temperature in Laundry Room is 7.7°C
+2025-05-19 15:16:38 [ALERT]  user_020: Temperature in Living Room is 6.0°C
+2025-05-19 15:17:08 [ALERT]  user_002: Humidity in Laundry Room is 22.9%
+2025-05-19 15:18:08 [ALERT]  user_010: Temperature in Bedroom is 7.1°C
+2025-05-19 15:19:35 [ALERT]  user_013: Temperature in Bathroom is 32.3°C
+2025-05-19 15:20:30 [ALERT]  user_012: Temperature in Kitchen is 6.2°C
+2025-05-19 15:21:30 [ALERT]  user_003: Temperature in Kitchen is 9.0°C
+2025-05-19 15:22:10 [ALERT]  user_004: Temperature in Kitchen is 5.9°C
+2025-05-19 15:23:00 [ALERT]  user_009: Humidity in Bathroom is 36.8%
