@@ -17,17 +17,21 @@ ROOMS = ["Kitchen", "Living Room", "Bathroom", "Bedroom", "Laundry Room"]
 
 # === FUNCTION ===
 
+# db connection
+def get_db_connection():
+    return psycopg2.connect(
+        host = os.environ.get("DB_HOST", "db"),
+        port = 5432,
+        database = os.environ.get("DB_NAME", "medicalData"),
+        user = os.environ.get("DB_USER", "user"),
+        password = os.environ.get("DB_PASSWORD", "password")
+    )
+
 # get ids from db
 def get_patients():
     for attempt in range(20):  # retry 20 times
         try:
-            conn = psycopg2.connect(
-                dbname="medicalData",
-                user="user",
-                password="password",
-                host="db",
-                port="5432"
-            )
+            conn = get_db_connection()
             break
         except psycopg2.OperationalError as e:
             print(f"⏳ Attempt {attempt+1}/20 - Waiting for database... {e}")
@@ -95,22 +99,27 @@ def device_type(room):
 
 # alert functions
 def check_temperature_alert(temp, room, user_id, patient_name):
-    if temp > 26.0:
+    if temp > 28.0:
         return f"{patient_name} - HIGH temp in {room}: {temp}°C"
-    elif temp < 17.0:
+    elif temp < 16.0:
         return f"{patient_name} - LOW temp in {room}: {temp}°C"
     return None
 
 def check_humidity_alert(humidity, room, user_id, patient_name):
-    if humidity > 60.0:
+    if humidity > 70.0:
         return f"{patient_name} - HIGH humidity in {room}: {humidity}%"
-    elif humidity < 40.0:
+    elif humidity < 35.0:
         return f"{patient_name} - LOW humidity in {room}: {humidity}%"
     return None
 
-def check_device_duration_alert(device, duration, room, user_id, patient_name):
+def check_device_duration_alert(device, duration, room, user_id, patient_name, alerted_devices):
     if duration > 15:
-        return f"{patient_name} - {device} running > 60min in {room}"
+        if not alerted_devices[user_id].get(device):
+            alerted_devices[user_id][device] = True
+            return f"{patient_name} - {device} running > 15min in {room}"
+        else:
+            if alerted_devices[user_id].get(device):
+                alerted_devices[user_id][device] = False
     return None
 
 # kafka error handler
@@ -120,15 +129,25 @@ def delivery_report(err, msg):
     else:
         print(f"✅ Message delivered to {msg.topic()} [{msg.partition()}]")
 
+# save alert in alerts table on db
+def save_alert_to_db(patient_id, alert_type, room, message, timestamp):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("INSERT INTO alerts (patient_id, alert_type, room, message, timestamp) VALUES (%s, %s, %s, %s, %s)", (patient_id, alert_type, room, message, timestamp))
+    conn.commit()
+    cur.close()
+    conn.close()
+
 # simulate real time data
 def simulate_realtime():
     producer = Producer(KAFKA_CONFIG)
     people_map = get_patients()
     people = list(people_map.keys())
+    alerted_devices = {pid: {} for pid in people}
     device_states = {pid: {} for pid in people}
 
     while True:
-        timestamp = datetime.now(timezone.utc).replace(microsecond=0, tzinfo=pytz.UTC).strftime("%Y-%m-%d %H:%M:%S")
+        timestamp = datetime.now(timezone.utc).replace(microsecond=0, tzinfo=pytz.UTC)
         active_people = random.sample(people, k = int(len(people) * 0.7)) # 70% active people
         snapshot = {}
         alerts = []
@@ -149,6 +168,7 @@ def simulate_realtime():
                     alert = fn(temp if fn == check_temperature_alert else humidity, room, user_id, patient_name)
                     if alert:
                         alerts.append(alert)
+                        save_alert_to_db(patient_id=pid, alert_type="temperature" if fn == check_temperature_alert else "humidity", room=room, message=alert, timestamp=timestamp)
 
                 for device in appliances:
                     prev = device_states[pid].get(device, {"Status": "Off", "Duration": 0})
@@ -156,9 +176,10 @@ def simulate_realtime():
                     duration = prev["Duration"] + 1 if prev["Status"] == "On" and status == "On" else (1 if status == "On" else 0)
                     device_states[pid][device] = {"Status": status, "Duration": duration}
 
-                    alert = check_device_duration_alert(device, duration, room, user_id, patient_name)
+                    alert = check_device_duration_alert(device, duration, room, user_id, patient_name, alerted_devices)
                     if alert:
                         alerts.append(alert)
+                        save_alert_to_db(patient_id=pid, alert_type="duration", room=room, message=alert, timestamp=timestamp)
 
                     room_appliances[device] = {"Status": status, "Duration (min)": duration}
 
@@ -167,8 +188,8 @@ def simulate_realtime():
                     "humidity": humidity,
                     "appliances": room_appliances
                 }
-
-            snapshot[user_id] = {timestamp: person_data}
+            timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
+            snapshot[user_id] = {timestamp_str: person_data}
 
         with open("house_data.json", "w") as f:
             json.dump(snapshot, f, indent=4)
@@ -176,9 +197,14 @@ def simulate_realtime():
         producer.produce(KAFKA_TOPIC_SMART, value=json.dumps(snapshot).encode(), callback=delivery_report)
 
         if alerts:
+            max_alerts_per_cycle = 10
+            alerts = alerts[:max_alerts_per_cycle]
+
             with open("alerts.log", "a") as f:
                 for alert in alerts:
                     f.write(f"{timestamp} {alert}\n")
+            if len(alerts) > max_alerts_per_cycle:
+                print(f"⚠️ Alert count capped at {max_alerts_per_cycle} (original: {len(alerts)})")
             print(f"[{timestamp}] ALERTS TRIGGERED:\n" + "\n".join(alerts))
             producer.produce(KAFKA_TOPIC_ALERT, value=json.dumps(alerts).encode(), callback=delivery_report)
         else:
@@ -186,6 +212,7 @@ def simulate_realtime():
 
         producer.flush()
         time.sleep(10)
+
 
 # === MAIN ===
 if __name__ == "__main__":

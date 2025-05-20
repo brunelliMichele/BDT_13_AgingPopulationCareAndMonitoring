@@ -1,4 +1,4 @@
-const alertSocket = io();
+const socket = io();
 
 // web socket connection
 socket.on("new_alert_message", (data) => {
