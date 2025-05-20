@@ -1,3 +1,4 @@
 pytz
 confluent-kafka
 pandas
+psycopg2-binary

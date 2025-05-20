@@ -1,148 +1,192 @@
+# === IMPORTS ===
 import random
 import time
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from Alert_functions import *
 import pytz
 from confluent_kafka import Producer
+import psycopg2
+import os
+
+# === CONFIG ===
+KAFKA_CONFIG = {"bootstrap.servers": "kafka:9092"}
+KAFKA_TOPIC_SMART = "smart_home_data"
+KAFKA_TOPIC_ALERT = "alert_topic"
+ROOMS = ["Kitchen", "Living Room", "Bathroom", "Bedroom", "Laundry Room"]
+
+# === FUNCTION ===
+
+# get ids from db
+def get_patients():
+    for attempt in range(20):  # retry 20 times
+        try:
+            conn = psycopg2.connect(
+                dbname="medicalData",
+                user="user",
+                password="password",
+                host="db",
+                port="5432"
+            )
+            break
+        except psycopg2.OperationalError as e:
+            print(f"⏳ Attempt {attempt+1}/20 - Waiting for database... {e}")
+            time.sleep(3)
+    else:
+        raise Exception("❌ Database not reachable")
+
+    cur = conn.cursor()
+    cur.execute("SELECT id, first, last FROM patients;")
+    patients = {str(row[0]): f"{row[1]} {row[2]}" for row in cur.fetchall()}
+    cur.close()
+    conn.close()
+    return patients
+
+# data generation
+def get_temperature(room):
+    hour = datetime.now(timezone.utc).hour
+    base_temp = {
+        "Kitchen": 22,
+        "Living Room": 21,
+        "Bathroom": 24,
+        "Bedroom": 19,
+        "Laundry Room": 18
+    }.get(room, 20)
+
+    # lowers the temperature at night
+    if hour < 6 or hour > 22:
+        base_temp -= 2
+
+    return round(random.normalvariate(base_temp, 1.2), 1)
+
+def get_humidity(room):
+    base_humidity = {
+        "Bathroom": 70,
+        "Kitchen": 60,
+        "Living Room": 45,
+        "Bedroom": 50,
+        "Laundry Room": 55
+    }.get(room, 50)
+
+    variation = random.uniform(-5, 5)
+    return round(base_humidity + variation, 1)
+
+def get_status(device=None):
+    hour = datetime.now(timezone.utc).hour
+
+    if device in ["TV", "Lamp"] and 18 <= hour <= 23:
+        return random.choices(["On", "Off"], weights=[0.6, 0.4])[0]
+    elif device in ["Washer", "Dryer"] and 9 <= hour <= 18:
+        return random.choices(["On", "Off"], weights=[0.4, 0.6])[0]
+    elif device in ["Fridge"]:
+        return "On"  # sempre acceso
+    else:
+        return random.choices(["On", "Off"], weights=[0.2, 0.8])[0]
 
 def device_type(room):
-    devices_by_room = {
-        "Kitchen": ["Oven", "Refrigerator", "Microwave", "Dishwasher"],
-        "Living Room": ["Television", "Air Conditioner", "Computer"],
-        "Bathroom": ["Hair Dryer", "Heater"],
-        "Bedroom": ["Fan", "Heater", "Television"],
-        "Laundry Room": ["Washing Machine", "Dryer"],
+    devices = {
+        "Kitchen": ["Fridge", "Microwave", "Oven"],
+        "Living Room": ["TV", "Lamp", "Fan"],
+        "Bathroom": ["Heater", "Hair Dryer"],
+        "Bedroom": ["Lamp", "Heater"],
+        "Laundry Room": ["Washing Machine", "Dryer"]
     }
-    return devices_by_room.get(room, [])
+    return devices.get(room, [])
 
-def get_temperature(min_temp=10.0, max_temp=30.0, anomaly_chance=0.001):
-    if random.random() < anomaly_chance:
-        if random.choice(["low", "high"]) == "low":
-            return round(random.uniform(5.0, min_temp - 0.1), 1)
-        else:
-            return round(random.uniform(max_temp + 0.1, 35.0), 1)
-    else:
-        return round(random.uniform(min_temp, max_temp), 1)
+# alert functions
+def check_temperature_alert(temp, room, user_id, patient_name):
+    if temp > 26.0:
+        return f"{patient_name} - HIGH temp in {room}: {temp}°C"
+    elif temp < 17.0:
+        return f"{patient_name} - LOW temp in {room}: {temp}°C"
+    return None
 
-def get_humidity(min_humidity=40.0, max_humidity=60.0, anomaly_chance=0.001):
-    if random.random() < anomaly_chance:
-        if random.choice(["low", "high"]) == "low":
-            return round(random.uniform(20.0, min_humidity - 0.1), 1)
-        else:
-            return round(random.uniform(max_humidity + 0.1, 80.0), 1)
-    else:
-        return round(random.uniform(min_humidity, max_humidity), 1)
+def check_humidity_alert(humidity, room, user_id, patient_name):
+    if humidity > 60.0:
+        return f"{patient_name} - HIGH humidity in {room}: {humidity}%"
+    elif humidity < 40.0:
+        return f"{patient_name} - LOW humidity in {room}: {humidity}%"
+    return None
 
-def get_status():
-    return random.choice(["On", "Off"])
+def check_device_duration_alert(device, duration, room, user_id, patient_name):
+    if duration > 15:
+        return f"{patient_name} - {device} running > 60min in {room}"
+    return None
 
-# Patients
-people = list(range(1, 21))
-
-# error handling for kafka
+# kafka error handler
 def delivery_report(err, msg):
     if err is not None:
-        print(f"Error raised: {err}")
+        print(f"❌ Delivery failed: {err}")
     else:
-        print(f"Message sended to {msg.topic()}")
+        print(f"✅ Message delivered to {msg.topic()} [{msg.partition()}]")
 
+# simulate real time data
 def simulate_realtime():
-
-    # configuration of Kafka Server
-    config = {
-        "bootstrap.servers": "kafka:9092"
-    }
-
-    # open connection with Kafka Server
-    producer = Producer(config)
-
-    rooms = ["Kitchen", "Living Room", "Bathroom", "Bedroom", "Laundry Room"]
-    person_device_states = {patient_id: {} for patient_id in people}
+    producer = Producer(KAFKA_CONFIG)
+    people_map = get_patients()
+    people = list(people_map.keys())
+    device_states = {pid: {} for pid in people}
 
     while True:
-        current_time = datetime.utcnow().replace(microsecond=0, tzinfo=pytz.UTC)
-        timestamp_str = current_time.strftime("%Y-%m-%d %H:%M:%S")
-
+        timestamp = datetime.now(timezone.utc).replace(microsecond=0, tzinfo=pytz.UTC).strftime("%Y-%m-%d %H:%M:%S")
+        active_people = random.sample(people, k = int(len(people) * 0.7)) # 70% active people
         snapshot = {}
         alerts = []
 
-        for patient_id in people:
-            user_id = f"user_{str(patient_id).zfill(3)}"
-            person_data = {
-                "rooms": {}
-            }
+        for pid in active_people:
+            user_id = str(pid)
+            patient_name = people_map[pid]
+            person_data = {"rooms": {}}
 
-            for room in rooms:
+            for room in ROOMS:
                 appliances = device_type(room)
-                temperature = get_temperature()
-                humidity = get_humidity()
-                appliances_data = {}
+                temp = get_temperature(room)
+                humidity = get_humidity(room)
+                room_appliances = {}
 
-                # Alerts
-                alert_temp = check_temperature_alert(temperature, room, user_id)
-                if alert_temp:
-                    alerts.append(alert_temp)
+                # Check alerts
+                for fn in [check_temperature_alert, check_humidity_alert]:
+                    alert = fn(temp if fn == check_temperature_alert else humidity, room, user_id, patient_name)
+                    if alert:
+                        alerts.append(alert)
 
-                alert_humidity = check_humidity_alert(humidity, room, user_id)
-                if alert_humidity:
-                    alerts.append(alert_humidity)
-
-                for appliance in appliances:
-                    if appliance not in person_device_states[patient_id]:
-                        person_device_states[patient_id][appliance] = {"Status": "Off", "Duration": 0}
-
-                    prev = person_device_states[patient_id][appliance]
+                for device in appliances:
+                    prev = device_states[pid].get(device, {"Status": "Off", "Duration": 0})
                     status = get_status()
+                    duration = prev["Duration"] + 1 if prev["Status"] == "On" and status == "On" else (1 if status == "On" else 0)
+                    device_states[pid][device] = {"Status": status, "Duration": duration}
 
-                    if status == "On" and prev["Status"] == "On":
-                        duration = prev["Duration"] + 1
-                    elif status == "On":
-                        duration = 1
-                    else:
-                        duration = 0
+                    alert = check_device_duration_alert(device, duration, room, user_id, patient_name)
+                    if alert:
+                        alerts.append(alert)
 
-                    person_device_states[patient_id][appliance] = {
-                        "Status": status,
-                        "Duration": duration
-                    }
-
-                    alert_duration = check_device_duration_alert(appliance, duration, room, user_id)
-                    if alert_duration:
-                        alerts.append(alert_duration)
-
-                    appliances_data[appliance] = {
-                        "Status": status,
-                        "Duration (min)": duration
-                    }
+                    room_appliances[device] = {"Status": status, "Duration (min)": duration}
 
                 person_data["rooms"][room] = {
-                    "temperature": temperature,
+                    "temperature": temp,
                     "humidity": humidity,
-                    "appliances": appliances_data
+                    "appliances": room_appliances
                 }
 
-            snapshot[user_id] = {
-                timestamp_str: person_data
-            }
+            snapshot[user_id] = {timestamp: person_data}
 
-        with open("house_data.json", "w") as json_file:
-            json.dump(snapshot, json_file, indent=4)
+        with open("house_data.json", "w") as f:
+            json.dump(snapshot, f, indent=4)
 
-        producer.produce("smart_home_data", value = json.dumps(snapshot).encode('utf-8'), callback = delivery_report)
-        producer.flush()
-        print(f"[KAFKA] - Send message {json.dumps(snapshot)[:100]} on topic 'smart_home_data")
+        producer.produce(KAFKA_TOPIC_SMART, value=json.dumps(snapshot).encode(), callback=delivery_report)
 
         if alerts:
-            with open("alerts.log", "a") as alert_file:
+            with open("alerts.log", "a") as f:
                 for alert in alerts:
-                    alert_file.write(f"{timestamp_str} {alert}\n")
-            print(f"[{current_time}] ALERTS TRIGGERED:\n" + "\n".join(alerts))
-            producer.produce("alert_topic", value = json.dumps(alert).encode("utf-8"), callback = delivery_report)
+                    f.write(f"{timestamp} {alert}\n")
+            print(f"[{timestamp}] ALERTS TRIGGERED:\n" + "\n".join(alerts))
+            producer.produce(KAFKA_TOPIC_ALERT, value=json.dumps(alerts).encode(), callback=delivery_report)
         else:
-            print(f"[{current_time}] No alerts. System operating normally.")
+            print(f"[{timestamp}] No alerts. System OK.")
 
+        producer.flush()
         time.sleep(10)
 
-simulate_realtime()
-
+# === MAIN ===
+if __name__ == "__main__":
+    simulate_realtime()

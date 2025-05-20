@@ -69,6 +69,7 @@ services:
         command: python data_generator.py
         depends_on:
             - kafka
+            - db
         volumes:
             - ./kafka:/app
     dbstream:
