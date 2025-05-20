@@ -2,3 +2,4 @@ flask
 flask-socketio
 kafka-python>=2.0.2
 psycopg2-binary
+numpy

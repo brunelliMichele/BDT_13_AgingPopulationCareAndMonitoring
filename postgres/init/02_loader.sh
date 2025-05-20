@@ -1,28 +1,28 @@
 #!/bin/bash
-# Postgres container name
-CONTAINER_NAME=bdt_13-db-1
 
+# Variabili ambiente (opzionali se già fornite da Docker)
+DB_NAME=${POSTGRES_DB:-medicalData}
+DB_USER=${POSTGRES_USER:-user}
 
-DB_NAME=medicalData
-DB_USER=user
-# add here csv file names and table name for the db
+# Percorso dei file CSV (montato da host a /data nel docker-compose.yml)
+CSV_DIR="/data"
+
+# Lista dei file CSV e tabelle corrispondenti
 CSV_FILES=("patients.csv" "organizations.csv" "providers.csv" "payers.csv" "encounters.csv" "allergies.csv" "careplans.csv" "claims.csv" "conditions.csv" "devices.csv" "imaging_studies.csv" "immunizations.csv" "medications.csv" "observations.csv" "procedures.csv" "supplies.csv")
 TABLES=("PATIENTS" "ORGANIZATIONS" "PROVIDERS" "PAYERS" "ENCOUNTERS" "ALLERGIES" "CAREPLANS" "CLAIMS" "CONDITIONS" "DEVICES" "IMAGING_STUDIES" "IMMUNIZATIONS" "MEDICATIONS" "OBSERVATIONS" "PROCEDURES" "SUPPLIES")
 
-# copy the csv file from local to the docker container
-for FILE in "${CSV_FILES[@]}"; do
-  echo "📁 Copying $FILE in the container..."
-  docker cp ./postgres/data/$FILE $CONTAINER_NAME:/tmp/$FILE
-done
-
-# populate the database
+# Importa ogni CSV nella tabella corrispondente
 for i in "${!CSV_FILES[@]}"; do
-  FILE=${CSV_FILES[$i]}
-  TABLE=${TABLES[$i]}
+  FILE="${CSV_FILES[$i]}"
+  TABLE="${TABLES[$i]}"
+  FILE_PATH="$CSV_DIR/$FILE"
 
-  echo "📥 Upload $FILE in table $TABLE..."
-
-  docker exec -i $CONTAINER_NAME psql -U $DB_USER -d $DB_NAME -c "\copy $TABLE FROM '/tmp/$FILE' WITH (FORMAT CSV, HEADER);"
+  if [[ -f "$FILE_PATH" ]]; then
+    echo "📥 Uploading $FILE into table $TABLE..."
+    psql -U "$DB_USER" -d "$DB_NAME" -c "\copy $TABLE FROM '$FILE_PATH' WITH (FORMAT CSV, HEADER);"
+  else
+    echo "❌ File $FILE not found in $CSV_DIR — skipping $TABLE"
+  fi
 done
 
 echo "✅ Import complete!"
