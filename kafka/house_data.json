@@ -1,10 +1,10 @@
 {
     "user_001": {
-        "2025-05-20 16:05:27": {
+        "2025-05-20 16:05:57": {
             "rooms": {
                 "Kitchen": {
-                    "temperature": 29.6,
-                    "humidity": 41.8,
+                    "temperature": 18.4,
+                    "humidity": 47.1,
                     "appliances": {
                         "Oven": {
                             "Status": "On",
@@ -15,8 +15,8 @@
                             "Duration (min)": 0
                         },
                         "Microwave": {
-                            "Status": "On",
-                            "Duration (min)": 2
+                            "Status": "Off",
+                            "Duration (min)": 0
                         },
                         "Dishwasher": {
                             "Status": "Off",
@@ -25,12 +25,12 @@
                     }
                 },
                 "Living Room": {
-                    "temperature": 20.7,
-                    "humidity": 44.8,
+                    "temperature": 11.7,
+                    "humidity": 47.1,
                     "appliances": {
                         "Television": {
-                            "Status": "Off",
-                            "Duration (min)": 0
+                            "Status": "On",
+                            "Duration (min)": 1
                         },
                         "Air Conditioner": {
                             "Status": "On",
@@ -43,26 +43,26 @@
                     }
                 },
                 "Bathroom": {
-                    "temperature": 22.7,
-                    "humidity": 54.4,
+                    "temperature": 15.6,
+                    "humidity": 57.6,
                     "appliances": {
                         "Hair Dryer": {
-                            "Status": "On",
-                            "Duration (min)": 1
+                            "Status": "Off",
+                            "Duration (min)": 0
                         },
                         "Heater": {
                             "Status": "On",
-                            "Duration (min)": 1
+                            "Duration (min)": 3
                         }
                     }
                 },
                 "Bedroom": {
-                    "temperature": 11.9,
-                    "humidity": 42.2,
+                    "temperature": 15.1,
+                    "humidity": 56.9,
                     "appliances": {
                         "Fan": {
-                            "Status": "On",
-                            "Duration (min)": 3
+                            "Status": "Off",
+                            "Duration (min)": 0
                         },
                         "Heater": {
                             "Status": "Off",
@@ -75,12 +75,12 @@
                     }
                 },
                 "Laundry Room": {
-                    "temperature": 19.7,
-                    "humidity": 54.9,
+                    "temperature": 12.8,
+                    "humidity": 50.3,
                     "appliances": {
                         "Washing Machine": {
-                            "Status": "On",
-                            "Duration (min)": 1
+                            "Status": "Off",
+                            "Duration (min)": 0
                         },
                         "Dryer": {
                             "Status": "Off",
@@ -92,91 +92,91 @@
         }
     },
     "user_002": {
-        "2025-05-20 16:05:27": {
+        "2025-05-20 16:05:57": {
             "rooms": {
                 "Kitchen": {
-                    "temperature": 29.3,
-                    "humidity": 59.5,
+                    "temperature": 13.7,
+                    "humidity": 51.1,
                     "appliances": {
                         "Oven": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Refrigerator": {
+                            "Status": "On",
+                            "Duration (min)": 3
+                        },
+                        "Microwave": {
                             "Status": "On",
                             "Duration (min)": 1
                         },
-                        "Refrigerator": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Microwave": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
                         "Dishwasher": {
                             "Status": "On",
-                            "Duration (min)": 2
+                            "Duration (min)": 1
                         }
                     }
                 },
                 "Living Room": {
-                    "temperature": 20.8,
-                    "humidity": 50.4,
+                    "temperature": 18.7,
+                    "humidity": 55.4,
                     "appliances": {
                         "Television": {
                             "Status": "On",
                             "Duration (min)": 2
                         },
                         "Air Conditioner": {
-                            "Status": "Off",
-                            "Duration (min)": 0
+                            "Status": "On",
+                            "Duration (min)": 1
                         },
                         "Computer": {
-                            "Status": "On",
-                            "Duration (min)": 2
+                            "Status": "Off",
+                            "Duration (min)": 0
                         }
                     }
                 },
                 "Bathroom": {
-                    "temperature": 10.5,
-                    "humidity": 59.8,
+                    "temperature": 13.6,
+                    "humidity": 48.7,
                     "appliances": {
                         "Hair Dryer": {
                             "Status": "Off",
                             "Duration (min)": 0
                         },
                         "Heater": {
-                            "Status": "Off",
-                            "Duration (min)": 0
+                            "Status": "On",
+                            "Duration (min)": 2
                         }
                     }
                 },
                 "Bedroom": {
-                    "temperature": 23.8,
-                    "humidity": 45.8,
+                    "temperature": 26.9,
+                    "humidity": 41.5,
                     "appliances": {
                         "Fan": {
-                            "Status": "Off",
-                            "Duration (min)": 0
+                            "Status": "On",
+                            "Duration (min)": 2
                         },
                         "Heater": {
                             "Status": "Off",
                             "Duration (min)": 0
                         },
                         "Television": {
-                            "Status": "On",
-                            "Duration (min)": 3
+                            "Status": "Off",
+                            "Duration (min)": 0
                         }
                     }
                 },
                 "Laundry Room": {
-                    "temperature": 16.2,
-                    "humidity": 51.3,
+                    "temperature": 25.7,
+                    "humidity": 49.8,
                     "appliances": {
                         "Washing Machine": {
                             "Status": "Off",
                             "Duration (min)": 0
                         },
                         "Dryer": {
-                            "Status": "Off",
-                            "Duration (min)": 0
+                            "Status": "On",
+                            "Duration (min)": 3
                         }
                     }
                 }
@@ -184,23 +184,23 @@
         }
     },
     "user_003": {
-        "2025-05-20 16:05:27": {
+        "2025-05-20 16:05:57": {
             "rooms": {
                 "Kitchen": {
-                    "temperature": 24.5,
-                    "humidity": 57.7,
+                    "temperature": 14.0,
+                    "humidity": 49.9,
                     "appliances": {
                         "Oven": {
                             "Status": "On",
                             "Duration (min)": 1
                         },
                         "Refrigerator": {
-                            "Status": "On",
-                            "Duration (min)": 3
-                        },
-                        "Microwave": {
                             "Status": "Off",
                             "Duration (min)": 0
+                        },
+                        "Microwave": {
+                            "Status": "On",
+                            "Duration (min)": 1
                         },
                         "Dishwasher": {
                             "Status": "On",
@@ -209,16 +209,16 @@
                     }
                 },
                 "Living Room": {
-                    "temperature": 28.5,
-                    "humidity": 59.1,
+                    "temperature": 12.1,
+                    "humidity": 58.3,
                     "appliances": {
                         "Television": {
-                            "Status": "On",
-                            "Duration (min)": 3
-                        },
-                        "Air Conditioner": {
                             "Status": "Off",
                             "Duration (min)": 0
+                        },
+                        "Air Conditioner": {
+                            "Status": "On",
+                            "Duration (min)": 3
                         },
                         "Computer": {
                             "Status": "Off",
@@ -227,48 +227,48 @@
                     }
                 },
                 "Bathroom": {
-                    "temperature": 14.4,
-                    "humidity": 56.3,
+                    "temperature": 23.1,
+                    "humidity": 43.7,
                     "appliances": {
                         "Hair Dryer": {
                             "Status": "On",
                             "Duration (min)": 2
                         },
                         "Heater": {
-                            "Status": "On",
-                            "Duration (min)": 1
+                            "Status": "Off",
+                            "Duration (min)": 0
                         }
                     }
                 },
                 "Bedroom": {
-                    "temperature": 12.7,
-                    "humidity": 49.6,
+                    "temperature": 11.2,
+                    "humidity": 44.8,
                     "appliances": {
                         "Fan": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Heater": {
                             "Status": "On",
                             "Duration (min)": 1
                         },
-                        "Heater": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
                         "Television": {
-                            "Status": "Off",
-                            "Duration (min)": 0
+                            "Status": "On",
+                            "Duration (min)": 1
                         }
                     }
                 },
                 "Laundry Room": {
-                    "temperature": 19.8,
-                    "humidity": 56.9,
+                    "temperature": 23.0,
+                    "humidity": 46.2,
                     "appliances": {
                         "Washing Machine": {
                             "Status": "On",
-                            "Duration (min)": 3
+                            "Duration (min)": 2
                         },
                         "Dryer": {
-                            "Status": "Off",
-                            "Duration (min)": 0
+                            "Status": "On",
+                            "Duration (min)": 2
                         }
                     }
                 }
@@ -276,11 +276,11 @@
         }
     },
     "user_004": {
-        "2025-05-20 16:05:27": {
+        "2025-05-20 16:05:57": {
             "rooms": {
                 "Kitchen": {
-                    "temperature": 15.2,
-                    "humidity": 52.8,
+                    "temperature": 26.4,
+                    "humidity": 40.5,
                     "appliances": {
                         "Oven": {
                             "Status": "Off",
@@ -288,7 +288,7 @@
                         },
                         "Refrigerator": {
                             "Status": "On",
-                            "Duration (min)": 2
+                            "Duration (min)": 1
                         },
                         "Microwave": {
                             "Status": "Off",
@@ -301,16 +301,16 @@
                     }
                 },
                 "Living Room": {
-                    "temperature": 27.0,
-                    "humidity": 49.3,
+                    "temperature": 23.1,
+                    "humidity": 40.7,
                     "appliances": {
                         "Television": {
                             "Status": "On",
-                            "Duration (min)": 1
+                            "Duration (min)": 3
                         },
                         "Air Conditioner": {
-                            "Status": "On",
-                            "Duration (min)": 1
+                            "Status": "Off",
+                            "Duration (min)": 0
                         },
                         "Computer": {
                             "Status": "Off",
@@ -319,26 +319,26 @@
                     }
                 },
                 "Bathroom": {
-                    "temperature": 20.4,
-                    "humidity": 43.4,
+                    "temperature": 13.2,
+                    "humidity": 42.8,
                     "appliances": {
                         "Hair Dryer": {
-                            "Status": "On",
-                            "Duration (min)": 1
+                            "Status": "Off",
+                            "Duration (min)": 0
                         },
                         "Heater": {
-                            "Status": "On",
-                            "Duration (min)": 1
+                            "Status": "Off",
+                            "Duration (min)": 0
                         }
                     }
                 },
                 "Bedroom": {
-                    "temperature": 24.8,
-                    "humidity": 59.2,
+                    "temperature": 26.6,
+                    "humidity": 58.0,
                     "appliances": {
                         "Fan": {
-                            "Status": "Off",
-                            "Duration (min)": 0
+                            "Status": "On",
+                            "Duration (min)": 2
                         },
                         "Heater": {
                             "Status": "Off",
@@ -351,16 +351,16 @@
                     }
                 },
                 "Laundry Room": {
-                    "temperature": 12.1,
-                    "humidity": 46.6,
+                    "temperature": 10.4,
+                    "humidity": 51.5,
                     "appliances": {
                         "Washing Machine": {
                             "Status": "On",
-                            "Duration (min)": 2
+                            "Duration (min)": 1
                         },
                         "Dryer": {
                             "Status": "On",
-                            "Duration (min)": 2
+                            "Duration (min)": 1
                         }
                     }
                 }
@@ -368,33 +368,33 @@
         }
     },
     "user_005": {
-        "2025-05-20 16:05:27": {
+        "2025-05-20 16:05:57": {
             "rooms": {
                 "Kitchen": {
-                    "temperature": 18.4,
-                    "humidity": 43.2,
+                    "temperature": 16.6,
+                    "humidity": 56.0,
                     "appliances": {
                         "Oven": {
                             "Status": "On",
                             "Duration (min)": 1
                         },
                         "Refrigerator": {
-                            "Status": "On",
-                            "Duration (min)": 2
+                            "Status": "Off",
+                            "Duration (min)": 0
                         },
                         "Microwave": {
-                            "Status": "On",
-                            "Duration (min)": 1
+                            "Status": "Off",
+                            "Duration (min)": 0
                         },
                         "Dishwasher": {
-                            "Status": "On",
-                            "Duration (min)": 1
+                            "Status": "Off",
+                            "Duration (min)": 0
                         }
                     }
                 },
                 "Living Room": {
-                    "temperature": 29.9,
-                    "humidity": 45.9,
+                    "temperature": 11.6,
+                    "humidity": 45.1,
                     "appliances": {
                         "Television": {
                             "Status": "Off",
@@ -402,21 +402,21 @@
                         },
                         "Air Conditioner": {
                             "Status": "On",
-                            "Duration (min)": 3
+                            "Duration (min)": 6
                         },
                         "Computer": {
-                            "Status": "Off",
-                            "Duration (min)": 0
+                            "Status": "On",
+                            "Duration (min)": 1
                         }
                     }
                 },
                 "Bathroom": {
-                    "temperature": 28.0,
-                    "humidity": 41.1,
+                    "temperature": 22.0,
+                    "humidity": 51.9,
                     "appliances": {
                         "Hair Dryer": {
-                            "Status": "Off",
-                            "Duration (min)": 0
+                            "Status": "On",
+                            "Duration (min)": 2
                         },
                         "Heater": {
                             "Status": "Off",
@@ -425,26 +425,26 @@
                     }
                 },
                 "Bedroom": {
-                    "temperature": 29.5,
-                    "humidity": 57.4,
+                    "temperature": 29.1,
+                    "humidity": 51.0,
                     "appliances": {
                         "Fan": {
                             "Status": "On",
-                            "Duration (min)": 1
+                            "Duration (min)": 4
                         },
                         "Heater": {
-                            "Status": "On",
-                            "Duration (min)": 1
-                        },
-                        "Television": {
                             "Status": "Off",
                             "Duration (min)": 0
+                        },
+                        "Television": {
+                            "Status": "On",
+                            "Duration (min)": 1
                         }
                     }
                 },
                 "Laundry Room": {
-                    "temperature": 16.7,
-                    "humidity": 59.5,
+                    "temperature": 10.2,
+                    "humidity": 49.4,
                     "appliances": {
                         "Washing Machine": {
                             "Status": "Off",
@@ -452,7 +452,7 @@
                         },
                         "Dryer": {
                             "Status": "On",
-                            "Duration (min)": 3
+                            "Duration (min)": 1
                         }
                     }
                 }
@@ -460,91 +460,91 @@
         }
     },
     "user_006": {
-        "2025-05-20 16:05:27": {
+        "2025-05-20 16:05:57": {
             "rooms": {
                 "Kitchen": {
-                    "temperature": 12.9,
-                    "humidity": 52.9,
+                    "temperature": 20.0,
+                    "humidity": 55.4,
                     "appliances": {
                         "Oven": {
-                            "Status": "On",
-                            "Duration (min)": 2
+                            "Status": "Off",
+                            "Duration (min)": 0
                         },
                         "Refrigerator": {
                             "Status": "On",
                             "Duration (min)": 1
                         },
                         "Microwave": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Dishwasher": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        }
+                    }
+                },
+                "Living Room": {
+                    "temperature": 28.4,
+                    "humidity": 55.0,
+                    "appliances": {
+                        "Television": {
+                            "Status": "On",
+                            "Duration (min)": 6
+                        },
+                        "Air Conditioner": {
                             "Status": "On",
                             "Duration (min)": 1
                         },
-                        "Dishwasher": {
+                        "Computer": {
                             "Status": "On",
                             "Duration (min)": 2
                         }
                     }
                 },
-                "Living Room": {
-                    "temperature": 14.0,
-                    "humidity": 43.1,
-                    "appliances": {
-                        "Television": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Air Conditioner": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Computer": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        }
-                    }
-                },
                 "Bathroom": {
-                    "temperature": 29.6,
-                    "humidity": 42.5,
+                    "temperature": 20.1,
+                    "humidity": 42.7,
                     "appliances": {
                         "Hair Dryer": {
                             "Status": "Off",
                             "Duration (min)": 0
                         },
                         "Heater": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        }
-                    }
-                },
-                "Bedroom": {
-                    "temperature": 29.2,
-                    "humidity": 51.7,
-                    "appliances": {
-                        "Fan": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Heater": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Television": {
                             "Status": "On",
                             "Duration (min)": 1
                         }
                     }
                 },
+                "Bedroom": {
+                    "temperature": 13.6,
+                    "humidity": 46.8,
+                    "appliances": {
+                        "Fan": {
+                            "Status": "On",
+                            "Duration (min)": 3
+                        },
+                        "Heater": {
+                            "Status": "On",
+                            "Duration (min)": 2
+                        },
+                        "Television": {
+                            "Status": "On",
+                            "Duration (min)": 7
+                        }
+                    }
+                },
                 "Laundry Room": {
-                    "temperature": 14.5,
-                    "humidity": 56.2,
+                    "temperature": 17.8,
+                    "humidity": 47.1,
                     "appliances": {
                         "Washing Machine": {
-                            "Status": "Off",
-                            "Duration (min)": 0
+                            "Status": "On",
+                            "Duration (min)": 2
                         },
                         "Dryer": {
-                            "Status": "Off",
-                            "Duration (min)": 0
+                            "Status": "On",
+                            "Duration (min)": 1
                         }
                     }
                 }
@@ -552,11 +552,11 @@
         }
     },
     "user_007": {
-        "2025-05-20 16:05:27": {
+        "2025-05-20 16:05:57": {
             "rooms": {
                 "Kitchen": {
-                    "temperature": 20.0,
-                    "humidity": 43.2,
+                    "temperature": 16.4,
+                    "humidity": 45.7,
                     "appliances": {
                         "Oven": {
                             "Status": "On",
@@ -567,36 +567,36 @@
                             "Duration (min)": 0
                         },
                         "Microwave": {
-                            "Status": "On",
-                            "Duration (min)": 1
-                        },
-                        "Dishwasher": {
                             "Status": "Off",
                             "Duration (min)": 0
+                        },
+                        "Dishwasher": {
+                            "Status": "On",
+                            "Duration (min)": 1
                         }
                     }
                 },
                 "Living Room": {
-                    "temperature": 19.8,
-                    "humidity": 53.2,
+                    "temperature": 11.5,
+                    "humidity": 43.9,
                     "appliances": {
                         "Television": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Air Conditioner": {
                             "Status": "On",
                             "Duration (min)": 2
                         },
-                        "Air Conditioner": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
                         "Computer": {
-                            "Status": "Off",
-                            "Duration (min)": 0
+                            "Status": "On",
+                            "Duration (min)": 1
                         }
                     }
                 },
                 "Bathroom": {
-                    "temperature": 25.4,
-                    "humidity": 47.6,
+                    "temperature": 21.8,
+                    "humidity": 58.2,
                     "appliances": {
                         "Hair Dryer": {
                             "Status": "Off",
@@ -609,8 +609,8 @@
                     }
                 },
                 "Bedroom": {
-                    "temperature": 18.9,
-                    "humidity": 49.4,
+                    "temperature": 24.6,
+                    "humidity": 57.3,
                     "appliances": {
                         "Fan": {
                             "Status": "On",
@@ -621,18 +621,18 @@
                             "Duration (min)": 0
                         },
                         "Television": {
-                            "Status": "Off",
-                            "Duration (min)": 0
+                            "Status": "On",
+                            "Duration (min)": 1
                         }
                     }
                 },
                 "Laundry Room": {
-                    "temperature": 13.7,
-                    "humidity": 54.8,
+                    "temperature": 11.0,
+                    "humidity": 59.5,
                     "appliances": {
                         "Washing Machine": {
                             "Status": "On",
-                            "Duration (min)": 2
+                            "Duration (min)": 1
                         },
                         "Dryer": {
                             "Status": "Off",
@@ -644,15 +644,107 @@
         }
     },
     "user_008": {
-        "2025-05-20 16:05:27": {
+        "2025-05-20 16:05:57": {
             "rooms": {
                 "Kitchen": {
-                    "temperature": 21.3,
-                    "humidity": 54.2,
+                    "temperature": 21.6,
+                    "humidity": 49.3,
+                    "appliances": {
+                        "Oven": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Refrigerator": {
+                            "Status": "On",
+                            "Duration (min)": 3
+                        },
+                        "Microwave": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Dishwasher": {
+                            "Status": "On",
+                            "Duration (min)": 1
+                        }
+                    }
+                },
+                "Living Room": {
+                    "temperature": 11.6,
+                    "humidity": 48.9,
+                    "appliances": {
+                        "Television": {
+                            "Status": "On",
+                            "Duration (min)": 2
+                        },
+                        "Air Conditioner": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Computer": {
+                            "Status": "On",
+                            "Duration (min)": 1
+                        }
+                    }
+                },
+                "Bathroom": {
+                    "temperature": 18.2,
+                    "humidity": 56.9,
+                    "appliances": {
+                        "Hair Dryer": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Heater": {
+                            "Status": "On",
+                            "Duration (min)": 2
+                        }
+                    }
+                },
+                "Bedroom": {
+                    "temperature": 12.9,
+                    "humidity": 58.2,
+                    "appliances": {
+                        "Fan": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Heater": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Television": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        }
+                    }
+                },
+                "Laundry Room": {
+                    "temperature": 18.5,
+                    "humidity": 59.2,
+                    "appliances": {
+                        "Washing Machine": {
+                            "Status": "On",
+                            "Duration (min)": 1
+                        },
+                        "Dryer": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "user_009": {
+        "2025-05-20 16:05:57": {
+            "rooms": {
+                "Kitchen": {
+                    "temperature": 16.5,
+                    "humidity": 46.6,
                     "appliances": {
                         "Oven": {
                             "Status": "On",
-                            "Duration (min)": 1
+                            "Duration (min)": 2
                         },
                         "Refrigerator": {
                             "Status": "Off",
@@ -669,7 +761,283 @@
                     }
                 },
                 "Living Room": {
-                    "temperature": 26.8,
+                    "temperature": 29.4,
+                    "humidity": 52.4,
+                    "appliances": {
+                        "Television": {
+                            "Status": "On",
+                            "Duration (min)": 1
+                        },
+                        "Air Conditioner": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Computer": {
+                            "Status": "On",
+                            "Duration (min)": 1
+                        }
+                    }
+                },
+                "Bathroom": {
+                    "temperature": 22.8,
+                    "humidity": 56.9,
+                    "appliances": {
+                        "Hair Dryer": {
+                            "Status": "On",
+                            "Duration (min)": 1
+                        },
+                        "Heater": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        }
+                    }
+                },
+                "Bedroom": {
+                    "temperature": 11.1,
+                    "humidity": 53.9,
+                    "appliances": {
+                        "Fan": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Heater": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Television": {
+                            "Status": "On",
+                            "Duration (min)": 2
+                        }
+                    }
+                },
+                "Laundry Room": {
+                    "temperature": 21.7,
+                    "humidity": 43.3,
+                    "appliances": {
+                        "Washing Machine": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Dryer": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "user_010": {
+        "2025-05-20 16:05:57": {
+            "rooms": {
+                "Kitchen": {
+                    "temperature": 28.2,
+                    "humidity": 44.8,
+                    "appliances": {
+                        "Oven": {
+                            "Status": "On",
+                            "Duration (min)": 4
+                        },
+                        "Refrigerator": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Microwave": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Dishwasher": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        }
+                    }
+                },
+                "Living Room": {
+                    "temperature": 26.1,
+                    "humidity": 45.0,
+                    "appliances": {
+                        "Television": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Air Conditioner": {
+                            "Status": "On",
+                            "Duration (min)": 1
+                        },
+                        "Computer": {
+                            "Status": "On",
+                            "Duration (min)": 2
+                        }
+                    }
+                },
+                "Bathroom": {
+                    "temperature": 21.0,
+                    "humidity": 40.8,
+                    "appliances": {
+                        "Hair Dryer": {
+                            "Status": "On",
+                            "Duration (min)": 2
+                        },
+                        "Heater": {
+                            "Status": "On",
+                            "Duration (min)": 1
+                        }
+                    }
+                },
+                "Bedroom": {
+                    "temperature": 16.3,
+                    "humidity": 53.8,
+                    "appliances": {
+                        "Fan": {
+                            "Status": "On",
+                            "Duration (min)": 3
+                        },
+                        "Heater": {
+                            "Status": "On",
+                            "Duration (min)": 2
+                        },
+                        "Television": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        }
+                    }
+                },
+                "Laundry Room": {
+                    "temperature": 11.5,
+                    "humidity": 46.8,
+                    "appliances": {
+                        "Washing Machine": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Dryer": {
+                            "Status": "On",
+                            "Duration (min)": 2
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "user_011": {
+        "2025-05-20 16:05:57": {
+            "rooms": {
+                "Kitchen": {
+                    "temperature": 18.5,
+                    "humidity": 42.6,
+                    "appliances": {
+                        "Oven": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Refrigerator": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Microwave": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Dishwasher": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        }
+                    }
+                },
+                "Living Room": {
+                    "temperature": 22.7,
+                    "humidity": 44.2,
+                    "appliances": {
+                        "Television": {
+                            "Status": "On",
+                            "Duration (min)": 2
+                        },
+                        "Air Conditioner": {
+                            "Status": "On",
+                            "Duration (min)": 4
+                        },
+                        "Computer": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        }
+                    }
+                },
+                "Bathroom": {
+                    "temperature": 19.7,
+                    "humidity": 50.9,
+                    "appliances": {
+                        "Hair Dryer": {
+                            "Status": "On",
+                            "Duration (min)": 1
+                        },
+                        "Heater": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        }
+                    }
+                },
+                "Bedroom": {
+                    "temperature": 25.3,
+                    "humidity": 49.5,
+                    "appliances": {
+                        "Fan": {
+                            "Status": "On",
+                            "Duration (min)": 2
+                        },
+                        "Heater": {
+                            "Status": "On",
+                            "Duration (min)": 1
+                        },
+                        "Television": {
+                            "Status": "On",
+                            "Duration (min)": 3
+                        }
+                    }
+                },
+                "Laundry Room": {
+                    "temperature": 20.6,
+                    "humidity": 54.9,
+                    "appliances": {
+                        "Washing Machine": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Dryer": {
+                            "Status": "On",
+                            "Duration (min)": 1
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "user_012": {
+        "2025-05-20 16:05:57": {
+            "rooms": {
+                "Kitchen": {
+                    "temperature": 20.7,
+                    "humidity": 51.9,
+                    "appliances": {
+                        "Oven": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Refrigerator": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Microwave": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Dishwasher": {
+                            "Status": "On",
+                            "Duration (min)": 4
+                        }
+                    }
+                },
+                "Living Room": {
+                    "temperature": 24.1,
                     "humidity": 46.0,
                     "appliances": {
                         "Television": {
@@ -687,30 +1055,30 @@
                     }
                 },
                 "Bathroom": {
-                    "temperature": 25.0,
-                    "humidity": 46.8,
+                    "temperature": 15.4,
+                    "humidity": 45.4,
                     "appliances": {
                         "Hair Dryer": {
-                            "Status": "On",
-                            "Duration (min)": 2
+                            "Status": "Off",
+                            "Duration (min)": 0
                         },
                         "Heater": {
-                            "Status": "On",
-                            "Duration (min)": 7
+                            "Status": "Off",
+                            "Duration (min)": 0
                         }
                     }
                 },
                 "Bedroom": {
-                    "temperature": 28.7,
-                    "humidity": 54.3,
+                    "temperature": 20.7,
+                    "humidity": 51.0,
                     "appliances": {
                         "Fan": {
                             "Status": "On",
-                            "Duration (min)": 2
+                            "Duration (min)": 1
                         },
                         "Heater": {
                             "Status": "On",
-                            "Duration (min)": 8
+                            "Duration (min)": 1
                         },
                         "Television": {
                             "Status": "On",
@@ -719,32 +1087,32 @@
                     }
                 },
                 "Laundry Room": {
-                    "temperature": 15.8,
-                    "humidity": 40.8,
+                    "temperature": 11.6,
+                    "humidity": 50.9,
                     "appliances": {
                         "Washing Machine": {
-                            "Status": "Off",
-                            "Duration (min)": 0
+                            "Status": "On",
+                            "Duration (min)": 1
                         },
                         "Dryer": {
-                            "Status": "Off",
-                            "Duration (min)": 0
+                            "Status": "On",
+                            "Duration (min)": 2
                         }
                     }
                 }
             }
         }
     },
-    "user_009": {
-        "2025-05-20 16:05:27": {
+    "user_013": {
+        "2025-05-20 16:05:57": {
             "rooms": {
                 "Kitchen": {
-                    "temperature": 16.9,
-                    "humidity": 44.2,
+                    "temperature": 20.5,
+                    "humidity": 44.6,
                     "appliances": {
                         "Oven": {
                             "Status": "On",
-                            "Duration (min)": 2
+                            "Duration (min)": 1
                         },
                         "Refrigerator": {
                             "Status": "Off",
@@ -761,12 +1129,12 @@
                     }
                 },
                 "Living Room": {
-                    "temperature": 29.1,
-                    "humidity": 50.4,
+                    "temperature": 22.8,
+                    "humidity": 57.5,
                     "appliances": {
                         "Television": {
-                            "Status": "On",
-                            "Duration (min)": 2
+                            "Status": "Off",
+                            "Duration (min)": 0
                         },
                         "Air Conditioner": {
                             "Status": "Off",
@@ -774,17 +1142,17 @@
                         },
                         "Computer": {
                             "Status": "On",
-                            "Duration (min)": 3
+                            "Duration (min)": 2
                         }
                     }
                 },
                 "Bathroom": {
-                    "temperature": 23.0,
-                    "humidity": 43.2,
+                    "temperature": 11.4,
+                    "humidity": 44.9,
                     "appliances": {
                         "Hair Dryer": {
-                            "Status": "Off",
-                            "Duration (min)": 0
+                            "Status": "On",
+                            "Duration (min)": 1
                         },
                         "Heater": {
                             "Status": "Off",
@@ -793,8 +1161,8 @@
                     }
                 },
                 "Bedroom": {
-                    "temperature": 17.7,
-                    "humidity": 57.1,
+                    "temperature": 24.2,
+                    "humidity": 55.9,
                     "appliances": {
                         "Fan": {
                             "Status": "Off",
@@ -806,13 +1174,13 @@
                         },
                         "Television": {
                             "Status": "On",
-                            "Duration (min)": 3
+                            "Duration (min)": 1
                         }
                     }
                 },
                 "Laundry Room": {
-                    "temperature": 18.5,
-                    "humidity": 56.9,
+                    "temperature": 25.6,
+                    "humidity": 59.1,
                     "appliances": {
                         "Washing Machine": {
                             "Status": "Off",
@@ -827,20 +1195,112 @@
             }
         }
     },
-    "user_010": {
-        "2025-05-20 16:05:27": {
+    "user_014": {
+        "2025-05-20 16:05:57": {
             "rooms": {
                 "Kitchen": {
-                    "temperature": 25.3,
-                    "humidity": 54.5,
+                    "temperature": 21.7,
+                    "humidity": 49.6,
                     "appliances": {
                         "Oven": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Refrigerator": {
                             "Status": "On",
                             "Duration (min)": 1
                         },
-                        "Refrigerator": {
+                        "Microwave": {
+                            "Status": "On",
+                            "Duration (min)": 1
+                        },
+                        "Dishwasher": {
                             "Status": "Off",
                             "Duration (min)": 0
+                        }
+                    }
+                },
+                "Living Room": {
+                    "temperature": 17.5,
+                    "humidity": 43.2,
+                    "appliances": {
+                        "Television": {
+                            "Status": "On",
+                            "Duration (min)": 1
+                        },
+                        "Air Conditioner": {
+                            "Status": "On",
+                            "Duration (min)": 2
+                        },
+                        "Computer": {
+                            "Status": "On",
+                            "Duration (min)": 1
+                        }
+                    }
+                },
+                "Bathroom": {
+                    "temperature": 27.4,
+                    "humidity": 54.5,
+                    "appliances": {
+                        "Hair Dryer": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Heater": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        }
+                    }
+                },
+                "Bedroom": {
+                    "temperature": 25.2,
+                    "humidity": 54.9,
+                    "appliances": {
+                        "Fan": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Heater": {
+                            "Status": "On",
+                            "Duration (min)": 1
+                        },
+                        "Television": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        }
+                    }
+                },
+                "Laundry Room": {
+                    "temperature": 19.5,
+                    "humidity": 46.9,
+                    "appliances": {
+                        "Washing Machine": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Dryer": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "user_015": {
+        "2025-05-20 16:05:57": {
+            "rooms": {
+                "Kitchen": {
+                    "temperature": 23.9,
+                    "humidity": 56.8,
+                    "appliances": {
+                        "Oven": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Refrigerator": {
+                            "Status": "On",
+                            "Duration (min)": 1
                         },
                         "Microwave": {
                             "Status": "Off",
@@ -854,48 +1314,48 @@
                 },
                 "Living Room": {
                     "temperature": 10.5,
-                    "humidity": 51.2,
+                    "humidity": 53.0,
                     "appliances": {
                         "Television": {
                             "Status": "Off",
                             "Duration (min)": 0
                         },
                         "Air Conditioner": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Computer": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        }
+                    }
+                },
+                "Bathroom": {
+                    "temperature": 16.3,
+                    "humidity": 49.7,
+                    "appliances": {
+                        "Hair Dryer": {
+                            "Status": "On",
+                            "Duration (min)": 3
+                        },
+                        "Heater": {
+                            "Status": "On",
+                            "Duration (min)": 1
+                        }
+                    }
+                },
+                "Bedroom": {
+                    "temperature": 14.8,
+                    "humidity": 48.0,
+                    "appliances": {
+                        "Fan": {
+                            "Status": "On",
+                            "Duration (min)": 1
+                        },
+                        "Heater": {
                             "Status": "On",
                             "Duration (min)": 2
                         },
-                        "Computer": {
-                            "Status": "On",
-                            "Duration (min)": 1
-                        }
-                    }
-                },
-                "Bathroom": {
-                    "temperature": 26.7,
-                    "humidity": 55.3,
-                    "appliances": {
-                        "Hair Dryer": {
-                            "Status": "On",
-                            "Duration (min)": 1
-                        },
-                        "Heater": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        }
-                    }
-                },
-                "Bedroom": {
-                    "temperature": 25.5,
-                    "humidity": 41.7,
-                    "appliances": {
-                        "Fan": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Heater": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
                         "Television": {
                             "Status": "On",
                             "Duration (min)": 1
@@ -903,8 +1363,8 @@
                     }
                 },
                 "Laundry Room": {
-                    "temperature": 15.5,
-                    "humidity": 53.3,
+                    "temperature": 14.6,
+                    "humidity": 54.7,
                     "appliances": {
                         "Washing Machine": {
                             "Status": "Off",
@@ -913,466 +1373,6 @@
                         "Dryer": {
                             "Status": "On",
                             "Duration (min)": 1
-                        }
-                    }
-                }
-            }
-        }
-    },
-    "user_011": {
-        "2025-05-20 16:05:27": {
-            "rooms": {
-                "Kitchen": {
-                    "temperature": 22.9,
-                    "humidity": 53.4,
-                    "appliances": {
-                        "Oven": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Refrigerator": {
-                            "Status": "On",
-                            "Duration (min)": 4
-                        },
-                        "Microwave": {
-                            "Status": "On",
-                            "Duration (min)": 3
-                        },
-                        "Dishwasher": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        }
-                    }
-                },
-                "Living Room": {
-                    "temperature": 13.1,
-                    "humidity": 42.0,
-                    "appliances": {
-                        "Television": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Air Conditioner": {
-                            "Status": "On",
-                            "Duration (min)": 1
-                        },
-                        "Computer": {
-                            "Status": "On",
-                            "Duration (min)": 5
-                        }
-                    }
-                },
-                "Bathroom": {
-                    "temperature": 11.1,
-                    "humidity": 44.2,
-                    "appliances": {
-                        "Hair Dryer": {
-                            "Status": "On",
-                            "Duration (min)": 2
-                        },
-                        "Heater": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        }
-                    }
-                },
-                "Bedroom": {
-                    "temperature": 19.5,
-                    "humidity": 44.4,
-                    "appliances": {
-                        "Fan": {
-                            "Status": "On",
-                            "Duration (min)": 1
-                        },
-                        "Heater": {
-                            "Status": "On",
-                            "Duration (min)": 1
-                        },
-                        "Television": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        }
-                    }
-                },
-                "Laundry Room": {
-                    "temperature": 22.6,
-                    "humidity": 57.7,
-                    "appliances": {
-                        "Washing Machine": {
-                            "Status": "On",
-                            "Duration (min)": 1
-                        },
-                        "Dryer": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        }
-                    }
-                }
-            }
-        }
-    },
-    "user_012": {
-        "2025-05-20 16:05:27": {
-            "rooms": {
-                "Kitchen": {
-                    "temperature": 22.3,
-                    "humidity": 47.7,
-                    "appliances": {
-                        "Oven": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Refrigerator": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Microwave": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Dishwasher": {
-                            "Status": "On",
-                            "Duration (min)": 1
-                        }
-                    }
-                },
-                "Living Room": {
-                    "temperature": 21.4,
-                    "humidity": 42.8,
-                    "appliances": {
-                        "Television": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Air Conditioner": {
-                            "Status": "On",
-                            "Duration (min)": 1
-                        },
-                        "Computer": {
-                            "Status": "On",
-                            "Duration (min)": 1
-                        }
-                    }
-                },
-                "Bathroom": {
-                    "temperature": 18.1,
-                    "humidity": 48.9,
-                    "appliances": {
-                        "Hair Dryer": {
-                            "Status": "On",
-                            "Duration (min)": 1
-                        },
-                        "Heater": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        }
-                    }
-                },
-                "Bedroom": {
-                    "temperature": 22.1,
-                    "humidity": 55.7,
-                    "appliances": {
-                        "Fan": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Heater": {
-                            "Status": "On",
-                            "Duration (min)": 1
-                        },
-                        "Television": {
-                            "Status": "On",
-                            "Duration (min)": 1
-                        }
-                    }
-                },
-                "Laundry Room": {
-                    "temperature": 28.9,
-                    "humidity": 55.3,
-                    "appliances": {
-                        "Washing Machine": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Dryer": {
-                            "Status": "On",
-                            "Duration (min)": 3
-                        }
-                    }
-                }
-            }
-        }
-    },
-    "user_013": {
-        "2025-05-20 16:05:27": {
-            "rooms": {
-                "Kitchen": {
-                    "temperature": 26.1,
-                    "humidity": 43.5,
-                    "appliances": {
-                        "Oven": {
-                            "Status": "On",
-                            "Duration (min)": 5
-                        },
-                        "Refrigerator": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Microwave": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Dishwasher": {
-                            "Status": "On",
-                            "Duration (min)": 4
-                        }
-                    }
-                },
-                "Living Room": {
-                    "temperature": 22.3,
-                    "humidity": 43.5,
-                    "appliances": {
-                        "Television": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Air Conditioner": {
-                            "Status": "On",
-                            "Duration (min)": 5
-                        },
-                        "Computer": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        }
-                    }
-                },
-                "Bathroom": {
-                    "temperature": 18.6,
-                    "humidity": 40.2,
-                    "appliances": {
-                        "Hair Dryer": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Heater": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        }
-                    }
-                },
-                "Bedroom": {
-                    "temperature": 22.4,
-                    "humidity": 54.3,
-                    "appliances": {
-                        "Fan": {
-                            "Status": "On",
-                            "Duration (min)": 1
-                        },
-                        "Heater": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Television": {
-                            "Status": "On",
-                            "Duration (min)": 1
-                        }
-                    }
-                },
-                "Laundry Room": {
-                    "temperature": 23.3,
-                    "humidity": 58.1,
-                    "appliances": {
-                        "Washing Machine": {
-                            "Status": "On",
-                            "Duration (min)": 1
-                        },
-                        "Dryer": {
-                            "Status": "On",
-                            "Duration (min)": 2
-                        }
-                    }
-                }
-            }
-        }
-    },
-    "user_014": {
-        "2025-05-20 16:05:27": {
-            "rooms": {
-                "Kitchen": {
-                    "temperature": 26.9,
-                    "humidity": 55.7,
-                    "appliances": {
-                        "Oven": {
-                            "Status": "On",
-                            "Duration (min)": 3
-                        },
-                        "Refrigerator": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Microwave": {
-                            "Status": "On",
-                            "Duration (min)": 2
-                        },
-                        "Dishwasher": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        }
-                    }
-                },
-                "Living Room": {
-                    "temperature": 18.7,
-                    "humidity": 56.2,
-                    "appliances": {
-                        "Television": {
-                            "Status": "On",
-                            "Duration (min)": 2
-                        },
-                        "Air Conditioner": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Computer": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        }
-                    }
-                },
-                "Bathroom": {
-                    "temperature": 21.0,
-                    "humidity": 49.1,
-                    "appliances": {
-                        "Hair Dryer": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Heater": {
-                            "Status": "On",
-                            "Duration (min)": 3
-                        }
-                    }
-                },
-                "Bedroom": {
-                    "temperature": 15.3,
-                    "humidity": 52.9,
-                    "appliances": {
-                        "Fan": {
-                            "Status": "On",
-                            "Duration (min)": 1
-                        },
-                        "Heater": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Television": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        }
-                    }
-                },
-                "Laundry Room": {
-                    "temperature": 13.1,
-                    "humidity": 56.0,
-                    "appliances": {
-                        "Washing Machine": {
-                            "Status": "On",
-                            "Duration (min)": 1
-                        },
-                        "Dryer": {
-                            "Status": "On",
-                            "Duration (min)": 3
-                        }
-                    }
-                }
-            }
-        }
-    },
-    "user_015": {
-        "2025-05-20 16:05:27": {
-            "rooms": {
-                "Kitchen": {
-                    "temperature": 12.0,
-                    "humidity": 52.2,
-                    "appliances": {
-                        "Oven": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Refrigerator": {
-                            "Status": "On",
-                            "Duration (min)": 1
-                        },
-                        "Microwave": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Dishwasher": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        }
-                    }
-                },
-                "Living Room": {
-                    "temperature": 11.3,
-                    "humidity": 47.6,
-                    "appliances": {
-                        "Television": {
-                            "Status": "On",
-                            "Duration (min)": 3
-                        },
-                        "Air Conditioner": {
-                            "Status": "On",
-                            "Duration (min)": 3
-                        },
-                        "Computer": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        }
-                    }
-                },
-                "Bathroom": {
-                    "temperature": 26.4,
-                    "humidity": 46.2,
-                    "appliances": {
-                        "Hair Dryer": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Heater": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        }
-                    }
-                },
-                "Bedroom": {
-                    "temperature": 18.9,
-                    "humidity": 42.4,
-                    "appliances": {
-                        "Fan": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Heater": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Television": {
-                            "Status": "On",
-                            "Duration (min)": 4
-                        }
-                    }
-                },
-                "Laundry Room": {
-                    "temperature": 22.6,
-                    "humidity": 59.7,
-                    "appliances": {
-                        "Washing Machine": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Dryer": {
-                            "Status": "Off",
-                            "Duration (min)": 0
                         }
                     }
                 }
@@ -1380,11 +1380,11 @@
         }
     },
     "user_016": {
-        "2025-05-20 16:05:27": {
+        "2025-05-20 16:05:57": {
             "rooms": {
                 "Kitchen": {
-                    "temperature": 24.8,
-                    "humidity": 45.8,
+                    "temperature": 16.6,
+                    "humidity": 41.0,
                     "appliances": {
                         "Oven": {
                             "Status": "On",
@@ -1395,8 +1395,8 @@
                             "Duration (min)": 0
                         },
                         "Microwave": {
-                            "Status": "On",
-                            "Duration (min)": 1
+                            "Status": "Off",
+                            "Duration (min)": 0
                         },
                         "Dishwasher": {
                             "Status": "On",
@@ -1405,16 +1405,16 @@
                     }
                 },
                 "Living Room": {
-                    "temperature": 27.9,
-                    "humidity": 51.2,
+                    "temperature": 23.0,
+                    "humidity": 46.4,
                     "appliances": {
                         "Television": {
-                            "Status": "On",
-                            "Duration (min)": 5
+                            "Status": "Off",
+                            "Duration (min)": 0
                         },
                         "Air Conditioner": {
-                            "Status": "On",
-                            "Duration (min)": 1
+                            "Status": "Off",
+                            "Duration (min)": 0
                         },
                         "Computer": {
                             "Status": "Off",
@@ -1423,40 +1423,40 @@
                     }
                 },
                 "Bathroom": {
-                    "temperature": 21.6,
-                    "humidity": 52.2,
+                    "temperature": 24.1,
+                    "humidity": 52.1,
                     "appliances": {
                         "Hair Dryer": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Heater": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        }
-                    }
-                },
-                "Bedroom": {
-                    "temperature": 24.6,
-                    "humidity": 48.9,
-                    "appliances": {
-                        "Fan": {
                             "Status": "On",
                             "Duration (min)": 3
                         },
                         "Heater": {
                             "Status": "On",
-                            "Duration (min)": 1
+                            "Duration (min)": 2
+                        }
+                    }
+                },
+                "Bedroom": {
+                    "temperature": 17.5,
+                    "humidity": 55.2,
+                    "appliances": {
+                        "Fan": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Heater": {
+                            "Status": "Off",
+                            "Duration (min)": 0
                         },
                         "Television": {
                             "Status": "On",
-                            "Duration (min)": 6
+                            "Duration (min)": 1
                         }
                     }
                 },
                 "Laundry Room": {
-                    "temperature": 17.8,
-                    "humidity": 48.3,
+                    "temperature": 26.0,
+                    "humidity": 48.5,
                     "appliances": {
                         "Washing Machine": {
                             "Status": "Off",
@@ -1464,7 +1464,7 @@
                         },
                         "Dryer": {
                             "Status": "On",
-                            "Duration (min)": 4
+                            "Duration (min)": 7
                         }
                     }
                 }
@@ -1472,37 +1472,37 @@
         }
     },
     "user_017": {
-        "2025-05-20 16:05:27": {
+        "2025-05-20 16:05:57": {
             "rooms": {
                 "Kitchen": {
-                    "temperature": 15.8,
-                    "humidity": 54.9,
+                    "temperature": 20.6,
+                    "humidity": 44.1,
                     "appliances": {
                         "Oven": {
-                            "Status": "On",
-                            "Duration (min)": 1
+                            "Status": "Off",
+                            "Duration (min)": 0
                         },
                         "Refrigerator": {
                             "Status": "On",
-                            "Duration (min)": 1
+                            "Duration (min)": 4
                         },
                         "Microwave": {
                             "Status": "On",
-                            "Duration (min)": 6
+                            "Duration (min)": 2
                         },
                         "Dishwasher": {
-                            "Status": "Off",
-                            "Duration (min)": 0
+                            "Status": "On",
+                            "Duration (min)": 1
                         }
                     }
                 },
                 "Living Room": {
-                    "temperature": 18.1,
-                    "humidity": 43.9,
+                    "temperature": 29.8,
+                    "humidity": 42.0,
                     "appliances": {
                         "Television": {
-                            "Status": "On",
-                            "Duration (min)": 4
+                            "Status": "Off",
+                            "Duration (min)": 0
                         },
                         "Air Conditioner": {
                             "Status": "Off",
@@ -1515,8 +1515,8 @@
                     }
                 },
                 "Bathroom": {
-                    "temperature": 24.1,
-                    "humidity": 53.4,
+                    "temperature": 15.8,
+                    "humidity": 54.3,
                     "appliances": {
                         "Hair Dryer": {
                             "Status": "Off",
@@ -1529,34 +1529,34 @@
                     }
                 },
                 "Bedroom": {
-                    "temperature": 13.0,
-                    "humidity": 59.1,
+                    "temperature": 18.5,
+                    "humidity": 53.6,
                     "appliances": {
                         "Fan": {
                             "Status": "On",
                             "Duration (min)": 1
                         },
                         "Heater": {
-                            "Status": "Off",
-                            "Duration (min)": 0
+                            "Status": "On",
+                            "Duration (min)": 1
                         },
                         "Television": {
-                            "Status": "Off",
-                            "Duration (min)": 0
+                            "Status": "On",
+                            "Duration (min)": 1
                         }
                     }
                 },
                 "Laundry Room": {
-                    "temperature": 26.7,
-                    "humidity": 58.4,
+                    "temperature": 17.3,
+                    "humidity": 48.8,
                     "appliances": {
                         "Washing Machine": {
-                            "Status": "On",
-                            "Duration (min)": 2
-                        },
-                        "Dryer": {
                             "Status": "Off",
                             "Duration (min)": 0
+                        },
+                        "Dryer": {
+                            "Status": "On",
+                            "Duration (min)": 1
                         }
                     }
                 }
@@ -1564,41 +1564,41 @@
         }
     },
     "user_018": {
-        "2025-05-20 16:05:27": {
+        "2025-05-20 16:05:57": {
             "rooms": {
                 "Kitchen": {
-                    "temperature": 27.0,
-                    "humidity": 46.2,
+                    "temperature": 28.3,
+                    "humidity": 57.3,
                     "appliances": {
                         "Oven": {
                             "Status": "Off",
                             "Duration (min)": 0
                         },
                         "Refrigerator": {
-                            "Status": "On",
-                            "Duration (min)": 1
+                            "Status": "Off",
+                            "Duration (min)": 0
                         },
                         "Microwave": {
                             "Status": "Off",
                             "Duration (min)": 0
                         },
                         "Dishwasher": {
-                            "Status": "Off",
-                            "Duration (min)": 0
+                            "Status": "On",
+                            "Duration (min)": 1
                         }
                     }
                 },
                 "Living Room": {
-                    "temperature": 25.5,
-                    "humidity": 46.7,
+                    "temperature": 24.1,
+                    "humidity": 40.1,
                     "appliances": {
                         "Television": {
                             "Status": "On",
                             "Duration (min)": 2
                         },
                         "Air Conditioner": {
-                            "Status": "On",
-                            "Duration (min)": 1
+                            "Status": "Off",
+                            "Duration (min)": 0
                         },
                         "Computer": {
                             "Status": "Off",
@@ -1607,40 +1607,40 @@
                     }
                 },
                 "Bathroom": {
-                    "temperature": 18.5,
-                    "humidity": 41.9,
+                    "temperature": 18.0,
+                    "humidity": 54.0,
                     "appliances": {
                         "Hair Dryer": {
-                            "Status": "On",
-                            "Duration (min)": 4
+                            "Status": "Off",
+                            "Duration (min)": 0
                         },
                         "Heater": {
-                            "Status": "On",
-                            "Duration (min)": 6
+                            "Status": "Off",
+                            "Duration (min)": 0
                         }
                     }
                 },
                 "Bedroom": {
-                    "temperature": 11.8,
-                    "humidity": 52.6,
+                    "temperature": 14.5,
+                    "humidity": 59.6,
                     "appliances": {
                         "Fan": {
                             "Status": "On",
-                            "Duration (min)": 5
+                            "Duration (min)": 1
                         },
                         "Heater": {
                             "Status": "On",
-                            "Duration (min)": 7
+                            "Duration (min)": 1
                         },
                         "Television": {
-                            "Status": "On",
-                            "Duration (min)": 3
+                            "Status": "Off",
+                            "Duration (min)": 0
                         }
                     }
                 },
                 "Laundry Room": {
-                    "temperature": 19.3,
-                    "humidity": 43.9,
+                    "temperature": 18.8,
+                    "humidity": 54.4,
                     "appliances": {
                         "Washing Machine": {
                             "Status": "On",
@@ -1656,15 +1656,15 @@
         }
     },
     "user_019": {
-        "2025-05-20 16:05:27": {
+        "2025-05-20 16:05:57": {
             "rooms": {
                 "Kitchen": {
-                    "temperature": 23.7,
-                    "humidity": 48.3,
+                    "temperature": 19.2,
+                    "humidity": 52.4,
                     "appliances": {
                         "Oven": {
-                            "Status": "Off",
-                            "Duration (min)": 0
+                            "Status": "On",
+                            "Duration (min)": 1
                         },
                         "Refrigerator": {
                             "Status": "Off",
@@ -1672,21 +1672,21 @@
                         },
                         "Microwave": {
                             "Status": "On",
-                            "Duration (min)": 6
+                            "Duration (min)": 2
                         },
                         "Dishwasher": {
-                            "Status": "Off",
-                            "Duration (min)": 0
+                            "Status": "On",
+                            "Duration (min)": 3
                         }
                     }
                 },
                 "Living Room": {
-                    "temperature": 15.9,
-                    "humidity": 47.6,
+                    "temperature": 22.0,
+                    "humidity": 50.6,
                     "appliances": {
                         "Television": {
-                            "Status": "On",
-                            "Duration (min)": 1
+                            "Status": "Off",
+                            "Duration (min)": 0
                         },
                         "Air Conditioner": {
                             "Status": "Off",
@@ -1699,48 +1699,48 @@
                     }
                 },
                 "Bathroom": {
-                    "temperature": 18.1,
-                    "humidity": 43.1,
+                    "temperature": 25.0,
+                    "humidity": 47.9,
                     "appliances": {
                         "Hair Dryer": {
-                            "Status": "Off",
-                            "Duration (min)": 0
-                        },
-                        "Heater": {
-                            "Status": "On",
-                            "Duration (min)": 1
-                        }
-                    }
-                },
-                "Bedroom": {
-                    "temperature": 28.7,
-                    "humidity": 57.8,
-                    "appliances": {
-                        "Fan": {
                             "Status": "On",
                             "Duration (min)": 2
                         },
                         "Heater": {
                             "Status": "Off",
                             "Duration (min)": 0
+                        }
+                    }
+                },
+                "Bedroom": {
+                    "temperature": 20.3,
+                    "humidity": 59.5,
+                    "appliances": {
+                        "Fan": {
+                            "Status": "On",
+                            "Duration (min)": 1
                         },
-                        "Television": {
+                        "Heater": {
                             "Status": "Off",
                             "Duration (min)": 0
+                        },
+                        "Television": {
+                            "Status": "On",
+                            "Duration (min)": 1
                         }
                     }
                 },
                 "Laundry Room": {
-                    "temperature": 29.0,
-                    "humidity": 44.4,
+                    "temperature": 12.5,
+                    "humidity": 51.5,
                     "appliances": {
                         "Washing Machine": {
                             "Status": "On",
-                            "Duration (min)": 7
+                            "Duration (min)": 2
                         },
                         "Dryer": {
-                            "Status": "Off",
-                            "Duration (min)": 0
+                            "Status": "On",
+                            "Duration (min)": 3
                         }
                     }
                 }
@@ -1748,11 +1748,11 @@
         }
     },
     "user_020": {
-        "2025-05-20 16:05:27": {
+        "2025-05-20 16:05:57": {
             "rooms": {
                 "Kitchen": {
-                    "temperature": 24.5,
-                    "humidity": 45.7,
+                    "temperature": 18.0,
+                    "humidity": 43.2,
                     "appliances": {
                         "Oven": {
                             "Status": "On",
@@ -1763,8 +1763,8 @@
                             "Duration (min)": 0
                         },
                         "Microwave": {
-                            "Status": "On",
-                            "Duration (min)": 1
+                            "Status": "Off",
+                            "Duration (min)": 0
                         },
                         "Dishwasher": {
                             "Status": "On",
@@ -1773,26 +1773,26 @@
                     }
                 },
                 "Living Room": {
-                    "temperature": 26.0,
-                    "humidity": 43.8,
+                    "temperature": 17.6,
+                    "humidity": 42.7,
                     "appliances": {
                         "Television": {
-                            "Status": "On",
-                            "Duration (min)": 5
-                        },
-                        "Air Conditioner": {
                             "Status": "Off",
                             "Duration (min)": 0
                         },
+                        "Air Conditioner": {
+                            "Status": "On",
+                            "Duration (min)": 3
+                        },
                         "Computer": {
                             "Status": "On",
-                            "Duration (min)": 4
+                            "Duration (min)": 7
                         }
                     }
                 },
                 "Bathroom": {
-                    "temperature": 27.4,
-                    "humidity": 59.5,
+                    "temperature": 16.7,
+                    "humidity": 44.0,
                     "appliances": {
                         "Hair Dryer": {
                             "Status": "Off",
@@ -1800,39 +1800,39 @@
                         },
                         "Heater": {
                             "Status": "On",
-                            "Duration (min)": 1
+                            "Duration (min)": 4
                         }
                     }
                 },
                 "Bedroom": {
-                    "temperature": 11.3,
-                    "humidity": 49.0,
+                    "temperature": 15.0,
+                    "humidity": 44.1,
                     "appliances": {
                         "Fan": {
-                            "Status": "On",
-                            "Duration (min)": 1
-                        },
-                        "Heater": {
-                            "Status": "On",
-                            "Duration (min)": 2
-                        },
-                        "Television": {
                             "Status": "Off",
                             "Duration (min)": 0
+                        },
+                        "Heater": {
+                            "Status": "Off",
+                            "Duration (min)": 0
+                        },
+                        "Television": {
+                            "Status": "On",
+                            "Duration (min)": 1
                         }
                     }
                 },
                 "Laundry Room": {
-                    "temperature": 25.5,
-                    "humidity": 51.6,
+                    "temperature": 11.7,
+                    "humidity": 46.0,
                     "appliances": {
                         "Washing Machine": {
                             "Status": "On",
                             "Duration (min)": 1
                         },
                         "Dryer": {
-                            "Status": "On",
-                            "Duration (min)": 2
+                            "Status": "Off",
+                            "Duration (min)": 0
                         }
                     }
                 }
