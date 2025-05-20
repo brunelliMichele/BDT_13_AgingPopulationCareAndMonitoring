@@ -111,13 +111,13 @@ function calculateAge(birthdateStr){
     return age;
 }
 
-/* // for handle test alert 
+// for handle test alert 
 function triggerTestAlert() {
     socket.emit("test_alert", {
         message: "🔥 Test alert triggered manually",
         timestamp: new Date().toLocaleTimeString()
     });
-} */
+}
 
 // !!-- EVENTS SECTION --!!
 // event handler for searchbox
@@ -133,16 +133,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const badge = document.getElementById("new-alert-badge");
     const alertList = document.getElementById("alert-list");
 
-    // badge
+    // populate badge if exists
     if (badge) {
-    const count = parseInt(sessionStorage.getItem("newAlertsCount") || "0");
-    if (count > 0) {
-        badge.textContent = count;
-        badge.classList.remove("hidden");
+        const count = parseInt(sessionStorage.getItem("newAlertsCount") || "0");
+        if (count > 0) {
+            badge.textContent = count;
+            badge.classList.remove("hidden");
+        }
     }
-}
 
-    // alert list
+    // populate alert list if exists
     if (alertList) {
         const saved = JSON.parse(sessionStorage.getItem("alerts") || "[]");
         if (saved.length > 0) {
@@ -184,103 +184,7 @@ nextBtn.addEventListener("click", () => {
 });
 
 
-// !!-- WEB SOCKET SECTION --!!
-const socket = io();
-
-socket.on("new_alert_message", (data) => {
-    const alertBox = document.getElementById("alert-box");
-    const alertElement = document.getElementById("alert");
-    const alertContent = document.getElementById("alert-content");
-    const alertList = document.getElementById("alert-list");
-
-    const timestamp = data.timestamp || new Date().toLocaleTimeString();
-    const message = typeof data === "string" ? data : "⚠️ Alert received";
-    
-    // save alert in sessionStorage
-    const storedAlerts = JSON.parse(sessionStorage.getItem("alerts") || "[]");
-    storedAlerts.unshift({ timestamp, message });
-    sessionStorage.setItem("alerts", JSON.stringify(storedAlerts.slice(0, 10)));
-
-    const badge = document.getElementById("new-alert-badge");
-    const newCount = parseInt(sessionStorage.getItem("newAlertsCount") || "0");
-
-    if (badge && newCount > 0) {
-        badge.textContent = newCount;
-        badge.classList.remove("hidden");
-    }
-
-    // dopo averli mostrati, rimuovi il flag
-    sessionStorage.removeItem("newAlerts");
-
-    // show pop-up
-    if (alertBox && alertElement && alertContent) {
-        alertBox.classList.remove("hidden");
-        alertElement.textContent = `${timestamp} — ${message}`;
-        alertContent.classList.remove("scale-95", "opacity-0");
-        alertContent.classList.add("scale-100", "opacity-100");
-
-        // automatically close pop-up after 10 seconds
-        setTimeout(() => {
-            alertBox.classList.add("hidden");
-            alertContent.classList.remove("scale-100", "opacity-100");
-            alertContent.classList.add("scale-95", "opacity-0");
-        }, 10000);
-    }
-
-    // populate the alert-list
-    if (alertList) {
-        if (alertList.children.length === 1 && alertList.children[0].textContent.includes("No alerts")) {
-            alertList.innerHTML = "";
-        }
-
-        const li = document.createElement("li");
-        li.className = "bg-rose-100 text-rose-700 border border-rose-200 px-2 py-1 rounded text-xs leading-tight break-words";
-        li.title = `${timestamp} — ${message}`;
-        li.textContent = `${timestamp} — ${message}`;
-        li.dataset.new = "true";
-
-        alertList.insertBefore(li, alertList.firstChild);
-
-        if (alertList.children.length > 10) {
-            alertList.removeChild(alertList.lastChild);
-        }
-    }
-});
-
-// listener for click on "pop-up closure"
-document.getElementById("close-alert-box").addEventListener("click", () => {
-    document.getElementById("alert-box").classList.add("hidden");
-});
-
-// listener for click on "new alert badge"
-document.getElementById("new-alert-badge").addEventListener("click", () => {
-    const newItems = document.querySelectorAll("#alert-list li[data-new='true']");
-    newItems.forEach(el => {
-        el.classList.add("bg-yellow-200", "border-2", "border-yellow-500");
-        setTimeout(() => {
-            el.classList.remove("bg-yellow-200", "border-2", "border-yellow-500");
-        }, 3000);
-        el.removeAttribute("data-new");
-    });
-
-    if (newItems.length > 0) {
-        newItems[0].scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-
-    const badge = document.getElementById("new-alert-badge");
-    badge.textContent = "0";
-    badge.classList.add("hidden");
-
-    sessionStorage.setItem("newAlertsCount", "0");
-    sessionStorage.removeItem("newAlerts");
-
-    const saved = JSON.parse(sessionStorage.getItem("alerts") || "[]");
-    const cleared = saved.map(alert => ({ ...alert, isNew: false }));
-    sessionStorage.setItem("alerts", JSON.stringify(cleared));
-});
-
-
-
+// !!-- CALL TO FUNCTIONS --!!
 applyFilters();
 updateMapMarkers();
 
