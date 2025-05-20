@@ -1,12 +1,13 @@
 // !!-- WEB SOCKET SECTION --!!
 const socket = io();
 
+const userId = document.getElementById("patient-id").dataset.id;
+
 socket.on('smart_data_message', function (msg) {
-    const userKey = "user_001" // for development only
 
-    if (!(userKey in msg)) return;
+    if (!(userId in msg)) return;
 
-    const data = msg[userKey];
+    const data = msg[userId];
     const timestamp = Object.keys(data)[0];
     const rooms = data[timestamp].rooms;
 

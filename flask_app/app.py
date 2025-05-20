@@ -70,18 +70,6 @@ def get_all_patients():
     conn.close()
     return patients
 
-""" # get all cities from postgres
-def get_all_cities():
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT DISTINCT city FROM patients WHERE city IS NOT NULL ORDER BY city;")
-    rows = cur.fetchall()
-    cities = [row[0] for row in rows]
-
-    cur.close()
-    conn.close()
-    return cities """
-
 # get all city with coordinates
 def get_city_avg_coords(patients):
     city_coords = defaultdict(list)

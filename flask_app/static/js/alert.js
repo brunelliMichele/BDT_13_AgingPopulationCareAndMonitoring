@@ -1,45 +1,43 @@
 const alertSocket = io();
 
 // web socket connection
-alertSocket.on("new_alert_message", (data) => {
+socket.on("new_alert_message", (data) => {
     const timestamp = new Date().toLocaleTimeString();
-    const message = typeof data === "string" ? data : (data?.message || "⚠️ Alert received");
 
-    // save in sessionStorage
-    const storedAlerts = JSON.parse(sessionStorage.getItem("alerts") || "[]");
-    storedAlerts.unshift({ timestamp, message, isNew: true });
-    sessionStorage.setItem("alerts", JSON.stringify(storedAlerts.slice(0, 10)));
+    const alerts = Array.isArray(data) ? data : [data?.message || "⚠️ Alert received"];
 
-    const currentCount = parseInt(sessionStorage.getItem("newAlertsCount") || "0");
-    sessionStorage.setItem("newAlertsCount", (currentCount + 1).toString());
-    sessionStorage.setItem("newAlerts", "true");
+    alerts.forEach(message => {
+        const stored = JSON.parse(sessionStorage.getItem("alerts") || "[]");
+        stored.unshift({ timestamp, message, isNew: true });
+        sessionStorage.setItem("alerts", JSON.stringify(stored.slice(0, 10)));
 
-    // update badge if exists
-    const badge = document.getElementById("new-alert-badge");
-    if (badge) {
-        const count = parseInt(sessionStorage.getItem("newAlertsCount") || "0");
-        badge.textContent = count;
-        badge.classList.remove("hidden");
-    }
+        const badge = document.getElementById("new-alert-badge");
+        const current = parseInt(sessionStorage.getItem("newAlertsCount") || "0");
+        sessionStorage.setItem("newAlertsCount", current + 1);
+        sessionStorage.setItem("newAlerts", "true");
 
-    // shows alert popup
-    const alerBox = document.getElementById("alert-box");
-    const alertElement = document.getElementById("alert");
-    const alertContent = document.getElementById("alert-content");
+        if (badge) {
+            badge.textContent = current + 1;
+            badge.classList.remove("hidden");
+        }
 
-    if (alerBox && alertElement && alertContent) {
-        alerBox.classList.remove("hidden");
-        alertElement.textContent = `${timestamp} — ${message}`;
-        alertContent.classList.remove("scale-95", "opacity-0");
-        alertContent.classList.add("scale-100", "opacity-100");
+        const alertBox = document.getElementById("alert-box");
+        const alertElement = document.getElementById("alert");
+        const alertContent = document.getElementById("alert-content");
 
-        // automatic close popup after 10 seconds
-        setTimeout(() => {
-            alerBox.classList.add("hidden");
-            alertContent.classList.remove("scale-100", "opacity-100");
-            alertContent.classList.add("scale-95", "opacity-0");
-        }, 10000);
-    }
+        if (alertBox && alertElement && alertContent) {
+            alertBox.classList.remove("hidden");
+            alertElement.textContent = `${timestamp} — ${message}`;
+            alertContent.classList.remove("scale-95", "opacity-0");
+            alertContent.classList.add("scale-100", "opacity-100");
+
+            setTimeout(() => {
+                alertBox.classList.add("hidden");
+                alertContent.classList.remove("scale-100", "opacity-100");
+                alertContent.classList.add("scale-95", "opacity-0");
+            }, 10000);
+        }
+    });
 });
 
 // event listener
