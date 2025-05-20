@@ -1,13 +1,7 @@
+// !!-- WEB SOCKET SECTION --!!
 const socket = io();
 
-socket.on('connect', () => {
-    console.log('✅ Connected to server');
-});
-
-socket.on('kafka_message', function (msg) {
-    /* const patientId = document.getElementById("patient-id").dataset.id;
-    const userKey = "user_" + patientId; */
-
+socket.on('smart_data_message', function (msg) {
     const userKey = "user_001" // for development only
 
     if (!(userKey in msg)) return;
@@ -40,7 +34,7 @@ socket.on('kafka_message', function (msg) {
 });
 
 
-socket.on("new_alert", (data) => {
+socket.on("new_alert_message", (data) => {
     const alertBox = document.getElementById("alert-box");
     const alertElement = document.getElementById("alert");
     const alertContent = document.getElementById("alert-content");
@@ -48,30 +42,30 @@ socket.on("new_alert", (data) => {
     const timestamp = new Date().toLocaleTimeString();
     const message = typeof data === "string" ? data : (data?.message || "⚠️ Alert received");
 
-    // save in sessionStorage
-    if (!document.getElementById("alert-list")) {
-        const storedAlerts = JSON.parse(sessionStorage.getItem("alerts") || "[]");
-        storedAlerts.unshift({ timestamp, message });
-        sessionStorage.setItem("alerts", JSON.stringify(storedAlerts.slice(0, 10)));
+    // save the sessionStorage
+    const storedAlerts = JSON.parse(sessionStorage.getItem("alerts") || "[]");
+    storedAlerts.unshift({ timestamp, message, isNew: true });
+    sessionStorage.setItem("alerts", JSON.stringify(storedAlerts.slice(0, 10)));
+    const currentCount = parseInt(sessionStorage.getItem("newAlertsCount") || "0");
+    sessionStorage.setItem("newAlertsCount", (currentCount + 1).toString());
+    sessionStorage.setItem("newAlerts", "true");
 
-        // shows the new alerts in the homepage on the nex visit
-        sessionStorage.setItem("newAlerts", "true");
-    }
-
-    // shows the badge (if it is presente in the page)
+    // shows Badge (if present)
     const badge = document.getElementById("new-alert-badge");
-    if (badge && sessionStorage.getItem("newAlerts") === "true") {
+    if (badge) {
+        let count = parseInt(badge.textContent) || 0;
+        count++;
+        badge.textContent = count;
         badge.classList.remove("hidden");
     }
 
-    // shows the pop-up
+    // shows Pop-up
     if (alertBox && alertElement && alertContent) {
         alertBox.classList.remove("hidden");
         alertElement.textContent = `${timestamp} — ${message}`;
         alertContent.classList.remove("scale-95", "opacity-0");
         alertContent.classList.add("scale-100", "opacity-100");
 
-        // automatically close the pop-up after 10 seconds
         setTimeout(() => {
             alertBox.classList.add("hidden");
             alertContent.classList.remove("scale-100", "opacity-100");
