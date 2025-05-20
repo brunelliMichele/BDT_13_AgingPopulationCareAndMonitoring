@@ -4,6 +4,9 @@ from kafka import KafkaConsumer
 import psycopg2
 import os
 import json
+from collections import defaultdict
+import numpy as np
+import sys
 
 # create flask app and initialize webSocket
 app = Flask(
@@ -14,52 +17,25 @@ app = Flask(
 
 socket_io = SocketIO(app, cors_allowed_origins = "*")
 
-""" # Kafka Config
-kafka_config = {
-    "bootstrap.servers": "kafka:9092", # kafka container name
-    "group.id": "smart_home", # consumer group name
-    "auto.offset.reset": "earliest", # with no offset, start from the beginning
-} 
-
-# Kafka consumer with error handling
-def consume_kafka():
-    try:
-        consumer = Consumer(kafka_config)
-        print(f"Started kafka consumer") # log
-        consumer.subscribe(["smart_home_data"])
-        print(f"Kafka subsribed on topic 'smart_home_data'") #log
-
-        while True:
-            msg = consumer.poll(1.0)
-            print(f"Polling...") # log
-            if msg is None:
-                print(f"No message recived") # log
-                continue
-            if msg.error():
-                print(f"[KAFKA] - Error: {msg.error()}") # log
-                continue
-            data = msg.value().decode("utf-8")
-            print(f"[MESSAGE DIMENSION] - {len(data)} bytes") # log
-            print(f"📤 Emitting to socket: {data[:80]}...")  # log
-            socket_io.emit('kafka_message', {'data': data})
-            # socket_io.emit('kafka_message', {'data': "test"})
-            print(f"[SocketIO] - Emit: {data[:80]}...") # log
-        
-        consumer.close()
-    except Exception as e:
-        import traceback
-        print("❌ EXCEPTION in Kafka thread:")
-        traceback.print_exc() """
-
-def kafka_consumer():
-    consumer = KafkaConsumer(
+# 
+def smart_data_consumer():
+    smart_data_consumer = KafkaConsumer(
         'smart_home_data',
         bootstrap_servers='kafka:9092',
         value_deserializer = lambda m: json.loads(m.decode('utf-8'))
     )
 
-    for message in consumer:
-        socket_io.emit('kafka_message', message.value)
+    for message in smart_data_consumer:
+        socket_io.emit('smart_data_message', message.value)
+
+def alert_consumer():
+    alert_consumer = KafkaConsumer(
+        'alert_topic',
+        bootstrap_servers='kafka:9092',
+        value_deserializer=lambda a: json.loads(a.decode('utf-8'))
+    )
+    for message in alert_consumer:
+        socket_io.emit("new_alert_message", message.value)
 
 # set postgres connection
 def get_db_connection():
@@ -75,7 +51,7 @@ def get_db_connection():
 def get_all_patients():
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT id, first, middle, last, city, birthdate FROM patients")
+    cur.execute("SELECT id, first, middle, last, city, birthdate, lat, lon FROM patients")
     rows = cur.fetchall()
     patients = []
     for row in rows:
@@ -86,13 +62,15 @@ def get_all_patients():
             "surname": row[3],
             "city": row[4],
             "birthdate": row[5],
+            "lat": row[6],
+            "lon": row[7],
             "url": f"/patient/{row[0]}"
         })
     cur.close()
     conn.close()
     return patients
 
-# get all cities from postgres
+""" # get all cities from postgres
 def get_all_cities():
     conn = get_db_connection()
     cur = conn.cursor()
@@ -102,43 +80,29 @@ def get_all_cities():
 
     cur.close()
     conn.close()
-    return cities
+    return cities """
 
-# Define city data
-CITY_DATA = {
-    "New York": [40.7128, -74.0060],
-    "London": [51.5074, -0.1278],
-    "Tokyo": [35.6762, 139.6503],
-    "Paris": [48.8566, 2.3522],
-    "Sydney": [-33.8688, 151.2093]
-}
-
-
-# set route for main page
-@app.route("/")
-def index():
-    #cities = get_all_cities()
-    cities = {
-        "New York": [40.7128, -74.0060],
-        "London": [51.5074, -0.1278],
-        "Tokyo": [35.6762, 139.6503],
-        "Paris": [48.8566, 2.3522],
-        "Sydney": [-33.8688, 151.2093]
+# get all city with coordinates
+def get_city_avg_coords(patients):
+    city_coords = defaultdict(list)
+    for p in patients:
+        if p.get("city") and p.get("lat") and p.get("lon"):
+            try:
+                city_coords[p["city"]].append((
+                    float(p["lat"]),
+                    float(p["lon"])
+                ))
+            except ValueError:
+                continue
+    return {
+        city: np.mean(coords, axis = 0).tolist()
+        for city, coords in city_coords.items()
     }
-    patients = get_all_patients()
-    return render_template("index.html", patients=patients,cities=cities.keys(), city_data=cities)
 
-# API route that returns JSON data
-@app.route("/api/city-data")
-def city_data():
-    return jsonify(CITY_DATA)
-
-# set route for patient detail page
-@app.route("/patient/<string:patient_id>")
-def patient_detail(patient_id):
+# get patient from ID
+def get_patient_by_id(patient_id):
     conn = get_db_connection()
     cur = conn.cursor()
-
     cur.execute("SELECT id, birthdate, deathdate, gender, birthplace, address, city, county, first, middle, last FROM patients WHERE id = %s", (patient_id,))
     patient = cur.fetchone()
 
@@ -146,7 +110,7 @@ def patient_detail(patient_id):
     conn.close()
 
     if patient:
-        patient_data = {
+        return {
             "id": patient[0],
             "birthdate": patient[1],
             "deathdate": patient[2],
@@ -159,9 +123,26 @@ def patient_detail(patient_id):
             "middlename": patient[9],
             "surname": patient[10]
         }
+    return None
+
+# set route for main page
+@app.route("/")
+def index():
+    patients = get_all_patients()
+    city_coords = get_city_avg_coords(patients)
+    cities = sorted(city_coords.keys())
+
+    return render_template("index.html", patients=patients, city_coords=city_coords, cities=cities)
+
+# set route for patient detail page
+@app.route("/patient/<string:patient_id>")
+def patient_detail(patient_id):
+    patient_data = get_patient_by_id(patient_id)
+
+    if patient_data:
         return render_template("patient.html", patient = patient_data)
     else:
-        return f"No patient with ID {patient_id}", 404
+        return (f"No patient with ID {patient_id}", 404)
 
 # run flask app and kafka consumer on localhost:8000
 if __name__ == "__main__":
@@ -169,5 +150,6 @@ if __name__ == "__main__":
     # socket_io.start_background_task(consume_kafka) # whitout this all works properly
     # print(f"Started KAFKA THREAD!")
     import threading
-    threading.Thread(target=kafka_consumer, daemon=True).start()
+    threading.Thread(target=alert_consumer, daemon=True).start()
+    threading.Thread(target=smart_data_consumer, daemon=True).start()
     socket_io.run(app, host="0.0.0.0", port=8000, allow_unsafe_werkzeug=True) # werkzeug only for debug
