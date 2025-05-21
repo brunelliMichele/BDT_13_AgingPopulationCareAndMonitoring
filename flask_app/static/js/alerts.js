@@ -1,17 +1,13 @@
 // alerts.js 
 
-// setup and alert handler function
-export function setupAlertHandling() {
-    const socket = io();
-
-    // close button handling
+export function setupAlertHandling(socket) {
     const closeBtn = document.getElementById("close-alert-box");
-        if (closeBtn) {
-            closeBtn.addEventListener("click", () => {
-                document.getElementById("alert-box").classList.add("hidden");
-            });
-        }
-    // close popup if background click
+    if (closeBtn) {
+        closeBtn.addEventListener("click", () => {
+            document.getElementById("alert-box").classList.add("hidden");
+        });
+    }
+
     const alertBox = document.getElementById("alert-box");
     if (alertBox) {
         alertBox.addEventListener("click", (e) => {
@@ -21,21 +17,15 @@ export function setupAlertHandling() {
         });
     }
 
-    // notification's click handler
     const badge = document.getElementById("new-alert-badge");
     if (badge) {
         badge.addEventListener("click", highlightNewAlerts);
     }
 
-    socket.on("connect", () => {
-        console.log("socket connected");
-    });
-
     socket.on("new_alert_message", (data) => {
-        console.log("ALERT RECIVED", data);
+        console.log("🚨 ALERT RECEIVED", data);
         const alerts = Array.isArray(data) ? data : [data?.message || "⚠️ Alert received"];
-
-        alerts.forEach(message => {
+        alerts.forEach((message) => {
             const timestamp = new Date().toLocaleTimeString();
             saveAlert(message, timestamp);
             updateBadge();
@@ -43,11 +33,11 @@ export function setupAlertHandling() {
         });
         renderAlertList();
     });
+
     renderAlertList();
     updateBadge();
 }
 
-// function to save new alert message to sessionStorage
 function saveAlert(message, timestamp) {
     const stored = JSON.parse(sessionStorage.getItem("alerts") || "[]");
     stored.unshift({ timestamp, message, isNew: true });
@@ -58,7 +48,6 @@ function saveAlert(message, timestamp) {
     sessionStorage.setItem("newAlerts", "true");
 }
 
-// notification badge update function
 function updateBadge() {
     const badge = document.getElementById("new-alert-badge");
     const count = parseInt(sessionStorage.getItem("newAlertsCount") || "0");
@@ -72,7 +61,6 @@ function updateBadge() {
     }
 }
 
-// function to display the warning popup
 function showPopup(message, timestamp) {
     const alertBox = document.getElementById("alert-box");
     const alertElement = document.getElementById("alert");
@@ -92,14 +80,13 @@ function showPopup(message, timestamp) {
     }
 }
 
-// function to highlight new alerts
 function highlightNewAlerts() {
     const alertList = document.getElementById("alert-list");
     const badge = document.getElementById("new-alert-badge");
     if (!alertList || !badge) return;
 
     const newItems = alertList.querySelectorAll("li[data-new='true']");
-    newItems.forEach(el => {
+    newItems.forEach((el) => {
         el.classList.add("bg-yellow-200", "border-2", "border-yellow-500");
         setTimeout(() => {
             el.classList.remove("bg-yellow-200", "border-2", "border-yellow-500");
@@ -107,18 +94,16 @@ function highlightNewAlerts() {
         el.removeAttribute("data-new");
     });
 
-    // reset status
     badge.textContent = "0";
     badge.classList.add("hidden");
     sessionStorage.setItem("newAlertsCount", "0");
     sessionStorage.removeItem("newAlerts");
 
     const saved = JSON.parse(sessionStorage.getItem("alerts") || "[]");
-    const cleared = saved.map(a => ({ ...a, isNew: false }));
+    const cleared = saved.map((a) => ({ ...a, isNew: false }));
     sessionStorage.setItem("alerts", JSON.stringify(cleared));
 }
 
-// alert list rendering function
 function renderAlertList() {
     const alertList = document.getElementById("alert-list");
     if (!alertList) return;
@@ -135,9 +120,7 @@ function renderAlertList() {
         li.className = "bg-rose-100 text-rose-700 border border-rose-200 px-2 py-1 rounded text-xs leading-tight break-words";
         li.title = `${timestamp} — ${message}`;
         li.textContent = `${timestamp} — ${message}`;
-        if (isNew) {
-            li.dataset.new = "true";
-        }
+        if (isNew) li.dataset.new = "true";
         alertList.appendChild(li);
     });
 }
