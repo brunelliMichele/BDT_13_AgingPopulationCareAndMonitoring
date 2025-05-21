@@ -3,7 +3,6 @@ import random
 import time
 import json
 from datetime import datetime, timezone
-from Alert_functions import *
 import pytz
 from confluent_kafka import Producer
 import psycopg2
