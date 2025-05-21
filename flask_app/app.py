@@ -35,8 +35,8 @@ def alert_consumer():
         value_deserializer=lambda a: json.loads(a.decode('utf-8'))
     )
     for message in alert_consumer:
-        socket_io.emit("new_alert_message", message.value)
-
+        socket_io.emit("new_alert_message", message.value, namespace="/")
+        
 # set postgres connection
 def get_db_connection():
     return psycopg2.connect(
