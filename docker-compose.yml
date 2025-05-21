@@ -11,8 +11,19 @@ services:
             - pgdata:/var/lib/postgresql/data
             - ./postgres/init:/docker-entrypoint-initdb.d
             - ./postgres/data:/data
+        networks:
+            - bdt_network
         restart: always
-    
+
+    zookeeper:
+        image: confluentinc/cp-zookeeper:7.6.0
+        environment:
+            ZOOKEEPER_CLIENT_PORT: 2181
+            ZOOKEEPER_TICK_TIME: 2000
+        networks:
+            - bdt_network
+        restart: always
+
     kafka:
         image: confluentinc/cp-kafka:7.6.0
         ports:
@@ -22,17 +33,13 @@ services:
         environment:
             KAFKA_BROKER_ID: 1
             KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-            KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092
+            KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092
             KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
             KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
             KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-        restart: always
-
-    zookeeper:
-        image: confluentinc/cp-zookeeper:7.6.0
-        environment:
-            ZOOKEEPER_CLIENT_PORT: 2181
+        networks:
+            - bdt_network
         restart: always
 
     spark:
@@ -47,6 +54,8 @@ services:
                 /opt/bitnami/spark/bin/spark-submit
                 --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0
                 /spark/spark_stream.py"
+        networks:
+            - bdt_network
         restart: always
 
     flask_web:
@@ -63,6 +72,9 @@ services:
             - DB_NAME=medicalData
             - DB_USER=user
             - DB_PASSWORD=password
+            - KAFKA_BROKER=kafka:29092
+        networks:
+            - bdt_network
         restart: always
     data_generator:
         build: ./kafka
@@ -72,6 +84,8 @@ services:
             - db
         volumes:
             - ./kafka:/app
+        networks:
+            - bdt_network
     dbstream:
         build:
             context: ./kafka
@@ -80,9 +94,11 @@ services:
         command: python db_to_kafka_stream.py
         volumes:
             - ./postgres/data:/app/data
+        networks:
+            - bdt_network
+
 volumes:
     pgdata:
 
 networks:
-    default:
-        name: bdt_network
+    bdt_network:

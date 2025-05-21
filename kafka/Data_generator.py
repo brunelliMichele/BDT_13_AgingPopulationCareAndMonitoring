@@ -147,11 +147,11 @@ def simulate_realtime():
 
     while True:
         timestamp = datetime.now(timezone.utc).replace(microsecond=0, tzinfo=pytz.UTC)
-        active_people = random.sample(people, k = int(len(people) * 0.7)) # 70% active people
+        # active_people = random.sample(people, k = int(len(people) * 0.7)) # 70% active people
         snapshot = {}
         alerts = []
 
-        for pid in active_people:
+        for pid in people:
             user_id = str(pid)
             patient_name = people_map[pid]
             person_data = {"rooms": {}}
