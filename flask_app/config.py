@@ -12,7 +12,7 @@ DB_USER = os.environ.get("DB_USER", "user")
 DB_PASSWORD = os.environ.get("DB_PASSWORD", "password")
 
 # KAFKA config
-KAFKA_BROKER = os.environ.get("KAFKA_BROKER", "kafka:29092")
+KAFKA_BROKER = os.environ.get("KAFKA_BROKER", "kafka:9092")
 SMART_TOPIC = os.environ.get("SMART_TOPIC", "smart_home_data")
 ALERT_TOPIC = os.environ.get("ALERT_TOPIC", "alert_topic")
 
