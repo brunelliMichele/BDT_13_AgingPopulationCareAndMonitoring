@@ -26,21 +26,23 @@ def register_sockets(socket_io: SocketIO):
                         value_deserializer=lambda m: json.loads(m.decode("utf-8")),
                         group_id="smart_data_group"
                     )
+                    print("KafkaConsumer initialized for 'smart_home_data'")
                     break
                 except Exception as e:
                     logging.warning(f"🔁 Retry smart_data_consumer: {e}")
                     time.sleep(5)
-                else:
-                    logging.error("❌ smart_data_consumer failed to connect")
-                    return
-                
-                try:
-                    for message in consumer:
-                        logging.info("🏠 Smart home data received.")
-                        logging.info("🔍 Emitting smart_data_message...")
-                        socket_io.emit("smart_data_message", message.value, to=None, namespace="/")
-                except Exception as e:
-                    logging.error(f"❌ smart_data_consumer error: {e}")
+            else:
+                logging.error("❌ smart_data_consumer failed to connect")
+                return
+
+            try:
+                for message in consumer:
+                    logging.info("🏠 Smart home data received.")
+                    logging.info("🔍 Emitting smart_data_message...")
+                    socket_io.emit("smart_data_message", message.value, to=None, namespace="/")
+            
+            except Exception as e:
+                logging.error(f"❌ smart_data_consumer error: {e}")
 
     def alert_consumer():
         with app.app_context():
@@ -71,4 +73,3 @@ def register_sockets(socket_io: SocketIO):
     # Avvio thread
     Thread(target=smart_data_consumer, name="SmartDataConsumer", daemon=True).start()
     Thread(target=alert_consumer, name="AlertConsumer", daemon=True).start()
-    
