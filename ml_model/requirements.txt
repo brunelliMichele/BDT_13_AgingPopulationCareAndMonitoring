@@ -1,8 +1,7 @@
--e ./flask_app
 joblib
 numpy
-pandas
-psycopg2-binary
+pandas>=2.2.0
+psycopg2-binary>=2.9
 scikit-learn
 tensorflow
 sqlalchemy

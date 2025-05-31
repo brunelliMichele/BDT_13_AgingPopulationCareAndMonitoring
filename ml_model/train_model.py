@@ -1,25 +1,50 @@
 from pathlib import Path
 import pandas as pd
 import numpy as np 
-from flask_app.db import get_db_connection
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dropout, Dense
 from tensorflow.keras.callbacks import EarlyStopping
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
+from tensorflow.keras import Input
 import joblib
 import os
 import random
+import psycopg2
 
 # === PATHS ===
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+OUTPUT_DIR = os.path.join(BASE_DIR, "output")
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-model_path = os.path.join(BASE_DIR, "model.keras")
-scaler_x_path = os.path.join(BASE_DIR, "scaler_x.pkl")
-scaler_y_path = os.path.join(BASE_DIR, "scaler_y.pkl")
+model_path = os.path.join(OUTPUT_DIR, "model.keras")
+scaler_x_path = os.path.join(OUTPUT_DIR, "scaler_x.pkl")
+scaler_y_path = os.path.join(OUTPUT_DIR, "scaler_y.pkl")
+
+# === GLOBAL VARIABLES ===
+DB_HOST = os.environ.get("DB_HOST", "db")
+DB_PORT = int(os.environ.get("DB_PORT", 5432))
+DB_NAME = os.environ.get("DB_NAME", "medicalData")
+DB_USER = os.environ.get("DB_USER", "user")
+DB_PASSWORD = os.environ.get("DB_PASSWORD", "password")
 
 # === FUNCTIONS ===
+
+def get_db_connection():
+    try:
+        return psycopg2.connect(
+            host = DB_HOST,
+            port = DB_PORT,
+            database = DB_NAME,
+            user = DB_USER,
+            password = DB_PASSWORD
+        )
+    except psycopg2.Error as e:
+        print(f"❌ DB connection failed: {e}")
+        raise
+
+
 def create_sequences(x, y, window_size = 6):
     x_seq, y_seq = [], []
     for i in range(len(x) - window_size):
@@ -111,41 +136,70 @@ def evaluate_risk_advanced(row):
 def load_training_data(after_date=None):
     conn = get_db_connection()
     query = """
-        SELECT "DATE", "PATIENT", "DESCRIPTION", "VALUE", "CATEGORY"
-        FROM observation
-        WHERE "CATEGORY" IN ('vital-signs', 'survey')
-          AND ("DESCRIPTION" ILIKE '%Heart rate%' OR "DESCRIPTION" ILIKE '%Respiratory rate%')
+        SELECT "date", "patient", "description", "value", "category"
+        FROM observations
+        WHERE "category" IN ('vital-signs', 'survey')
+          AND ("description" ILIKE '%Heart rate%' OR "description" ILIKE '%Respiratory rate%')
     """
     if after_date:
-        query += f" AND \"DATE\" > '{after_date.strftime('%Y-%m-%d %H:%M:%S')}'"
-    df = pd.read_sql(query, conn)
+        query += f" AND \"date\" > '{after_date.strftime('%Y-%m-%d %H:%M:%S')}'"
+    engine = create_engine(f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
+    with engine.connect() as connection:
+        df = pd.read_sql(sql=text(query), con=connection)
     conn.close()
 
-    df["VALUE"] = pd.to_numeric(df["VALUE"], errors='coerce')
-    df = df[["DATE", "PATIENT", "DESCRIPTION", "VALUE"]]
-    df["DATE"] = pd.to_datetime(df["DATE"])
+    if df.empty:
+        print("⚠️ Nessun dato trovato nella query.")
+        return pd.DataFrame()
 
-    pivot_df = df.pivot_table(index=["PATIENT", "DATE"], columns="DESCRIPTION", values="VALUE").reset_index()
+    df["value"] = pd.to_numeric(df["value"], errors='coerce')
+    df = df[["date", "patient", "description", "value"]]
+    df["date"] = pd.to_datetime(df["date"])
+    # print(f"📊 Step 1 - Dati iniziali: {df.shape}")
+
+    pivot_df = df.pivot_table(index=["patient", "date"], columns="description", values="value").reset_index()
     pivot_df.columns.name = None
-    pivot_df = pivot_df.rename(columns={"Heart rate": "HR", "Respiratory rate": "RR"})
-    pivot_df = pivot_df.sort_values(["PATIENT", "DATE"]).reset_index(drop=True)
+    # print(f"📊 Step 2 - Dopo pivot: {pivot_df.shape}")
 
-    pivot_df = pivot_df.groupby("PATIENT", group_keys=False).apply(simulate_body_temperature)
-    pivot_df = pivot_df.groupby("PATIENT", group_keys=False).apply(simulate_spo2_gsr)
+    pivot_df = pivot_df.rename(columns={"Heart rate": "HR", "Respiratory rate": "RR"})
+    pivot_df = pivot_df.sort_values(["patient", "date"]).reset_index(drop=True)
+    # print(f"📊 Step 3 - Dopo ordinamento: {pivot_df.shape}")
+
+    # Ensure "patient" is not both index and column
+    if "patient" in pivot_df.index.names:
+        pivot_df = pivot_df.reset_index()
+
+    pivot_df = pivot_df.groupby("patient", group_keys=False).apply(simulate_body_temperature).reset_index(drop=True)
+    # print(f"📊 Step 4 - Dopo simulazione temperatura: {pivot_df.shape}")
+
+    pivot_df = pivot_df.groupby("patient", group_keys=False).apply(simulate_spo2_gsr).reset_index(drop=True)
+    # print(f"📊 Step 5 - Dopo simulazione SpO2 e GSR: {pivot_df.shape}")
+
     pivot_df.dropna(inplace=True)
-    pivot_df["Risk Level"] = pivot_df.apply(evaluate_risk_advanced, axis=1)
+    # print(f"📊 Step 6 - Dopo dropna: {pivot_df.shape}")
+
+    # print("🔍 Checking Risk Level return types:")
+    test_results = pivot_df.apply(lambda row: evaluate_risk_advanced(row), axis=1)
+    # print(test_results.apply(type).value_counts())
+
+    if not test_results.empty and isinstance(test_results.iloc[0], (int, float)):
+        pivot_df["Risk Level"] = test_results.astype(float)
+    else:
+        print("⚠️ Nessun dato valido per calcolare il livello di rischio.")
+        return pivot_df
+    print("✅ Risk level evaluated.")
 
     return pivot_df
 
 def main():
-    LAST_TRAINING_FILE = Path("last_training_date.txt")
+    LAST_TRAINING_FILE = Path(OUTPUT_DIR) / "last_training_date.txt"
     last_training_date = None
     if LAST_TRAINING_FILE.exists():
         last_training_date = pd.to_datetime(LAST_TRAINING_FILE.read_text().strip())
 
     df = load_training_data(after_date=last_training_date)
     if df.empty:
-        print("No new data available. Skipping training.")
+        # print("No new data available. Skipping training.")
         return
 
     x_data = df[["HR", "RR", "Body Temperature", "SpO2", "GSR"]].values
@@ -159,23 +213,30 @@ def main():
     x_seq, y_seq = create_sequences(x_scaled, y_scaled, window_size = 6)
     x_train, x_test, y_train, y_test = train_test_split(x_seq, y_seq, test_size = 0.2, random_state = 42)
 
-    model = Sequential()
-    model.add(LSTM(128, return_sequences = True, input_shape = (x_train.shape[1], x_train.shape[2])))
-    model.add(Dropout(0.3))
-    model.add(LSTM(64))
-    model.add(Dropout(0.3))
-    model.add(Dense(1, activation = "linear"))
+
+    model = Sequential([
+        Input(shape=(x_train.shape[1], x_train.shape[2])),
+        LSTM(128, return_sequences=True),
+        Dropout(0.3),
+        LSTM(64),
+        Dropout(0.3),
+        Dense(1, activation="linear")
+    ])
     model.compile(optimizer = "adam", loss = "mse", metrics = ["mae"])
     model.fit(x_train, y_train, epochs=50, batch_size=128, validation_data = (x_test, y_test), callbacks = [EarlyStopping(patience = 5, restore_best_weights = True)], verbose = 1)
+    # print("✅ Training completed. Saving model and scalers...")
     
     # save model and scalers
     model.save(model_path)
+    # print("✅ Model saved.")
     joblib.dump(scaler_x, scaler_x_path)
     joblib.dump(scaler_y, scaler_y_path)
+    # print("✅ Scalers saved.")
 
-    engine = create_engine("postgresql://your_username:your_password@localhost:5432/your_db_name")
+    engine = create_engine(f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
     with get_db_connection() as conn:
         with conn.cursor() as cur:
+            # print("✅ Creating table vital_signs_table if not exists...")
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS vital_signs_table (
                     "patient" TEXT,
@@ -191,9 +252,11 @@ def main():
 
     df_to_save = df[["patient", "date", "HR", "RR", "Body Temperature", "SpO2", "GSR", "Risk Level"]]
     df_to_save.to_sql("vital_signs_table", con=engine, if_exists="replace", index=False)
+    # print("✅ Data saved to vital_signs_table.")
 
-    latest_date = df["DATE"].max()
+    latest_date = df["date"].max()
     LAST_TRAINING_FILE.write_text(str(latest_date))
+    print(f"✅ Training complete. Last training date saved: {latest_date}")
 
 # === MAIN ===
 if __name__ == "__main__":

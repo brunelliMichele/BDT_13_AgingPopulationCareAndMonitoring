@@ -6,10 +6,29 @@ import psycopg2
 import sys
 import os
 from sqlalchemy import create_engine, text
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from flask_app.db import get_db_connection
+
+# === GLOBAL VARIABLES ===
+DB_HOST = os.environ.get("DB_HOST", "db")
+DB_PORT = int(os.environ.get("DB_PORT", 5432))
+DB_NAME = os.environ.get("DB_NAME", "medicalData")
+DB_USER = os.environ.get("DB_USER", "user")
+DB_PASSWORD = os.environ.get("DB_PASSWORD", "password")
 
 # === FUNCTIONS ===
+
+def get_db_connection():
+    try:
+        return psycopg2.connect(
+            host = DB_HOST,
+            port = DB_PORT,
+            database = DB_NAME,
+            user = DB_USER,
+            password = DB_PASSWORD
+        )
+    except psycopg2.Error as e:
+        print(f"❌ DB connection failed: {e}")
+        raise
+
 def get_latest_vital_signs(patient_id, conn, limit=6):
     query = f""" SELECT 'HR', 'RR', 'Body Temperature', 'SpO2', 'GSR' FROM vital_signs_table WHERE patient_id = %s ORDER BY measurement_time DESC LIMIT %s"""
 

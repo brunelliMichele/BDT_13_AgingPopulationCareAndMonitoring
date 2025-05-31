@@ -77,6 +77,7 @@ services:
         networks:
             - bdt_network
         restart: always
+
     data_generator:
         build: ./kafka
         command: python data_generator.py
@@ -87,6 +88,7 @@ services:
             - ./kafka:/app
         networks:
             - bdt_network
+
     dbstream:
         build:
             context: ./kafka
@@ -95,6 +97,18 @@ services:
         command: python db_to_kafka_stream.py
         volumes:
             - ./postgres/data:/app/data
+        networks:
+            - bdt_network
+    
+    train_model:
+        build:
+            context: ./ml_model
+        depends_on:
+            - db
+        environment:
+            - PYTHONUNBUFFERED=1
+        volumes:
+            - ./ml_model:/app
         networks:
             - bdt_network
 
