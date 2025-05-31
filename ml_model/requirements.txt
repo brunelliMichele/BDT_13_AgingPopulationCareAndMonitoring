@@ -1,0 +1,8 @@
+-e ./flask_app
+joblib
+numpy
+pandas
+psycopg2-binary
+scikit-learn
+tensorflow
+sqlalchemy
