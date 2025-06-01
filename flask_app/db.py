@@ -82,6 +82,6 @@ def get_patient_by_id(patient_id):
 def get_risk_level_by_id(patient_id):
     with get_db_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT risk_level FROM vital_signs_table WHERE patient = %s ORDER BY date DESC LIMIT 1", (patient_id))
+            cur.execute("SELECT risk_level FROM vital_signs WHERE patient_id = %s ORDER BY date DESC LIMIT 1", (patient_id,))
             result = cur.fetchone()
-            return result[0] if result else None
+            return float(result[0]) if result else None
