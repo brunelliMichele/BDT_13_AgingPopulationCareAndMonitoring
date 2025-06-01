@@ -3,5 +3,5 @@ flask-socketio==5.3.4
 eventlet==0.33.3
 python-dotenv==1.0.1
 psycopg2-binary==2.9.9
-kafka-python==2.0.2
+confluent-kafka==2.3.0
 pandas==2.2.1

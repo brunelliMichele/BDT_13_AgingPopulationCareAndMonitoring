@@ -56,7 +56,7 @@ def simulate_body_temperature(group):
     group = group.copy()
     body_temp = np.random.normal(loc=36.8, scale=0.3, size=len(group))
     body_temp = np.clip(body_temp, 35.5, 39.0)
-    group['Body Temperature'] = np.round(body_temp, 1)
+    group['body_temperature'] = np.round(body_temp, 1)
     return group
 
 def generate_spo2_elderly():
@@ -84,7 +84,7 @@ def evaluate_risk_advanced(row):
     gsr = row['GSR']
     hr = row['HR']
     rr = row['RR']
-    body_temp = row['Body Temperature']
+    body_temp = row['body_temperature']
 
     if spo2 < 90:
         risk_score += 6
@@ -136,10 +136,10 @@ def evaluate_risk_advanced(row):
 def load_training_data(after_date=None):
     conn = get_db_connection()
     query = """
-        SELECT "date", "patient", "description", "value", "category"
+        SELECT date, patient AS patient_id, description, value, category
         FROM observations
-        WHERE "category" IN ('vital-signs', 'survey')
-          AND ("description" ILIKE '%Heart rate%' OR "description" ILIKE '%Respiratory rate%')
+        WHERE category IN ('vital-signs', 'survey')
+          AND (description ILIKE '%Heart rate%' OR description ILIKE '%Respiratory rate%')
     """
     if after_date:
         query += f" AND \"date\" > '{after_date.strftime('%Y-%m-%d %H:%M:%S')}'"
@@ -152,27 +152,27 @@ def load_training_data(after_date=None):
         print("⚠️ Nessun dato trovato nella query.")
         return pd.DataFrame()
 
-    df["value"] = pd.to_numeric(df["value"], errors='coerce')
-    df = df[["date", "patient", "description", "value"]]
+    df["value"] = pd.to_numeric(df["value"], errors="coerce")
+    df = df[["date", "patient_id", "description", "value"]]
     df["date"] = pd.to_datetime(df["date"])
     # print(f"📊 Step 1 - Dati iniziali: {df.shape}")
 
-    pivot_df = df.pivot_table(index=["patient", "date"], columns="description", values="value").reset_index()
+    pivot_df = df.pivot_table(index=["patient_id", "date"], columns="description", values="value").reset_index()
     pivot_df.columns.name = None
     # print(f"📊 Step 2 - Dopo pivot: {pivot_df.shape}")
 
     pivot_df = pivot_df.rename(columns={"Heart rate": "HR", "Respiratory rate": "RR"})
-    pivot_df = pivot_df.sort_values(["patient", "date"]).reset_index(drop=True)
+    pivot_df = pivot_df.sort_values(["patient_id", "date"]).reset_index(drop=True)
     # print(f"📊 Step 3 - Dopo ordinamento: {pivot_df.shape}")
 
-    # Ensure "patient" is not both index and column
-    if "patient" in pivot_df.index.names:
+    # Ensure "patient_id" is not both index and column
+    if "patient_id" in pivot_df.index.names:
         pivot_df = pivot_df.reset_index()
 
-    pivot_df = pivot_df.groupby("patient", group_keys=False).apply(simulate_body_temperature).reset_index(drop=True)
+    pivot_df = pivot_df.groupby("patient_id", group_keys=False).apply(simulate_body_temperature).reset_index(drop=True)
     # print(f"📊 Step 4 - Dopo simulazione temperatura: {pivot_df.shape}")
 
-    pivot_df = pivot_df.groupby("patient", group_keys=False).apply(simulate_spo2_gsr).reset_index(drop=True)
+    pivot_df = pivot_df.groupby("patient_id", group_keys=False).apply(simulate_spo2_gsr).reset_index(drop=True)
     # print(f"📊 Step 5 - Dopo simulazione SpO2 e GSR: {pivot_df.shape}")
 
     pivot_df.dropna(inplace=True)
@@ -183,7 +183,7 @@ def load_training_data(after_date=None):
     # print(test_results.apply(type).value_counts())
 
     if not test_results.empty and isinstance(test_results.iloc[0], (int, float)):
-        pivot_df["Risk Level"] = test_results.astype(float)
+        pivot_df["risk_level"] = test_results.astype(float)
     else:
         print("⚠️ Nessun dato valido per calcolare il livello di rischio.")
         return pivot_df
@@ -202,8 +202,8 @@ def main():
         # print("No new data available. Skipping training.")
         return
 
-    x_data = df[["HR", "RR", "Body Temperature", "SpO2", "GSR"]].values
-    y_data = df[["Risk Level"]].values
+    x_data = df[["HR", "RR", "body_temperature", "SpO2", "GSR"]].values
+    y_data = df[["risk_level"]].values
 
     scaler_x = MinMaxScaler()
     scaler_y = MinMaxScaler()
@@ -236,22 +236,23 @@ def main():
     engine = create_engine(f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
     with get_db_connection() as conn:
         with conn.cursor() as cur:
-            # print("✅ Creating table vital_signs_table if not exists...")
+            # print("✅ Creating table vital_signs if not exists...")
             cur.execute("""
-                CREATE TABLE IF NOT EXISTS vital_signs_table (
-                    "patient" TEXT,
+                CREATE TABLE IF NOT EXISTS vital_signs (
+                    "patient_id" UUID REFERENCES patients(id),
                     "date" TIMESTAMP,
                     "HR" FLOAT,
                     "RR" FLOAT,
-                    "Body Temperature" FLOAT,
+                    "body_temperature" FLOAT,
                     "SpO2" FLOAT,
                     "GSR" FLOAT,
-                    "Risk Level" FLOAT
+                    "risk_level" FLOAT,
+                    PRIMARY KEY ("patient_id", "date")
                 );
             """)
 
-    df_to_save = df[["patient", "date", "HR", "RR", "Body Temperature", "SpO2", "GSR", "Risk Level"]]
-    df_to_save.to_sql("vital_signs_table", con=engine, if_exists="replace", index=False)
+    df_to_save = df[["patient_id", "date", "HR", "RR", "body_temperature", "SpO2", "GSR", "risk_level"]]
+    df_to_save.to_sql("vital_signs", con=engine, if_exists="append", index=False)
     # print("✅ Data saved to vital_signs_table.")
 
     latest_date = df["date"].max()

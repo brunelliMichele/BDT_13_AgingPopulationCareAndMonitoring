@@ -1,4 +1,5 @@
-pytz
-confluent-kafka
-pandas
-psycopg2-binary
+pytz==2023.3
+confluent-kafka==2.3.0
+pandas==2.1.4
+psycopg2-binary==2.9.9
+sqlalchemy==2.0.29

@@ -39,6 +39,11 @@ services:
             - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
             - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
             - ALLOW_PLAINTEXT_LISTENER=yes
+        healthcheck:
+            test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+            interval: 10s
+            timeout: 5s
+            retries: 10
         networks:
             - bdt_network
         restart: always
@@ -46,7 +51,8 @@ services:
     spark:
         build: ./spark
         depends_on:
-            - kafka
+            kafka:
+                condition: service_healthy
         volumes:
             - ./spark:/spark
             - ./spark/spark-defaults.conf:/opt/bitnami/spark/conf/spark-defaults.conf
@@ -66,8 +72,10 @@ services:
         volumes:
             - ./flask_app:/app
         depends_on:
-            - kafka
-            - db
+            kafka:
+                condition: service_healthy
+            db:
+                condition: service_started
         environment:
             - DB_HOST=db
             - DB_NAME=medicalData
@@ -82,8 +90,10 @@ services:
         build: ./kafka
         command: python data_generator.py
         depends_on:
-            - kafka
-            - db
+            kafka:
+                condition: service_healthy
+            db:
+                condition: service_started
         volumes:
             - ./kafka:/app
         networks:
@@ -93,7 +103,8 @@ services:
         build:
             context: ./kafka
         depends_on:
-            - kafka
+            kafka:
+                condition: service_healthy
         command: python db_to_kafka_stream.py
         volumes:
             - ./postgres/data:/app/data
@@ -111,6 +122,21 @@ services:
             - ./ml_model:/app
         networks:
             - bdt_network
+
+    alert_producer:
+        build:
+            context: ./kafka
+        command: python alert_producer.py
+        depends_on:
+            kafka:
+                condition: service_healthy
+            db:
+                condition: service_started
+        volumes:
+            - ./kafka:/app
+        networks:
+            - bdt_network
+        restart: always
 
 volumes:
     pgdata:

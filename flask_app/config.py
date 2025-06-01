@@ -15,4 +15,5 @@ DB_PASSWORD = os.environ.get("DB_PASSWORD", "password")
 KAFKA_BROKER = os.environ.get("KAFKA_BROKER", "kafka:9092")
 SMART_TOPIC = os.environ.get("SMART_TOPIC", "smart_home_data")
 ALERT_TOPIC = os.environ.get("ALERT_TOPIC", "alert_topic")
+RISK_TOPIC = os.environ.get("RISK_TOPIC", "risk_alerts")
 

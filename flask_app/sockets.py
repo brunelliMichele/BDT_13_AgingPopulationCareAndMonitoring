@@ -1,10 +1,10 @@
 # sockets.py
-from kafka import KafkaConsumer
+from confluent_kafka import Consumer
 import json
 from threading import Thread
 import logging
 from flask_socketio import SocketIO, rooms
-from config import KAFKA_BROKER, SMART_TOPIC, ALERT_TOPIC
+from config import KAFKA_BROKER, SMART_TOPIC, ALERT_TOPIC, RISK_TOPIC
 from app import app
 import time
 
@@ -20,12 +20,12 @@ def register_sockets(socket_io: SocketIO):
             logging.info("📡 Starting smart_data_consumer thread...")
             for _ in range(5):        
                 try:
-                    consumer = KafkaConsumer(
-                        SMART_TOPIC,
-                        bootstrap_servers=KAFKA_BROKER,
-                        value_deserializer=lambda m: json.loads(m.decode("utf-8")),
-                        group_id="smart_data_group"
-                    )
+                    consumer = Consumer({
+                        'bootstrap.servers': KAFKA_BROKER,
+                        'group.id': 'smart_data_group',
+                        'auto.offset.reset': 'earliest'
+                    })
+                    consumer.subscribe([SMART_TOPIC])
                     print("KafkaConsumer initialized for 'smart_home_data'")
                     break
                 except Exception as e:
@@ -36,10 +36,16 @@ def register_sockets(socket_io: SocketIO):
                 return
 
             try:
-                for message in consumer:
+                while True:
+                    msg = consumer.poll(1.0)
+                    if msg is None:
+                        continue
+                    if msg.error():
+                        logging.error(f"Consumer error: {msg.error()}")
+                        continue
                     logging.info("🏠 Smart home data received.")
                     logging.info("🔍 Emitting smart_data_message...")
-                    socket_io.emit("smart_data_message", message.value, to=None, namespace="/")
+                    socket_io.emit("smart_data_message", json.loads(msg.value().decode("utf-8")), to=None, namespace="/")
             
             except Exception as e:
                 logging.error(f"❌ smart_data_consumer error: {e}")
@@ -49,12 +55,13 @@ def register_sockets(socket_io: SocketIO):
             logging.info("📡 Starting alert_consumer thread...")
             for _ in range(5):
                 try:
-                    consumer = KafkaConsumer(
-                        ALERT_TOPIC,
-                        bootstrap_servers=KAFKA_BROKER,
-                        value_deserializer=lambda a: json.loads(a.decode("utf-8")),
-                        group_id="alert_group"
-                    )
+                    consumer = Consumer({
+                        'bootstrap.servers': KAFKA_BROKER,
+                        'group.id': 'alert_group',
+                        'auto.offset.reset': 'earliest'
+                    })
+                    consumer.subscribe([ALERT_TOPIC])
+                    print("Kafka Consumer initialized for 'alert_topic'")
                 except Exception as e:
                     logging.warning(f"🔁 Retry alert_consumer: {e}")
                     time.sleep(5)
@@ -62,14 +69,55 @@ def register_sockets(socket_io: SocketIO):
                     logging.error("❌ alert_consumer failed to connect")
 
                 try:
-                    for message in consumer:
+                    while True:
+                        msg = consumer.poll(1.0)
+                        if msg is None:
+                            continue
+                        if msg.error():
+                            logging.error(f"Consumer error: {msg.error()}")
+                            continue
                         logging.info("⚠️ Alert received and sent.")
                         logging.info("🔍 Emitting alert...")
-                        socket_io.emit("new_alert_message", message.value, to=None, namespace="/")
+                        socket_io.emit("new_alert_message", json.loads(msg.value().decode("utf-8")), to=None, namespace="/")
 
                 except Exception as e:
                     logging.error(f"❌ alert_consumer error: {e}")
 
+    def risk_alert_consumer():
+        with app.app_context():
+            logging.info("📡 Starting risk_alert_consumer thread...")
+            for _ in range(5):
+                try:
+                    consumer = Consumer({
+                        'bootstrap.servers': KAFKA_BROKER,
+                        'group.id': 'risk_alert_group',
+                        'auto.offset.reset': 'earliest'
+                    })
+                    consumer.subscribe([RISK_TOPIC])
+                    print("KafkaConsumer initialized for 'risk_alerts'")
+                    break
+                except Exception as e:
+                    logging.warning(f"🔁 Retry risk_alert_consumer: {e}")
+                    time.sleep(5)
+            else:
+                logging.error("❌ risk_alert_consumer failed to connect")
+                return
+
+            try:
+                while True:
+                    msg = consumer.poll(1.0)
+                    if msg is None:
+                        continue
+                    if msg.error():
+                        logging.error(f"Consumer error: {msg.error()}")
+                        continue
+                    logging.info("🚨 Risk alert received.")
+                    logging.info("🔍 Emitting risk_alert_message...")
+                    socket_io.emit("risk_alert_message", json.loads(msg.value().decode("utf-8")), to=None, namespace="/")
+            except Exception as e:
+                logging.error(f"❌ risk_alert_consumer error: {e}")
+
     # Avvio thread
     Thread(target=smart_data_consumer, name="SmartDataConsumer", daemon=True).start()
     Thread(target=alert_consumer, name="AlertConsumer", daemon=True).start()
+    Thread(target=risk_alert_consumer, name="RiskAlertConsumer", daemon=True).start()

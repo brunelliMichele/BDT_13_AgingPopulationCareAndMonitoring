@@ -11,7 +11,7 @@ conf = {
 
 producer = Producer(conf)
 
-def acked(err, msg):
+def delivery_report(err, msg):
     if err is not None:
         print("❌ Delivery failed:", err)
     else:
@@ -24,7 +24,7 @@ df = df.sort_values(by="DATE")
 # Stream each row to Kafka
 for _, row in df.iterrows():
     msg = json.dumps(row.to_dict(), default=str)
-    producer.produce(TOPIC, value=msg, callback=acked)
+    producer.produce(TOPIC, value=msg, callback=delivery_report)
     producer.poll(0)  # trigger delivery report
     time.sleep(1)
 

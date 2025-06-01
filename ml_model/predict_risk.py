@@ -30,7 +30,13 @@ def get_db_connection():
         raise
 
 def get_latest_vital_signs(patient_id, conn, limit=6):
-    query = f""" SELECT 'HR', 'RR', 'Body Temperature', 'SpO2', 'GSR' FROM vital_signs_table WHERE patient_id = %s ORDER BY measurement_time DESC LIMIT %s"""
+    query = """
+        SELECT HR, RR, body_temperature, SpO2, GSR
+        FROM vital_signs
+        WHERE patient_id = %s
+        ORDER BY measurement_time DESC
+        LIMIT %s
+    """
 
     df = pd.read_sql(query, conn, params=(patient_id, limit))
     df = df.iloc[::-1].reset_index(drop=True)
@@ -38,39 +44,45 @@ def get_latest_vital_signs(patient_id, conn, limit=6):
     return df
 
 
-def main(patient_id):
+def predict_risk(patient_id):
     # Loading model and scalers
     model = tf.keras.models.load_model('model.keras')
     scaler_X = joblib.load("scaler_x.pkl")
     scaler_Y = joblib.load("scaler_y.pkl")
 
     conn = get_db_connection()
-    
-    # Get latest 6 vital signs for patient
-    data = get_latest_vital_signs(patient_id, conn, limit = 6)
+    try:
+        # Get latest 6 vital signs for patient
+        data = get_latest_vital_signs(patient_id, conn, limit=6)
 
-    if data.shape[0] < 6:
-        print(f"⚠️ Not enough data for patient {patient_id} to predict risk.")
-        return
+        if data.shape[0] < 6:
+            print(f"⚠️ Not enough data for patient {patient_id} to predict risk.")
+            return None
 
-    features = ["HR", "RR", "Body Temperature", "SpO2", "GSR"]
-    x = data[features].values
+        features = ["HR", "RR", "body_temperature", "SpO2", "GSR"]
+        x = data[features].values
 
-    # Scale features
-    x_scaled = scaler_X.transform(x)
-    # reshape for LSTM input: (1, time_steps, features)
-    x_input = np.expand_dims(x_scaled, axis = 0)
+        # Scale features
+        x_scaled = scaler_X.transform(x)
+        # reshape for LSTM input: (1, time_steps, features)
+        x_input = np.expand_dims(x_scaled, axis=0)
 
-    # predict risk (scaled)
-    y_pred_scaled = model.predict(x_input)
-    # inverse transform to original scale
-    y_pred = scaler_Y.inverse_transform(y_pred_scaled)
+        # predict risk (scaled)
+        y_pred_scaled = model.predict(x_input)
+        # inverse transform to original scale
+        y_pred = scaler_Y.inverse_transform(y_pred_scaled)
 
-    # RISK LEVEL
-    risk_level = y_pred[0][0]
-    print(f"✅ Predicted Risk Level for patient {patient_id}: {risk_level:.1f}")
+        # RISK LEVEL
+        risk_level = y_pred[0][0]
+        return risk_level
+    finally:
+        conn.close()
 
-    conn.close()
+
+def main(patient_id):
+    risk_level = predict_risk(patient_id)
+    if risk_level is not None:
+        print(f"✅ Predicted Risk Level for patient {patient_id}: {risk_level:.1f}")
 
 
 # === MAIN ===
