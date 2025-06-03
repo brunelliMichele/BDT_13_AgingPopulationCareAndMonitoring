@@ -191,6 +191,9 @@ def main():
         last_training_date = pd.to_datetime(LAST_TRAINING_FILE.read_text().strip())
 
     df = load_training_data(after_date=last_training_date)
+
+    engine = get_db_engine()
+
     if df.empty:
         # print("No new data available. Skipping training.")
         return
@@ -226,31 +229,32 @@ def main():
     joblib.dump(scaler_y, scaler_y_path)
     # print("✅ Scalers saved.")
 
-    engine = get_db_engine()
-    with engine.connect() as conn:
+
+    df_to_save = df[["patient_id", "date", "HR", "RR", "body_temperature", "SpO2", "GSR", "risk_level"]]
+    # Rename columns to lowercase except for patient_id, date, risk_level
+    df_to_save.columns = [col.lower() if col not in ("patient_id", "date", "risk_level") else col for col in df_to_save.columns]
+
+    with engine.begin() as conn:
         conn.execute(text("""
             CREATE TABLE IF NOT EXISTS vital_signs (
-                "patient_id" UUID REFERENCES patients(id),
-                "date" TIMESTAMP,
-                "HR" FLOAT,
-                "RR" FLOAT,
-                "body_temperature" FLOAT,
-                "SpO2" FLOAT,
-                "GSR" FLOAT,
-                "risk_level" FLOAT,
-                PRIMARY KEY ("patient_id", "date")
+                patient_id UUID REFERENCES patients(id),
+                date TIMESTAMP,
+                hr FLOAT,
+                rr FLOAT,
+                body_temperature FLOAT,
+                spo2 FLOAT,
+                gsr FLOAT,
+                risk_level FLOAT,
+                PRIMARY KEY (patient_id, date)
             );
         """))
 
-    df_to_save = df[["patient_id", "date", "HR", "RR", "body_temperature", "SpO2", "GSR", "risk_level"]]
-    with engine.connect() as conn:
+        metadata = MetaData()
+        vital_signs = Table("vital_signs", metadata, autoload_with=conn)
         for _, row in df_to_save.iterrows():
-            metadata = MetaData()
-            vital_signs = Table("vital_signs", metadata, autoload_with=engine)
             stmt = insert(vital_signs).values(row.to_dict())
             stmt = stmt.on_conflict_do_nothing(index_elements=["patient_id", "date"])
             conn.execute(stmt)
-    # print("✅ Data saved to vital_signs_table.")
 
     latest_date = df["date"].max()
     LAST_TRAINING_FILE.write_text(str(latest_date))

@@ -32,7 +32,7 @@ def get_patients():
     for attempt in range(20):  # retry 20 times
         try:
             engine = get_db_engine()
-            with engine.connect as conn:
+            with engine.connect() as conn:
                 result = conn.execute(text("SELECT id, first, last FROM patients;"))
                 patients = {str(row.id): f"{row.first} {row.last}" for row in result}
             return patients            

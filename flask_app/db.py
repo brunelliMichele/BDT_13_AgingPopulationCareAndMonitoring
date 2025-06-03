@@ -103,7 +103,22 @@ def get_all_risk_level():
 
 def get_risk_trend_by_id(patient_id):
     engine = get_db_engine()
-    query = "SELECT date, risk_level FROM vital_signs WHERE patient_id = %s ORDER BY date ASC"
-    df = pd.read_sql(query, con=engine, params = (patient_id,))
+    query = """
+        SELECT date, risk_level
+        FROM vital_signs
+        WHERE patient_id = %s
+        ORDER BY date ASC
+    """
+    df = pd.read_sql(query, con=engine, params=(patient_id,))
     df = df.dropna(subset=["risk_level"])
-    return df.to_dict(orient = "records")
+    return {
+        "dates": df["date"].astype(str).tolist(),
+        "values": df["risk_level"].tolist()
+    }
+
+def get_risk_trend_raw(patient_id):
+    engine = get_db_engine()
+    query = "SELECT date, hr, rr, body_temperature, spo2, gsr, risk_level FROM vital_signs WHERE patient_id = %s ORDER BY date ASC"    
+    df = pd.read_sql_query(query, con=engine, params=(patient_id,))
+    return df.to_dict(orient="records")
+

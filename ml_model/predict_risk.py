@@ -26,7 +26,7 @@ def get_db_connection():
 
 def get_latest_vital_signs(patient_id, conn, limit=6):
     query = text("""
-        SELECT HR, RR, body_temperature, SpO2, GSR
+        SELECT hr, rr, body_temperature, spo2, gsr
         FROM vital_signs
         WHERE patient_id = :pid
         ORDER BY measurement_time DESC
@@ -52,8 +52,7 @@ def predict_risk(patient_id):
             print(f"⚠️ Not enough data for patient {patient_id} to predict risk.")
             return None
 
-        features = ["HR", "RR", "body_temperature", "SpO2", "GSR"]
-        x = data[features].values
+        features = ["hr", "rr", "body_temperature", "spo2", "gsr"]        x = data[features].values
 
         # Scale features
         x_scaled = scaler_X.transform(x)
