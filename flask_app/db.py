@@ -1,44 +1,37 @@
 # db.py
 import os
-import psycopg2
 from collections import defaultdict
 import numpy as np
+import pandas as pd
 from config import DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD
+from sqlalchemy import create_engine
+from sqlalchemy.engine import Engine
 
 # set postgres connection
-def get_db_connection():
-    try:
-        return psycopg2.connect(
-            host = DB_HOST,
-            port = DB_PORT,
-            database = DB_NAME,
-            user = DB_USER,
-            password = DB_PASSWORD
-        )
-    except psycopg2.Error as e:
-        print(f"❌ DB connection failed: {e}")
-        raise
+def get_db_engine() -> Engine:
+    return create_engine(
+        f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    )
 
 # get all patients from postgres
 def get_all_patients():
-    with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute("SELECT id, first, middle, last, city, birthdate, lat, lon FROM patients")
-            rows = cur.fetchall()
-            return [
-                {
-                    "id": row[0],
-                    "name": row[1],
-                    "middlename": row[2],
-                    "surname": row[3],
-                    "city": row[4],
-                    "birthdate": row[5],
-                    "lat": row[6],
-                    "lon": row[7],
-                    "url": f"/patient/{row[0]}"
-                }
-                for row in rows
-            ]
+    engine = get_db_engine()
+    query = "SELECT id, first, middle, last, city, birthdate, lat, lon FROM patients"
+    df = pd.read_sql(query, con=engine)
+    return [
+        {
+            "id": row["id"],
+            "name": row["first"],
+            "middlename": row["middle"],
+            "surname": row["last"],
+            "city": row["city"],
+            "birthdate": row["birthdate"],
+            "lat": row["lat"],
+            "lon": row["lon"],
+            "url": f"/patient/{row['id']}"
+        }
+        for _, row in df.iterrows()
+    ]
 
 # get all city with coordinates
 def get_city_avg_coords(patients):
@@ -59,36 +52,58 @@ def get_city_avg_coords(patients):
 
 # get patient from ID
 def get_patient_by_id(patient_id):
-    with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute("SELECT id, birthdate, deathdate, gender, birthplace, address, city, county, first, middle, last FROM patients WHERE id = %s", (patient_id,))
-            patient = cur.fetchone()
-            if patient:
-                return {
-                    "id": patient[0],
-                    "birthdate": patient[1],
-                    "deathdate": patient[2],
-                    "gender": patient[3],
-                    "birthplace": patient[4],
-                    "address": patient[5],
-                    "city": patient[6],
-                    "county": patient[7],
-                    "name": patient[8],
-                    "middlename": patient[9],
-                    "surname": patient[10]
-                }
-            return None
-        
+    engine = get_db_engine()
+    query = """
+        SELECT id, birthdate, deathdate, gender, birthplace, address,
+               city, county, first, middle, last
+        FROM patients
+        WHERE id = %s
+    """
+    df = pd.read_sql(query, con=engine, params=(patient_id,))
+    if not df.empty:
+        patient = df.iloc[0]
+        return {
+            "id": patient["id"],
+            "birthdate": patient["birthdate"],
+            "deathdate": patient["deathdate"],
+            "gender": patient["gender"],
+            "birthplace": patient["birthplace"],
+            "address": patient["address"],
+            "city": patient["city"],
+            "county": patient["county"],
+            "name": patient["first"],
+            "middlename": patient["middle"],
+            "surname": patient["last"]
+        }
+    return None
+    
 def get_risk_level_by_id(patient_id):
-    with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute("SELECT risk_level FROM vital_signs WHERE patient_id = %s ORDER BY date DESC LIMIT 1", (patient_id,))
-            result = cur.fetchone()
-            return float(result[0]) if result else None
-        
+    engine = get_db_engine()
+    query = """
+        SELECT risk_level
+        FROM vital_signs
+        WHERE patient_id = %s AND risk_level IS NOT NULL
+        ORDER BY date DESC
+        LIMIT 1
+    """
+    df = pd.read_sql(query, con=engine, params=(patient_id,))
+    return float(df.iloc[0]["risk_level"]) if not df.empty else None
+    
 def get_all_risk_level():
-    with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute("SELECT DISTINCT ON (patient_id) patient_id, risk_level FROM vital_signs WHERE risk_level IS NOT NULL ORDER BY patient_id, date DESC")
-            rows = cur.fetchall()
-            return {str(row[0]): float(row[1]) for row in rows}
+    engine = get_db_engine()
+    query = """
+        SELECT DISTINCT ON (patient_id) patient_id, risk_level
+        FROM vital_signs
+        WHERE risk_level IS NOT NULL
+        ORDER BY patient_id, date DESC
+    """
+    df = pd.read_sql(query, con=engine)
+    return {str(row["patient_id"]): float(row["risk_level"]) for _, row in df.iterrows()}
+    
+
+def get_risk_trend_by_id(patient_id):
+    engine = get_db_engine()
+    query = "SELECT date, risk_level FROM vital_signs WHERE patient_id = %s ORDER BY date ASC"
+    df = pd.read_sql(query, con=engine, params = (patient_id,))
+    df = df.dropna(subset=["risk_level"])
+    return df.to_dict(orient = "records")

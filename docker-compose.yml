@@ -126,7 +126,7 @@ services:
     alert_producer:
         build:
             context: ./kafka
-        command: python alert_producer.py
+        command: python risk_level_producer.py
         depends_on:
             kafka:
                 condition: service_healthy
