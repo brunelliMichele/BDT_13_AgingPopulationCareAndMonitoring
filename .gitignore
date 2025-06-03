@@ -1,3 +1,6 @@
 kafka/house_data.json
 kafka/alerts.log
-ml_model/output/
+ml_model/output/last_training_date.txt
+ml_model/output/model.keras
+ml_model/output/scaler_x.pkl
+ml_model/output/scaler_y.pkl
