@@ -48,9 +48,16 @@ wait_for_table(engine, "vital_signs")
 
 # Fetch high-risk patients for debug
 query = """
-SELECT patient_id, risk_level, date
-FROM vital_signs
-WHERE risk_level > 30;
+SELECT 
+    vs.patient_id, 
+    vs.risk_level, 
+    vs.date, 
+    p.first,
+	p.middle,
+    p.last
+FROM vital_signs vs
+JOIN patients p ON vs.patient_id = p.id
+WHERE vs.risk_level > 30;
 """
 
 while True:
@@ -63,6 +70,9 @@ while True:
             print(f"📣 Sending alert for patient {row['patient_id']} with risk level {row['risk_level']}")
             alert = {
                 "patient_id": str(row["patient_id"]),
+                "first": row["first"],
+                "middle": row["middle"],
+                "last": row["last"],
                 "risk_level": row["risk_level"],
                 "category": "HIGH"
             }

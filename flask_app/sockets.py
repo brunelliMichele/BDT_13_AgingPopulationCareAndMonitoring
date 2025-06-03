@@ -76,7 +76,7 @@ def register_sockets(socket_io: SocketIO):
                         if msg.error():
                             logging.error(f"Consumer error: {msg.error()}")
                             continue
-                        logging.info("⚠️ Alert received and sent.")
+                        logging.info("⚠️ Alert received.")
                         logging.info("🔍 Emitting alert...")
                         socket_io.emit("new_alert_message", json.loads(msg.value().decode("utf-8")), to=None, namespace="/")
 

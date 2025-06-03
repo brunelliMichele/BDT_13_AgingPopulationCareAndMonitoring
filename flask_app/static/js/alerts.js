@@ -34,13 +34,36 @@ export function setupAlertHandling(socket) {
         renderAlertList();
     });
 
+    socket.on("risk_alert_message", (data) => {
+        console.log("📈 RISK ALERT RAW DATA", JSON.stringify(data));
+
+        if (data && data.patient_id && data.risk_level !== undefined) {
+            const fullName = data.first && data.last
+                ? `${data.first} ${data.middle ? data.middle + ' ' : ''}${data.last}`
+                : `ID ${data.patient_id}`;
+            const message = `⚠️ High risk for patient ${fullName} — level: ${data.risk_level}`;
+            const timestamp = new Date().toLocaleTimeString();
+            saveAlert(`[Risk] ${message}`, timestamp, "risk");
+            updateBadge();
+            showPopup(`[Risk] ${message}`, timestamp);
+        } else {
+            const fallback = data?.message || "⚠️ Risk alert received";
+            const timestamp = new Date().toLocaleTimeString();
+            saveAlert(`[Risk] ${fallback}`, timestamp, "risk");
+            updateBadge();
+            showPopup(`[Risk] ${fallback}`, timestamp);
+        }
+
+        renderAlertList();
+    });
+
     renderAlertList();
     updateBadge();
 }
 
-function saveAlert(message, timestamp) {
+function saveAlert(message, timestamp, type = "default") {
     const stored = JSON.parse(sessionStorage.getItem("alerts") || "[]");
-    stored.unshift({ timestamp, message, isNew: true });
+    stored.unshift({ timestamp, message, isNew: true, type });
     sessionStorage.setItem("alerts", JSON.stringify(stored.slice(0, 50)));
 
     const count = parseInt(sessionStorage.getItem("newAlertsCount") || "0") + 1;
@@ -115,9 +138,12 @@ function renderAlertList() {
     }
 
     alertList.innerHTML = "";
-    saved.forEach(({ timestamp, message, isNew }) => {
+    saved.forEach(({ timestamp, message, isNew, type }) => {
         const li = document.createElement("li");
-        li.className = "bg-rose-100 text-rose-700 border border-rose-200 px-2 py-1 rounded text-xs leading-tight break-words";
+        li.className =
+            type === "risk"
+                ? "bg-yellow-100 text-yellow-900 border border-yellow-400 px-2 py-1 rounded text-xs leading-tight break-words"
+                : "bg-rose-100 text-rose-700 border border-rose-200 px-2 py-1 rounded text-xs leading-tight break-words";
         li.title = `${timestamp} — ${message}`;
         li.textContent = `${timestamp} — ${message}`;
         if (isNew) li.dataset.new = "true";
