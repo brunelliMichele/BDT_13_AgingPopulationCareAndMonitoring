@@ -277,4 +277,13 @@ CREATE TABLE IF NOT EXISTS alerts (
     timestamp TIMESTAMP NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS ecg (
+    id SERIAL PRIMARY KEY,
+    patient_id UUID REFERENCES patients(id),
+    timestamp TIMESTAMP NOT NULL
+    lead TEXT NOT NULL.
+    voltage DOUBLE_PRECISION NOT NULL
+);
+
+
 COMMIT;
