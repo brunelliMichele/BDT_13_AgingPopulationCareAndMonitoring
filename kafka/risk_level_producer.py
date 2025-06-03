@@ -53,11 +53,11 @@ SELECT
     vs.risk_level, 
     vs.date, 
     p.first,
-	p.middle,
+    p.middle,
     p.last
 FROM vital_signs vs
 JOIN patients p ON vs.patient_id = p.id
-WHERE vs.risk_level > 30;
+WHERE vs.date > NOW() - interval '1 hour';
 """
 
 while True:
@@ -74,7 +74,11 @@ while True:
                 "middle": row["middle"],
                 "last": row["last"],
                 "risk_level": row["risk_level"],
-                "category": "HIGH"
+                "category": (
+                    "HIGH" if row["risk_level"] > 60 else
+                    "MEDIUM" if row["risk_level"] > 30 else
+                    "LOW"
+                )
             }
             producer.produce("risk_alerts", value=json.dumps(alert).encode("utf-8"), callback=delivery_report)
             producer.flush()

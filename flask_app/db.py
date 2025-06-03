@@ -85,3 +85,10 @@ def get_risk_level_by_id(patient_id):
             cur.execute("SELECT risk_level FROM vital_signs WHERE patient_id = %s ORDER BY date DESC LIMIT 1", (patient_id,))
             result = cur.fetchone()
             return float(result[0]) if result else None
+        
+def get_all_risk_level():
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT DISTINCT ON (patient_id) patient_id, risk_level FROM vital_signs WHERE risk_level IS NOT NULL ORDER BY patient_id, date DESC")
+            rows = cur.fetchall()
+            return {str(row[0]): float(row[1]) for row in rows}

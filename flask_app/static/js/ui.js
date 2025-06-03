@@ -72,11 +72,25 @@ function renderPatients() {
         const div = document.createElement("div");
         div.className = "bg-teal-50 border border-teal-200 p-4 rounded-lg shadow-md";
 
+        let riskLevelDisplay = '';
+        if (p.risk_level !== undefined && p.risk_level !== null) {
+            let riskColor = 'text-green-600';
+            if (p.risk_level > 60) {
+                riskColor = 'text-red-600';
+            } else if (p.risk_level > 30) {
+                riskColor = 'text-yellow-600';
+            }
+            riskLevelDisplay = `<p class="text-sm font-semibold ${riskColor}">Risk Level: ${p.risk_level.toFixed(1)}%</p>`;
+        } else {
+            riskLevelDisplay = `<p class="text-sm text-gray-500 italic">Risk level not available</p>`;
+        }
+
         div.innerHTML = `
             <h3 class="text-lg font-bold text-teal-700">🧓 ${p.name} ${p.middlename} ${p.surname}</h3>
             <p class="text-gray-700 text-sm"><strong>ID:</strong> ${p.id}</p>
             <p class="text-gray-700 text-sm"><strong>Age:</strong> ${calculateAge(p.birthdate)} years</p>
             <p class="text-gray-700 text-sm"><strong>City:</strong> ${p.city}</p>
+            ${riskLevelDisplay}
             <a href="${p.url}" class="text-teal-600 hover:text-teal-800 underline text-sm">View details</a>
         `;
         container.appendChild(div);

@@ -83,7 +83,7 @@ def register_sockets(socket_io: SocketIO):
                 except Exception as e:
                     logging.error(f"❌ alert_consumer error: {e}")
 
-    def risk_alert_consumer():
+    def risk_level_consumer():
         with app.app_context():
             logging.info("📡 Starting risk_alert_consumer thread...")
             for _ in range(5):
@@ -113,11 +113,13 @@ def register_sockets(socket_io: SocketIO):
                         continue
                     logging.info("🚨 Risk alert received.")
                     logging.info("🔍 Emitting risk_alert_message...")
-                    socket_io.emit("risk_alert_message", json.loads(msg.value().decode("utf-8")), to=None, namespace="/")
+                    alert_data = json.loads(msg.value().decode("utf-8"))
+                    logging.info(f"🚨 Emitting risk alert: {alert_data}")
+                    socket_io.emit("risk_alert_message", alert_data, to=None, namespace="/")
             except Exception as e:
                 logging.error(f"❌ risk_alert_consumer error: {e}")
 
     # Avvio thread
     Thread(target=smart_data_consumer, name="SmartDataConsumer", daemon=True).start()
     Thread(target=alert_consumer, name="AlertConsumer", daemon=True).start()
-    Thread(target=risk_alert_consumer, name="RiskAlertConsumer", daemon=True).start()
+    Thread(target=risk_level_consumer, name="RiskLevelConsumer", daemon=True).start()
