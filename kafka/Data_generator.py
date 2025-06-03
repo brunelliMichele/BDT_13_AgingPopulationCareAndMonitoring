@@ -5,45 +5,41 @@ import json
 from datetime import datetime, timezone
 import pytz
 from confluent_kafka import Producer
-import psycopg2
+from sqlalchemy import create_engine, text
 import os
 
-# === CONFIG ===
+# === GLOBAL VARIABLES ===
 KAFKA_CONFIG = {"bootstrap.servers": "kafka:9092"}
 KAFKA_TOPIC_SMART = "smart_home_data"
 KAFKA_TOPIC_ALERT = "alert_topic"
 ROOMS = ["Kitchen", "Living Room", "Bathroom", "Bedroom", "Laundry Room"]
 
+DB_HOST = os.environ.get("DB_HOST", "db")
+DB_PORT = int(os.environ.get("DB_PORT", 5432))
+DB_NAME = os.environ.get("DB_NAME", "medicalData")
+DB_USER = os.environ.get("DB_USER", "user")
+DB_PASSWORD = os.environ.get("DB_PASSWORD", "password")
+
 # === FUNCTION ===
 
 # db connection
-def get_db_connection():
-    return psycopg2.connect(
-        host = os.environ.get("DB_HOST", "db"),
-        port = 5432,
-        database = os.environ.get("DB_NAME", "medicalData"),
-        user = os.environ.get("DB_USER", "user"),
-        password = os.environ.get("DB_PASSWORD", "password")
-    )
+def get_db_engine():
+    db_url = f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    return create_engine(db_url)
 
 # get ids from db
 def get_patients():
     for attempt in range(20):  # retry 20 times
         try:
-            conn = get_db_connection()
-            break
-        except psycopg2.OperationalError as e:
+            engine = get_db_engine()
+            with engine.connect as conn:
+                result = conn.execute(text("SELECT id, first, last FROM patients;"))
+                patients = {str(row.id): f"{row.first} {row.last}" for row in result}
+            return patients            
+        except Exception as e:
             print(f"⏳ Attempt {attempt+1}/20 - Waiting for database... {e}")
             time.sleep(3)
-    else:
-        raise Exception("❌ Database not reachable")
-
-    cur = conn.cursor()
-    cur.execute("SELECT id, first, last FROM patients;")
-    patients = {str(row[0]): f"{row[1]} {row[2]}" for row in cur.fetchall()}
-    cur.close()
-    conn.close()
-    return patients
+    raise Exception("❌ Database not reachable")
 
 # data generation
 def get_temperature(room):
@@ -130,12 +126,12 @@ def delivery_report(err, msg):
 
 # save alert in alerts table on db
 def save_alert_to_db(patient_id, alert_type, room, message, timestamp):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("INSERT INTO alerts (patient_id, alert_type, room, message, timestamp) VALUES (%s, %s, %s, %s, %s)", (patient_id, alert_type, room, message, timestamp))
-    conn.commit()
-    cur.close()
-    conn.close()
+    engine = get_db_engine()
+    with engine.connect() as conn:
+        conn.execute(
+            text("INSERT INTO alerts (patient_id, alert_type, room, message, timestamp) VALUES (:pid, :atype, :room, :msg, :ts)"),
+            {"pid": patient_id, "atype": alert_type, "room": room, "msg": message, "ts": timestamp}
+        )
 
 # simulate real time data
 def simulate_realtime():

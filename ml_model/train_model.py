@@ -6,12 +6,12 @@ from sklearn.model_selection import train_test_split
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dropout, Dense
 from tensorflow.keras.callbacks import EarlyStopping
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, text, Table, MetaData
+from sqlalchemy.dialects.postgresql import insert
 from tensorflow.keras import Input
 import joblib
 import os
 import random
-import psycopg2
 
 # === PATHS ===
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -31,17 +31,12 @@ DB_PASSWORD = os.environ.get("DB_PASSWORD", "password")
 
 # === FUNCTIONS ===
 
-def get_db_connection():
+def get_db_engine():
     try:
-        return psycopg2.connect(
-            host = DB_HOST,
-            port = DB_PORT,
-            database = DB_NAME,
-            user = DB_USER,
-            password = DB_PASSWORD
-        )
-    except psycopg2.Error as e:
-        print(f"❌ DB connection failed: {e}")
+        db_url = f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+        return create_engine(db_url)
+    except Exception as e:
+        print(f"❌ Failed to create SQLAlchemy engine: {e}")
         raise
 
 
@@ -134,7 +129,7 @@ def evaluate_risk_advanced(row):
     return round(risk_percentage, 1)
 
 def load_training_data(after_date=None):
-    conn = get_db_connection()
+    engine = get_db_engine()
     query = """
         SELECT date, patient AS patient_id, description, value, category
         FROM observations
@@ -143,10 +138,8 @@ def load_training_data(after_date=None):
     """
     if after_date:
         query += f" AND \"date\" > '{after_date.strftime('%Y-%m-%d %H:%M:%S')}'"
-    engine = create_engine(f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
     with engine.connect() as connection:
         df = pd.read_sql(sql=text(query), con=connection)
-    conn.close()
 
     if df.empty:
         print("⚠️ Nessun dato trovato nella query.")
@@ -233,26 +226,30 @@ def main():
     joblib.dump(scaler_y, scaler_y_path)
     # print("✅ Scalers saved.")
 
-    engine = create_engine(f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
-    with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            # print("✅ Creating table vital_signs if not exists...")
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS vital_signs (
-                    "patient_id" UUID REFERENCES patients(id),
-                    "date" TIMESTAMP,
-                    "HR" FLOAT,
-                    "RR" FLOAT,
-                    "body_temperature" FLOAT,
-                    "SpO2" FLOAT,
-                    "GSR" FLOAT,
-                    "risk_level" FLOAT,
-                    PRIMARY KEY ("patient_id", "date")
-                );
-            """)
+    engine = get_db_engine()
+    with engine.connect() as conn:
+        conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS vital_signs (
+                "patient_id" UUID REFERENCES patients(id),
+                "date" TIMESTAMP,
+                "HR" FLOAT,
+                "RR" FLOAT,
+                "body_temperature" FLOAT,
+                "SpO2" FLOAT,
+                "GSR" FLOAT,
+                "risk_level" FLOAT,
+                PRIMARY KEY ("patient_id", "date")
+            );
+        """))
 
     df_to_save = df[["patient_id", "date", "HR", "RR", "body_temperature", "SpO2", "GSR", "risk_level"]]
-    df_to_save.to_sql("vital_signs", con=engine, if_exists="append", index=False)
+    with engine.connect() as conn:
+        for _, row in df_to_save.iterrows():
+            metadata = MetaData()
+            vital_signs = Table("vital_signs", metadata, autoload_with=engine)
+            stmt = insert(vital_signs).values(row.to_dict())
+            stmt = stmt.on_conflict_do_nothing(index_elements=["patient_id", "date"])
+            conn.execute(stmt)
     # print("✅ Data saved to vital_signs_table.")
 
     latest_date = df["date"].max()

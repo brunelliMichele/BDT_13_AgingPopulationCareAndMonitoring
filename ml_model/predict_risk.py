@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 import joblib
-import psycopg2
 import sys
 import os
 from sqlalchemy import create_engine, text
@@ -18,29 +17,23 @@ DB_PASSWORD = os.environ.get("DB_PASSWORD", "password")
 
 def get_db_connection():
     try:
-        return psycopg2.connect(
-            host = DB_HOST,
-            port = DB_PORT,
-            database = DB_NAME,
-            user = DB_USER,
-            password = DB_PASSWORD
-        )
-    except psycopg2.Error as e:
+        db_url = f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+        engine = create_engine(db_url)
+        return engine.connect()
+    except Exception as e:
         print(f"❌ DB connection failed: {e}")
         raise
 
 def get_latest_vital_signs(patient_id, conn, limit=6):
-    query = """
+    query = text("""
         SELECT HR, RR, body_temperature, SpO2, GSR
         FROM vital_signs
-        WHERE patient_id = %s
+        WHERE patient_id = :pid
         ORDER BY measurement_time DESC
-        LIMIT %s
-    """
-
-    df = pd.read_sql(query, conn, params=(patient_id, limit))
+        LIMIT :limit
+    """)
+    df = pd.read_sql(query, conn, params={"pid": patient_id, "limit": limit})
     df = df.iloc[::-1].reset_index(drop=True)
-
     return df
 
 
