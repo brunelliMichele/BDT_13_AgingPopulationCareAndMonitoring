@@ -1,6 +1,5 @@
 // chart.js
 const rawData = JSON.parse(document.getElementById("risk-data").textContent);
-console.log("📊 riskChart rawData:", rawData);
 
 const labels = rawData.dates || [];
 const data = rawData.values || [];

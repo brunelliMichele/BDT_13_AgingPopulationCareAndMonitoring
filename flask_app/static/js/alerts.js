@@ -23,7 +23,6 @@ export function setupAlertHandling(socket) {
     }
 
     socket.on("new_alert_message", (data) => {
-        console.log("🚨 ALERT RECEIVED", data);
         const alerts = Array.isArray(data) ? data : [data?.message || "⚠️ Alert received"];
         alerts.forEach((message) => {
             const timestamp = new Date().toLocaleTimeString();
@@ -35,8 +34,6 @@ export function setupAlertHandling(socket) {
     });
 
     socket.on("risk_alert_message", (data) => {
-        console.log("📈 RISK ALERT RAW DATA", JSON.stringify(data));
-
         if (data && data.patient_id && data.risk_level !== undefined) {
             const fullName = data.first && data.last
                 ? `${data.first} ${data.middle ? data.middle + ' ' : ''}${data.last}`

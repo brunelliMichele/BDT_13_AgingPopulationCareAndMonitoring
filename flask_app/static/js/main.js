@@ -7,14 +7,6 @@ import { initMap } from "./map.js";
 
 const socket = io("/");
 
-socket.on("connect", () => {
-    console.log("✅ Socket connected");
-});
-
-socket.onAny((event, ...args) => {
-    console.log("📡 Received event:", event, args);
-});
-
 document.addEventListener("DOMContentLoaded", () => {
     initMap();
     setupAlertHandling(socket);

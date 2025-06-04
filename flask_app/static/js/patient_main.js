@@ -63,12 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 icon.textContent = direction === "asc" ? "↑" : "↓";
 
                 const flexContainer = sortedTh.querySelector("div.flex");
-                if (flexContainer) {
                     flexContainer.appendChild(icon);
-                }
-                else {
-                    console.warn("⚠️ div.flex not found inside sorted th");
-                }
             }
         });
     }
