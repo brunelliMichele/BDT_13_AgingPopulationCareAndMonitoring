@@ -53,24 +53,24 @@ services:
             - bdt_network
         restart: always
 
-    spark:
-        build: ./spark
-        depends_on:
-            kafka:
-                condition: service_healthy
-        environment:
-            - KAFKA_BROKER=kafka:9092
-        volumes:
-            - ./spark:/spark
-            - ./spark/spark-defaults.conf:/opt/bitnami/spark/conf/spark-defaults.conf
-        command: >
-                bash -c "sleep 10 &&
-                /opt/bitnami/spark/bin/spark-submit
-                --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0
-                /spark/spark_stream.py"
-        networks:
-            - bdt_network
-        restart: always
+    # spark:
+    #     build: ./spark
+    #     depends_on:
+    #         kafka:
+    #             condition: service_healthy
+    #     environment:
+    #         - KAFKA_BROKER=kafka:9092
+    #     volumes:
+    #         - ./spark:/spark
+    #         - ./spark/spark-defaults.conf:/opt/bitnami/spark/conf/spark-defaults.conf
+    #     command: >
+    #             bash -c "sleep 10 &&
+    #             /opt/bitnami/spark/bin/spark-submit
+    #             --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0
+    #             /spark/spark_stream.py"
+    #     networks:
+    #         - bdt_network
+    #     restart: always
 
     flask_web:
         build: ./flask_app

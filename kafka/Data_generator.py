@@ -162,7 +162,10 @@ def simulate_realtime():
                 for fn in [check_temperature_alert, check_humidity_alert]:
                     alert = fn(temp if fn == check_temperature_alert else humidity, room, user_id, patient_name)
                     if alert:
-                        alerts.append(alert)
+                        alerts.append({
+                            "message": alert,
+                            "patient_id": str(pid)
+                        })
                         save_alert_to_db(patient_id=pid, alert_type="temperature" if fn == check_temperature_alert else "humidity", room=room, message=alert, timestamp=timestamp)
 
                 for device in appliances:
@@ -173,7 +176,10 @@ def simulate_realtime():
 
                     alert = check_device_duration_alert(device, duration, room, user_id, patient_name, alerted_devices)
                     if alert:
-                        alerts.append(alert)
+                        alerts.append({
+                            "message": alert,
+                            "patient_id": str(pid)
+                        })
                         save_alert_to_db(patient_id=pid, alert_type="duration", room=room, message=alert, timestamp=timestamp)
 
                     room_appliances[device] = {"Status": status, "Duration (min)": duration}
@@ -184,7 +190,12 @@ def simulate_realtime():
                     "appliances": room_appliances
                 }
             timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
-            snapshot[user_id] = {timestamp_str: person_data}
+            snapshot[user_id] = {
+                "patient_id": user_id,
+                "patient_name": patient_name,
+                "timestamp": timestamp_str,
+                "data": person_data
+            }
 
         with open("house_data.json", "w") as f:
             json.dump(snapshot, f, indent=4)
@@ -200,7 +211,7 @@ def simulate_realtime():
                     f.write(f"{timestamp} {alert}\n")
             if len(alerts) > max_alerts_per_cycle:
                 print(f"⚠️ Alert count capped at {max_alerts_per_cycle} (original: {len(alerts)})")
-            print(f"[{timestamp}] ALERTS TRIGGERED:\n" + "\n".join(alerts))
+            print(f"[{timestamp}] ALERTS TRIGGERED:\n" + "\n".join(a["message"] for a in alerts))
             producer.produce(KAFKA_TOPIC_ALERT, value=json.dumps(alerts).encode(), callback=delivery_report)
         else:
             print(f"[{timestamp}] No alerts. System OK.")

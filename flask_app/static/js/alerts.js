@@ -2,71 +2,50 @@
 
 export function setupAlertHandling(socket) {
     const closeBtn = document.getElementById("close-alert-box");
+    const alertBox = document.getElementById("alert-box");
+
     if (closeBtn) {
         closeBtn.addEventListener("click", () => {
-            document.getElementById("alert-box").classList.add("hidden");
-        });
-    }
-
-    const alertBox = document.getElementById("alert-box");
-    if (alertBox) {
-        alertBox.addEventListener("click", (e) => {
-            if (e.target.id === "alert-box") {
-                alertBox.classList.add("hidden");
-            }
+            alertBox?.classList.add("hidden");
         });
     }
 
     socket.on("new_alert_message", (data) => {
-        const alerts = Array.isArray(data) ? data : [data?.message || "⚠️ Alert received"];
-
-        // Clear previous "isNew" flags
-        const old = JSON.parse(sessionStorage.getItem("alerts") || "[]").map(a => ({ ...a, isNew: false }));
-        sessionStorage.setItem("alerts", JSON.stringify(old));
-
-        // Save new alerts
-        alerts.forEach((message) => {
-            const timestamp = new Date().toLocaleTimeString();
-            saveAlert(message, timestamp);
-            showToastAlert(message, timestamp);
-        });
-
-        renderAlertList();
+        handleIncomingAlert("default", data);
     });
 
     socket.on("risk_alert_message", (data) => {
-        // Clear previous "isNew" flags
-        const old = JSON.parse(sessionStorage.getItem("alerts") || "[]").map(a => ({ ...a, isNew: false }));
-        sessionStorage.setItem("alerts", JSON.stringify(old));
-
-        const alerts = [];
-
-        if (data && data.patient_id && data.risk_level !== undefined) {
-            const fullName = data.first && data.last
-                ? `${data.first} ${data.middle ? data.middle + ' ' : ''}${data.last}`
-                : `ID ${data.patient_id}`;
-            const message = `⚠️ High risk for patient ${fullName} — level: ${data.risk_level}`;
-            alerts.push(`[Risk] ${message}`);
-        } else {
-            const fallback = data?.message || "⚠️ Risk alert received";
-            alerts.push(`[Risk] ${fallback}`);
-        }
-
-        alerts.forEach((message) => {
-            const timestamp = new Date().toLocaleTimeString();
-            saveAlert(message, timestamp, "risk");
-            showToastAlert(message, timestamp);
-        });
-
-        renderAlertList();
+        handleIncomingAlert("risk", data);
     });
 
     renderAlertList();
 }
 
-function saveAlert(message, timestamp, type = "default") {
+function handleIncomingAlert(type, data) {
+    console.log(`📩 Received ${type} alert:`, data); // 👈 LOG DI DEBUG
+    const alerts = Array.isArray(data)
+        ? data.map((msg) => ({ message: msg.message || msg, patient_id: msg.patient_id }))
+        : [{
+            message: data.message || `⚠️ ${type === "risk" ? "Risk" : "Alert"} received`,
+            patient_id: data.patient_id
+        }];
+
+    // Clear previous "isNew" flags
+    const old = JSON.parse(sessionStorage.getItem("alerts") || "[]").map(a => ({ ...a, isNew: false }));
+    sessionStorage.setItem("alerts", JSON.stringify(old));
+
+    alerts.forEach(({ message, patient_id }) => {
+        const timestamp = new Date().toLocaleTimeString();
+        saveAlert(message, timestamp, type, patient_id);
+        showToastAlert(message, timestamp, { patient_id });
+    });
+
+    renderAlertList();
+}
+
+function saveAlert(message, timestamp, type = "default", patientId = null) {
     const stored = JSON.parse(sessionStorage.getItem("alerts") || "[]");
-    const newAlert = { timestamp, message, isNew: true, type };
+    const newAlert = { timestamp, message, isNew: true, type, patientId };
     const updated = [newAlert, ...stored];
     sessionStorage.setItem("alerts", JSON.stringify(updated.slice(0, 50)));
 }
@@ -82,12 +61,20 @@ function renderAlertList() {
     }
 
     alertList.innerHTML = "";
-    saved.forEach(({ timestamp, message, isNew, type }) => {
+    saved.forEach(({ timestamp, message, isNew, type, patientId }) => {
         const li = document.createElement("li");
         const baseClass = "px-2 py-1 rounded text-xs leading-tight break-words flex justify-between items-center gap-2";
         const riskClass = "bg-red-100 text-red-900 border border-red-400";
         const defaultClass = "bg-yellow-100 text-yellow-900 border border-yellow-400";
         li.className = `${type === "risk" ? riskClass : defaultClass} ${baseClass}`;
+
+        if (patientId) {
+            li.classList.add("cursor-pointer");
+            li.addEventListener("click", () => {
+                window.location.href = `/patient/${patientId}`;
+            });
+        }
+
         li.innerHTML = `
             <span>${timestamp} — ${message}</span>
             ${isNew ? '<span class="ml-2 px-2 py-0.5 text-[10px] bg-red-500 text-white rounded-full">NEW</span>' : ''}
@@ -96,24 +83,49 @@ function renderAlertList() {
     });
 }
 
-export function showToastAlert(message, timestamp = "") {
-    const container = document.getElementById("alert-container");
-    if (!container) return;
+export function showToastAlert(message, timestamp = "", messageData = {}) {
+    let container = document.getElementById("alert-container");
+    let wrapper = document.getElementById("alert-wrapper");
+
+    if (!wrapper) {
+        wrapper = document.createElement("div");
+        wrapper.id = "alert-wrapper";
+        wrapper.className = "fixed top-2 right-6 z-50 flex flex-col items-end gap-2";
+        document.body.appendChild(wrapper);
+    }
+
+    if (!container) {
+        container = document.createElement("div");
+        container.id = "alert-container";
+        container.className = "flex flex-col gap-2";
+        wrapper.appendChild(container);
+    }
 
     const alertDiv = document.createElement("div");
-    const isRisk = message.includes("[Risk]");
+    const isRisk = messageData?.type === "risk" || message.includes("[Risk]");
     alertDiv.className = `${isRisk ? "bg-red-100 border-red-500 text-red-700" : "bg-yellow-100 border-yellow-500 text-yellow-700"} border-l-4 p-3 rounded shadow-lg max-w-xs animate-fadeInOut`;
+
     alertDiv.innerHTML = `
         <div class="flex justify-between items-start gap-2">
             <div class="text-sm">
                 <strong class="block mb-1">⚠️ Alert</strong>
                 <span>${timestamp} — ${message}</span>
             </div>
-            <button class="text-yellow-500 hover:text-yellow-700 text-xl leading-none font-bold">&times;</button>
+            <button class="bg-white border border-gray-300 hover:border-gray-400 rounded px-2 py-0.5 text-gray-600 hover:text-black text-base font-semibold shadow-sm transition" aria-label="Close alert">&times;</button>
         </div>
     `;
 
-    alertDiv.querySelector("button").addEventListener("click", () => {
+    const patientId = messageData.patient_id || (message.match(/\(ID: ([\w-]+)\)/)?.[1] ?? null);
+
+    if (patientId) {
+        alertDiv.classList.add("cursor-pointer");
+        alertDiv.addEventListener("click", () => {
+            window.location.href = `/patient/${patientId}`;
+        });
+    }
+
+    alertDiv.querySelector("button").addEventListener("click", (e) => {
+        e.stopPropagation();
         alertDiv.remove();
     });
 
@@ -121,5 +133,42 @@ export function showToastAlert(message, timestamp = "") {
 
     setTimeout(() => {
         alertDiv.remove();
+        showCloseAllButton();
     }, 6000);
+
+    const observer = new MutationObserver(() => {
+        showCloseAllButton();
+    });
+    observer.observe(container, { childList: true });
+}
+
+// Dynamically create and insert the "Close all" button when there are alerts
+function showCloseAllButton() {
+    let wrapper = document.getElementById("alert-wrapper");
+    let container = document.getElementById("alert-container");
+    if (!wrapper || !container) return;
+
+    // Only show button if there are visible alerts
+    const hasAlerts = container.children.length > 0;
+    let closeAllBtn = document.getElementById("close-all-alerts");
+
+    // Remove button if no alerts
+    if (!hasAlerts && closeAllBtn) {
+        closeAllBtn.remove();
+        return;
+    }
+
+    // Add button if alerts exist and button not present
+    if (hasAlerts && !closeAllBtn) {
+        closeAllBtn = document.createElement("button");
+        closeAllBtn.id = "close-all-alerts";
+        closeAllBtn.className = "bg-white text-sm border border-gray-300 hover:border-gray-400 px-3 py-1 rounded shadow text-gray-600 hover:text-black transition mb-1";
+        closeAllBtn.textContent = "✖ Close all";
+        closeAllBtn.addEventListener("click", () => {
+            container.innerHTML = "";
+            showCloseAllButton();
+        });
+        // Insert button at the top of the wrapper
+        wrapper.insertBefore(closeAllBtn, wrapper.firstChild);
+    }
 }

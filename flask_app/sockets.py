@@ -43,9 +43,24 @@ def register_sockets(socket_io: SocketIO):
                     if msg.error():
                         logging.error(f"Consumer error: {msg.error()}")
                         continue
+
                     logging.info("🏠 Smart home data received.")
-                    logging.info("🔍 Emitting smart_data_message...")
-                    socket_io.emit("smart_data_message", json.loads(msg.value().decode("utf-8")), to=None, namespace="/")
+
+                    try:
+                        raw = msg.value().decode("utf-8")
+                        data = json.loads(raw)
+
+                        # Controllo formato
+                        if isinstance(data, dict) and any(
+                            isinstance(v, dict) and "patient_id" in v for v in data.values()
+                        ):
+                            logging.info("🔍 Emitting smart_data_message...")
+                            socket_io.emit("smart_data_message", data, to=None, namespace="/")
+                        else:
+                            logging.warning("⚠️ Struttura del messaggio non valida per smart_data_message.")
+                    
+                    except Exception as parse_err:
+                        logging.error(f"❌ Errore nel parsing o emissione del messaggio Kafka: {parse_err}")
             
             except Exception as e:
                 logging.error(f"❌ smart_data_consumer error: {e}")
@@ -76,10 +91,31 @@ def register_sockets(socket_io: SocketIO):
                         if msg.error():
                             logging.error(f"Consumer error: {msg.error()}")
                             continue
-                        logging.info("⚠️ Alert received.")
-                        logging.info("🔍 Emitting alert...")
-                        socket_io.emit("new_alert_message", json.loads(msg.value().decode("utf-8")), to=None, namespace="/")
 
+                        logging.info("⚠️ Alert received.")
+
+                        try:
+                            raw = msg.value().decode("utf-8")
+                            data = json.loads(raw)
+
+                            logging.debug(f"📨 Messaggio ALERT ricevuto:\n{json.dumps(data, indent=2)}")
+
+                            # Il frontend accetta sia una lista di dict, sia un singolo dict
+                            is_valid = (
+                                isinstance(data, list) and all(isinstance(x, dict) and "message" in x and "patient_id" in x for x in data)
+                            ) or (
+                                isinstance(data, dict) and "message" in data and "patient_id" in data
+                            )
+
+                            if is_valid:
+                                logging.info("🔍 Emitting new_alert_message...")
+                                socket_io.emit("new_alert_message", data, to=None, namespace="/")
+                            else:
+                                logging.warning("⚠️ Messaggio alert non valido o malformato.")
+
+                        except Exception as parse_err:
+                            logging.error(f"❌ Errore nel parsing o nell’emissione alert: {parse_err}")
+                
                 except Exception as e:
                     logging.error(f"❌ alert_consumer error: {e}")
 
