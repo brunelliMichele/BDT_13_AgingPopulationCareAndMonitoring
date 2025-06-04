@@ -87,6 +87,16 @@
             <!-- Vital Sign Measurements Table -->
             <div class="bg-white border border-gray-200 rounded-xl shadow-md p-6">
                 <h2 class="text-xl font-bold text-teal-700 mb-4">📋 Vital Signs History</h2>
+                <div class="mb-4 text-sm text-gray-700">
+                    <strong class="text-teal-700">Legend:</strong> Values outside the normal range are <span class="bg-red-100 text-red-700 px-1 rounded">highlighted</span>.<br>
+                    <ul class="list-disc list-inside ml-4 mt-1 space-y-1">
+                        <li><strong>Heart Rate:</strong> 60–100 bpm</li>
+                        <li><strong>Respiratory Rate:</strong> 12–20 breaths/min</li>
+                        <li><strong>Body Temperature:</strong> 36.0–38.0 °C</li>
+                        <li><strong>O₂ Saturation:</strong> ≥ 95%</li>
+                        <li><strong>Skin Conductivity (GSR):</strong> 1.5–5.5</li>
+                    </ul>
+                </div>
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm text-left text-gray-700">
                     <thead class="bg-teal-100 text-teal-800 text-xs">
@@ -139,11 +149,11 @@
                         {% for row in risk_trend_raw %}
                         <tr class="border-b hover:bg-gray-100">
                         <td class="px-4 py-2">{{ row.date }}</td>
-                        <td class="px-4 py-2">{{ row.hr }}</td>
-                        <td class="px-4 py-2">{{ row.rr }}</td>
-                        <td class="px-4 py-2">{{ row.body_temperature }}</td>
-                        <td class="px-4 py-2">{{ row.spo2 }}</td>
-                        <td class="px-4 py-2">{{ row.gsr }}</td>
+                        <td class="px-4 py-2 {% if row.hr < 60 or row.hr > 100 %}bg-red-100 text-red-700 font-bold{% endif %}">{{ row.hr }}</td>
+                        <td class="px-4 py-2 {% if row.rr < 12 or row.rr > 20 %}bg-red-100 text-red-700 font-bold{% endif %}">{{ row.rr }}</td>
+                        <td class="px-4 py-2 {% if row.body_temperature < 36.0 or row.body_temperature > 38.0 %}bg-red-100 text-red-700 font-bold{% endif %}">{{ row.body_temperature }}</td>
+                        <td class="px-4 py-2 {% if row.spo2 < 95 %}bg-red-100 text-red-700 font-bold{% endif %}">{{ row.spo2 }}</td>
+                        <td class="px-4 py-2 {% if row.gsr < 1.5 or row.gsr > 5.5 %}bg-red-100 text-red-700 font-bold{% endif %}">{{ row.gsr }}</td>
                         <td class="px-4 py-2">{{ row.risk_level }}</td>
                         </tr>
                         {% endfor %}
