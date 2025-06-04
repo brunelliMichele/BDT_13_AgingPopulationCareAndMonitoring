@@ -5,20 +5,11 @@ import { setupAlertHandling } from "./alerts.js";
 
 const socket = io("/");
 
-socket.on("connect", () => {
-    console.log("✅ Socket connected");
-});
-
-socket.onAny((event, ...args) => {
-    console.log("📡 Received event:", event, args);
-});
-
 function setupSensorUpdates() {
     const userId = document.getElementById("patient-id")?.dataset.id;
     if (!userId) return;
 
     socket.on("smart_data_message", (msg) => {
-        console.log("💡 smart_data_message", msg);
         if (!(userId in msg)) return;
 
         const data = msg[userId];
@@ -56,16 +47,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const table = document.querySelector("table");
     if (table) {
         const sorter = new Tablesort(table);
-        console.log("✅ Tablesort initialized");
 
         table.addEventListener("afterSort", function (e) {
             // Remove all existing sort icons
             document.querySelectorAll("span.sort-indicator").forEach((el) => el.remove());
 
             // Tablesort adds class 'asc' or 'desc' to the sorted header
-            const sortedTh = table.querySelector("th.asc, th.desc");
+            const sortedTh = table.querySelector("th[aria-sort='ascending'], th[aria-sort='descending']");
+            
             if (sortedTh) {
-                const direction = sortedTh.classList.contains("asc") ? "asc" : "desc";
+                const direction = sortedTh.getAttribute("aria-sort") === "ascending" ? "asc" : "desc";
 
                 const icon = document.createElement("span");
                 icon.className = "sort-indicator text-xs ml-1";
@@ -74,6 +65,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 const flexContainer = sortedTh.querySelector("div.flex");
                 if (flexContainer) {
                     flexContainer.appendChild(icon);
+                }
+                else {
+                    console.warn("⚠️ div.flex not found inside sorted th");
                 }
             }
         });
