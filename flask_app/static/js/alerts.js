@@ -17,111 +17,58 @@ export function setupAlertHandling(socket) {
         });
     }
 
-    const badge = document.getElementById("new-alert-badge");
-    if (badge) {
-        badge.addEventListener("click", highlightNewAlerts);
-    }
-
     socket.on("new_alert_message", (data) => {
         const alerts = Array.isArray(data) ? data : [data?.message || "⚠️ Alert received"];
+
+        // Clear previous "isNew" flags
+        const old = JSON.parse(sessionStorage.getItem("alerts") || "[]").map(a => ({ ...a, isNew: false }));
+        sessionStorage.setItem("alerts", JSON.stringify(old));
+
+        // Save new alerts
         alerts.forEach((message) => {
             const timestamp = new Date().toLocaleTimeString();
             saveAlert(message, timestamp);
-            updateBadge();
-            showPopup(message, timestamp);
+            showToastAlert(message, timestamp);
         });
+
         renderAlertList();
     });
 
     socket.on("risk_alert_message", (data) => {
+        // Clear previous "isNew" flags
+        const old = JSON.parse(sessionStorage.getItem("alerts") || "[]").map(a => ({ ...a, isNew: false }));
+        sessionStorage.setItem("alerts", JSON.stringify(old));
+
+        const alerts = [];
+
         if (data && data.patient_id && data.risk_level !== undefined) {
             const fullName = data.first && data.last
                 ? `${data.first} ${data.middle ? data.middle + ' ' : ''}${data.last}`
                 : `ID ${data.patient_id}`;
             const message = `⚠️ High risk for patient ${fullName} — level: ${data.risk_level}`;
-            const timestamp = new Date().toLocaleTimeString();
-            saveAlert(`[Risk] ${message}`, timestamp, "risk");
-            updateBadge();
-            showPopup(`[Risk] ${message}`, timestamp);
+            alerts.push(`[Risk] ${message}`);
         } else {
             const fallback = data?.message || "⚠️ Risk alert received";
-            const timestamp = new Date().toLocaleTimeString();
-            saveAlert(`[Risk] ${fallback}`, timestamp, "risk");
-            updateBadge();
-            showPopup(`[Risk] ${fallback}`, timestamp);
+            alerts.push(`[Risk] ${fallback}`);
         }
+
+        alerts.forEach((message) => {
+            const timestamp = new Date().toLocaleTimeString();
+            saveAlert(message, timestamp, "risk");
+            showToastAlert(message, timestamp);
+        });
 
         renderAlertList();
     });
 
     renderAlertList();
-    updateBadge();
 }
 
 function saveAlert(message, timestamp, type = "default") {
     const stored = JSON.parse(sessionStorage.getItem("alerts") || "[]");
-    stored.unshift({ timestamp, message, isNew: true, type });
-    sessionStorage.setItem("alerts", JSON.stringify(stored.slice(0, 50)));
-
-    const count = parseInt(sessionStorage.getItem("newAlertsCount") || "0") + 1;
-    sessionStorage.setItem("newAlertsCount", count);
-    sessionStorage.setItem("newAlerts", "true");
-}
-
-function updateBadge() {
-    const badge = document.getElementById("new-alert-badge");
-    const count = parseInt(sessionStorage.getItem("newAlertsCount") || "0");
-    if (badge) {
-        if (count > 0) {
-            badge.textContent = count;
-            badge.classList.remove("hidden");
-        } else {
-            badge.classList.add("hidden");
-        }
-    }
-}
-
-function showPopup(message, timestamp) {
-    const alertBox = document.getElementById("alert-box");
-    const alertElement = document.getElementById("alert");
-    const alertContent = document.getElementById("alert-content");
-
-    if (alertBox && alertElement && alertContent) {
-        alertBox.classList.remove("hidden");
-        alertElement.textContent = `${timestamp} — ${message}`;
-        alertContent.classList.remove("scale-95", "opacity-0");
-        alertContent.classList.add("scale-100", "opacity-100");
-
-        setTimeout(() => {
-            alertBox.classList.add("hidden");
-            alertContent.classList.remove("scale-100", "opacity-100");
-            alertContent.classList.add("scale-95", "opacity-0");
-        }, 10000);
-    }
-}
-
-function highlightNewAlerts() {
-    const alertList = document.getElementById("alert-list");
-    const badge = document.getElementById("new-alert-badge");
-    if (!alertList || !badge) return;
-
-    const newItems = alertList.querySelectorAll("li[data-new='true']");
-    newItems.forEach((el) => {
-        el.classList.add("bg-yellow-200", "border-2", "border-yellow-500");
-        setTimeout(() => {
-            el.classList.remove("bg-yellow-200", "border-2", "border-yellow-500");
-        }, 3000);
-        el.removeAttribute("data-new");
-    });
-
-    badge.textContent = "0";
-    badge.classList.add("hidden");
-    sessionStorage.setItem("newAlertsCount", "0");
-    sessionStorage.removeItem("newAlerts");
-
-    const saved = JSON.parse(sessionStorage.getItem("alerts") || "[]");
-    const cleared = saved.map((a) => ({ ...a, isNew: false }));
-    sessionStorage.setItem("alerts", JSON.stringify(cleared));
+    const newAlert = { timestamp, message, isNew: true, type };
+    const updated = [newAlert, ...stored];
+    sessionStorage.setItem("alerts", JSON.stringify(updated.slice(0, 50)));
 }
 
 function renderAlertList() {
@@ -137,13 +84,42 @@ function renderAlertList() {
     alertList.innerHTML = "";
     saved.forEach(({ timestamp, message, isNew, type }) => {
         const li = document.createElement("li");
-        li.className =
-            type === "risk"
-                ? "bg-yellow-100 text-yellow-900 border border-yellow-400 px-2 py-1 rounded text-xs leading-tight break-words"
-                : "bg-rose-100 text-rose-700 border border-rose-200 px-2 py-1 rounded text-xs leading-tight break-words";
-        li.title = `${timestamp} — ${message}`;
-        li.textContent = `${timestamp} — ${message}`;
-        if (isNew) li.dataset.new = "true";
+        const baseClass = "px-2 py-1 rounded text-xs leading-tight break-words flex justify-between items-center gap-2";
+        const riskClass = "bg-red-100 text-red-900 border border-red-400";
+        const defaultClass = "bg-yellow-100 text-yellow-900 border border-yellow-400";
+        li.className = `${type === "risk" ? riskClass : defaultClass} ${baseClass}`;
+        li.innerHTML = `
+            <span>${timestamp} — ${message}</span>
+            ${isNew ? '<span class="ml-2 px-2 py-0.5 text-[10px] bg-red-500 text-white rounded-full">NEW</span>' : ''}
+        `;
         alertList.appendChild(li);
     });
+}
+
+export function showToastAlert(message, timestamp = "") {
+    const container = document.getElementById("alert-container");
+    if (!container) return;
+
+    const alertDiv = document.createElement("div");
+    const isRisk = message.includes("[Risk]");
+    alertDiv.className = `${isRisk ? "bg-red-100 border-red-500 text-red-700" : "bg-yellow-100 border-yellow-500 text-yellow-700"} border-l-4 p-3 rounded shadow-lg max-w-xs animate-fadeInOut`;
+    alertDiv.innerHTML = `
+        <div class="flex justify-between items-start gap-2">
+            <div class="text-sm">
+                <strong class="block mb-1">⚠️ Alert</strong>
+                <span>${timestamp} — ${message}</span>
+            </div>
+            <button class="text-yellow-500 hover:text-yellow-700 text-xl leading-none font-bold">&times;</button>
+        </div>
+    `;
+
+    alertDiv.querySelector("button").addEventListener("click", () => {
+        alertDiv.remove();
+    });
+
+    container.appendChild(alertDiv);
+
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 6000);
 }

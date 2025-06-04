@@ -45,14 +45,15 @@ def wait_for_table(engine, table_name):
 
 wait_for_table(engine, "vital_signs")
 
-# # Fetch high-risk patients from recent data
+
+# # Fetch high-risk patients from recent data [FOR PRODUCTION]
 # query = """
 # SELECT patient_id, risk_level, date
 # FROM vital_signs
 # WHERE date > NOW() - interval '1 hour' AND risk_level > 60;
 # """
 
-# Fetch high-risk patients for debug
+# Fetch high-risk patients  [DEBUG]
 query = """
 SELECT 
     vs.patient_id, 
@@ -63,7 +64,7 @@ SELECT
     p.last
 FROM vital_signs vs
 JOIN patients p ON vs.patient_id = p.id
-WHERE vs.date > NOW() - interval '1 hour';
+WHERE risk_level > 40;
 """
 
 while True:

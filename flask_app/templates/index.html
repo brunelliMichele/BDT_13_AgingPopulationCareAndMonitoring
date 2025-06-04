@@ -3,13 +3,12 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        
-        <!-- Stylesheet section-->
-        <script src="https://cdn.tailwindcss.com"></script>
-        <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" />
         <title>CARES</title>
 
-        <!-- LEAFLET CSS-->
+        <!-- Stylesheet section-->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+        <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" />
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
         crossorigin=""/>
@@ -93,19 +92,8 @@
                 </div>
             </section>
 
-            <!-- Alert Modal (hidden by default) -->
-            <div id="alert-box" style="z-index: 9999;" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 transition-all duration-300 ease-in-out">
-                <div class="bg-white border-2 border-red-400 rounded-xl shadow-xl w-[90%] max-w-xl p-6 space-y-4 text-center relative scale-95 opacity-0 transition-all duration-300 ease-in-out" id="alert-content">    
-                    <!-- Close Button -->
-                    <button id="close-alert-box" class="absolute top-2 right-4 text-red-400 hover:text-red-600 text-2xl font-bold leading-none">
-                        &times;
-                    </button>
-                    <h3 class="text-2xl font-extrabold text-red-600">⚠️ ALERT ⚠️</h3>
-                    <p id="alert" class="text-base text-gray-800 italic">
-                        [ The new alert will be visible here ]
-                    </p>
-                </div>
-            </div>
+            <!-- Container for toast-style alerts -->
+            <div id="alert-container" class="fixed top-6 right-6 z-50 space-y-2"></div>
         </main>
 
         <!-- Footer -->
