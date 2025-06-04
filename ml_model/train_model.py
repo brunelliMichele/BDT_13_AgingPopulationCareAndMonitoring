@@ -142,7 +142,7 @@ def load_training_data(after_date=None):
         df = pd.read_sql(sql=text(query), con=connection)
 
     if df.empty:
-        print("⚠️ Nessun dato trovato nella query.")
+        print("⚠️ No data found in the query.")
         return pd.DataFrame()
 
     df["value"] = pd.to_numeric(df["value"], errors="coerce")
@@ -178,7 +178,7 @@ def load_training_data(after_date=None):
     if not test_results.empty and isinstance(test_results.iloc[0], (int, float)):
         pivot_df["risk_level"] = test_results.astype(float)
     else:
-        print("⚠️ Nessun dato valido per calcolare il livello di rischio.")
+        print("⚠️ No valid data to calculate risk level.")
         return pivot_df
     print("✅ Risk level evaluated.")
 
@@ -193,6 +193,19 @@ def main():
     df = load_training_data(after_date=last_training_date)
 
     engine = get_db_engine()
+
+        # Debug: check if vital_signs table exists and has data
+    with engine.connect() as conn:
+        table_check = conn.execute(text("""
+            SELECT to_regclass('public.vital_signs');
+        """)).scalar()
+
+        if table_check is None:
+            print("🔍 Table 'vital_signs' does not exist yet.")
+        else:
+            count = conn.execute(text("SELECT COUNT(*) FROM vital_signs")).scalar()
+            print(f"🔍 Table 'vital_signs' exists and contains {count} rows.")
+
 
     if df.empty:
         # print("No new data available. Skipping training.")

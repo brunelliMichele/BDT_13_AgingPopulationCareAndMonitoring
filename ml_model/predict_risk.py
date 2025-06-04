@@ -52,7 +52,8 @@ def predict_risk(patient_id):
             print(f"⚠️ Not enough data for patient {patient_id} to predict risk.")
             return None
 
-        features = ["hr", "rr", "body_temperature", "spo2", "gsr"]        x = data[features].values
+        features = ["hr", "rr", "body_temperature", "spo2", "gsr"]        
+        x = data[features].values
 
         # Scale features
         x_scaled = scaler_X.transform(x)

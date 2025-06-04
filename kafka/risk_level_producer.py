@@ -1,4 +1,5 @@
 import json
+import os
 import pandas as pd
 import psycopg2
 from confluent_kafka import Producer
@@ -19,7 +20,12 @@ def delivery_report(err, msg):
         print(f"✅ Record successfully produced to {msg.topic()} [{msg.partition()}] at offset {msg.offset()}")
 
 # Connect to PostgreSQL
-engine = create_engine("postgresql://user:password@db:5432/medicalData")
+DB_USER = os.environ.get("DB_USER", "user")
+DB_PASSWORD = os.environ.get("DB_PASSWORD", "password")
+DB_HOST = os.environ.get("DB_HOST", "db")
+DB_NAME = os.environ.get("DB_NAME", "medicalData")
+
+engine = create_engine(f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:5432/{DB_NAME}")
 
 def wait_for_table(engine, table_name):
     while True:

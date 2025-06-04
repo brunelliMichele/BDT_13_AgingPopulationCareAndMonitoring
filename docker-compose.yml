@@ -14,6 +14,11 @@ services:
         networks:
             - bdt_network
         restart: always
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U user"]
+            interval: 5s
+            timeout: 5s
+            retries: 10
 
     zookeeper:
         image: confluentinc/cp-zookeeper:7.6.0
@@ -41,7 +46,7 @@ services:
             - ALLOW_PLAINTEXT_LISTENER=yes
         healthcheck:
             test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
-            interval: 10s
+            interval: 5s
             timeout: 5s
             retries: 10
         networks:
@@ -53,6 +58,8 @@ services:
         depends_on:
             kafka:
                 condition: service_healthy
+        environment:
+            - KAFKA_BROKER=kafka:9092
         volumes:
             - ./spark:/spark
             - ./spark/spark-defaults.conf:/opt/bitnami/spark/conf/spark-defaults.conf
@@ -75,7 +82,7 @@ services:
             kafka:
                 condition: service_healthy
             db:
-                condition: service_started
+                condition: service_healthy
         environment:
             - DB_HOST=db
             - DB_NAME=medicalData
@@ -93,7 +100,13 @@ services:
             kafka:
                 condition: service_healthy
             db:
-                condition: service_started
+                condition: service_healthy
+        environment:
+            - DB_HOST=db
+            - DB_NAME=medicalData
+            - DB_USER=user
+            - DB_PASSWORD=password
+            - KAFKA_BROKER=kafka:9092
         volumes:
             - ./kafka:/app
         networks:
@@ -105,6 +118,14 @@ services:
         depends_on:
             kafka:
                 condition: service_healthy
+            db:
+                condition: service_healthy
+        environment:
+            - DB_HOST=db
+            - DB_NAME=medicalData
+            - DB_USER=user
+            - DB_PASSWORD=password
+            - KAFKA_BROKER=kafka:9092
         command: python db_to_kafka_stream.py
         volumes:
             - ./postgres/data:/app/data
@@ -115,8 +136,14 @@ services:
         build:
             context: ./ml_model
         depends_on:
-            - db
+            db:
+                condition: service_healthy
         environment:
+            - DB_HOST=db
+            - DB_NAME=medicalData
+            - DB_USER=user
+            - DB_PASSWORD=password
+            - KAFKA_BROKER=kafka:9092
             - PYTHONUNBUFFERED=1
         volumes:
             - ./ml_model:/app
@@ -131,7 +158,13 @@ services:
             kafka:
                 condition: service_healthy
             db:
-                condition: service_started
+                condition: service_healthy
+        environment:
+            - DB_HOST=db
+            - DB_NAME=medicalData
+            - DB_USER=user
+            - DB_PASSWORD=password
+            - KAFKA_BROKER=kafka:9092
         volumes:
             - ./kafka:/app
         networks:
