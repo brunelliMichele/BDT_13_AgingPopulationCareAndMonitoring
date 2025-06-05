@@ -10,26 +10,29 @@ function setupSensorUpdates() {
     if (!userId) return;
 
     socket.on("smart_data_message", (msg) => {
-        console.log("📨 Messaggio ricevuto:", JSON.stringify(msg, null, 2));
+        const userId = document.getElementById("patient-id")?.dataset.id;
+
         for (const key in msg) {
             const entry = msg[key];
-
-            if(!entry || entry.patient_id) continue;
-            if (String(entry.patient_id).trim() !== String(userId).trim()) {
-                console.log("❌ SALTATO - entry.patient_id:", entry.patient_id, "userId:", userId);
+            if (!entry || !entry.patient_id || String(entry.patient_id).trim() !== String(userId).trim()) {
                 continue;
             }
 
             const timestamp = entry.timestamp;
-            const rooms = entry.data.rooms;
+            const rooms = entry.data?.rooms;
 
             document.getElementById("sensor-timestamp").textContent = timestamp;
             const container = document.getElementById("sensor-rooms");
             container.innerHTML = "";
 
+            if (!rooms || Object.keys(rooms).length === 0) {
+                container.innerHTML = "<p class='italic text-gray-500'>No room data available.</p>";
+                return;
+            }
+
             for (const room in rooms) {
                 const r = rooms[room];
-                const appliances = Object.entries(r.appliances)
+                const appliances = Object.entries(r.appliances || {})
                     .filter(([_, info]) => info.Status === "On")
                     .map(([name, info]) => `⚙️ ${name} (${info["Duration (min)"]} min)`)
                     .join(", ");
