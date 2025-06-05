@@ -75,17 +75,17 @@ while True:
 
         for _, row in df.iterrows():
             print(f"📣 Sending alert for patient {row['patient_id']} with risk level {row['risk_level']}")
+            full_name = " ".join(filter(None, [row["first"], row["middle"], row["last"]]))
             alert = {
                 "patient_id": str(row["patient_id"]),
-                "first": row["first"],
-                "middle": row["middle"],
-                "last": row["last"],
+                "patient_name": full_name,
                 "risk_level": row["risk_level"],
                 "category": (
                     "HIGH" if row["risk_level"] > 60 else
                     "MEDIUM" if row["risk_level"] > 30 else
                     "LOW"
-                )
+                ),
+                "message": f"🚨 {full_name} - Risk level {row['risk_level']} ({'HIGH' if row['risk_level'] > 60 else 'MEDIUM'})"
             }
             producer.produce("risk_alerts", value=json.dumps(alert).encode("utf-8"), callback=delivery_report)
             producer.flush()

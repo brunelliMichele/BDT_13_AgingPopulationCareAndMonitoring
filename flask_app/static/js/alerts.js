@@ -22,30 +22,41 @@ export function setupAlertHandling(socket) {
 }
 
 function handleIncomingAlert(type, data) {
-    console.log(`📩 Received ${type} alert:`, data); // 👈 LOG DI DEBUG
     const alerts = Array.isArray(data)
-        ? data.map((msg) => ({ message: msg.message || msg, patient_id: msg.patient_id }))
+        ? data.map((msg) => {
+            const message = typeof msg === "string" ? msg : msg.message || "⚠️ Alert received";
+            const patient_id = typeof msg === "object" ? msg.patient_id : null;
+            return {
+                message,
+                patient_id,
+                isNew: true,
+                type
+            };
+        })
         : [{
             message: data.message || `⚠️ ${type === "risk" ? "Risk" : "Alert"} received`,
-            patient_id: data.patient_id
+            patient_id: data.patient_id,
+            isNew: true,
+            type
         }];
 
-    // Clear previous "isNew" flags
     const old = JSON.parse(sessionStorage.getItem("alerts") || "[]").map(a => ({ ...a, isNew: false }));
-    sessionStorage.setItem("alerts", JSON.stringify(old));
 
-    alerts.forEach(({ message, patient_id }) => {
+    const newAlerts = alerts.map(({ message, patient_id, isNew, type }) => {
         const timestamp = new Date().toLocaleTimeString();
-        saveAlert(message, timestamp, type, patient_id);
-        showToastAlert(message, timestamp, { patient_id });
+        showToastAlert(message, timestamp, { patient_id, type });
+        return { timestamp, message, isNew, type, patientId: patient_id };
     });
+
+    const updated = [...newAlerts, ...old].slice(0, 50);
+    sessionStorage.setItem("alerts", JSON.stringify(updated));
 
     renderAlertList();
 }
 
-function saveAlert(message, timestamp, type = "default", patientId = null) {
+function saveAlert(message, timestamp, type = "default", patientId = null, isNew = true) {
     const stored = JSON.parse(sessionStorage.getItem("alerts") || "[]");
-    const newAlert = { timestamp, message, isNew: true, type, patientId };
+    const newAlert = { timestamp, message, isNew, type, patientId };
     const updated = [newAlert, ...stored];
     sessionStorage.setItem("alerts", JSON.stringify(updated.slice(0, 50)));
 }

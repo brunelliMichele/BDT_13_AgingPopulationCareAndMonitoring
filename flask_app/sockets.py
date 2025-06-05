@@ -150,8 +150,17 @@ def register_sockets(socket_io: SocketIO):
                     logging.info("🚨 Risk alert received.")
                     logging.info("🔍 Emitting risk_alert_message...")
                     alert_data = json.loads(msg.value().decode("utf-8"))
+
+                    if isinstance(alert_data, dict):
+                        patient = alert_data.get("patient_name", "Unknown")
+                        risk = alert_data.get("risk_level", alert_data.get("message", "unspecified risk"))
+
+                        if "message" not in alert_data or not alert_data["message"]:
+                            alert_data["message"] = f"🚨 {patient} - Risk detected: {risk}"
+
                     logging.info(f"🚨 Emitting risk alert: {alert_data}")
                     socket_io.emit("risk_alert_message", alert_data, to=None, namespace="/")
+                    
             except Exception as e:
                 logging.error(f"❌ risk_alert_consumer error: {e}")
 
