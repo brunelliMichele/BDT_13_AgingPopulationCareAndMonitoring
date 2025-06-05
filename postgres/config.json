@@ -1,0 +1,18 @@
+{
+  "generate.default_state": "Massachusetts",
+  "generate.geography.population_density_adjustment": 1.0,
+  "generate.demographics.age_mean": 75,
+  "generate.demographics.age_range": 10,
+  "generate.demographics.gender_female_ratio": 0.55,
+  "generate.only_alive_patients": true,
+  "generate.encounters.encounter_modules": true,
+
+  "generate.conditions.chronic": true,
+  "generate.conditions.acute": false,
+
+  "generate.timestep": "1d",
+
+  "generate.exporter.csv.export": true,
+  "generate.exporter.csv.folder": "output/csv",
+  "generate.exporter.fhir.export": false
+}

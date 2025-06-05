@@ -94,8 +94,9 @@ services:
         restart: always
 
     data_generator:
-        build: ./kafka
-        command: python data_generator.py
+        build: 
+            context: ./kafka
+        command: python smart_data_producer.py
         depends_on:
             kafka:
                 condition: service_healthy
@@ -170,6 +171,19 @@ services:
         networks:
             - bdt_network
         restart: always
+
+    synthea-loader:
+        build:
+            context: ./postgres
+        depends_on:
+            db:
+                condition: service_healthy
+        environment:
+            - DB_HOST=db
+            - DB_NAME=medicalData
+            - DB_USER=user
+            - DB_PASSWORD=password
+            - GENERATE_INTERVAL=300 # five minutes
 
 volumes:
     pgdata:
