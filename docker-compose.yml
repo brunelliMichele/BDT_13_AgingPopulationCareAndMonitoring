@@ -10,7 +10,6 @@ services:
         volumes:
             - pgdata:/var/lib/postgresql/data
             - ./postgres/init:/docker-entrypoint-initdb.d
-            - ./postgres/data:/data
         networks:
             - bdt_network
         restart: always
@@ -53,25 +52,6 @@ services:
             - bdt_network
         restart: always
 
-    # spark:
-    #     build: ./spark
-    #     depends_on:
-    #         kafka:
-    #             condition: service_healthy
-    #     environment:
-    #         - KAFKA_BROKER=kafka:9092
-    #     volumes:
-    #         - ./spark:/spark
-    #         - ./spark/spark-defaults.conf:/opt/bitnami/spark/conf/spark-defaults.conf
-    #     command: >
-    #             bash -c "sleep 10 &&
-    #             /opt/bitnami/spark/bin/spark-submit
-    #             --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0
-    #             /spark/spark_stream.py"
-    #     networks:
-    #         - bdt_network
-    #     restart: always
-
     flask_web:
         build: ./flask_app
         ports:
@@ -83,6 +63,8 @@ services:
                 condition: service_healthy
             db:
                 condition: service_healthy
+            train_model:
+                condition: service_completed_successfully
         environment:
             - DB_HOST=db
             - DB_NAME=medicalData
@@ -139,6 +121,8 @@ services:
         depends_on:
             db:
                 condition: service_healthy
+            synthea-init:
+                condition: service_completed_successfully
         environment:
             - DB_HOST=db
             - DB_NAME=medicalData
@@ -148,6 +132,8 @@ services:
             - PYTHONUNBUFFERED=1
         volumes:
             - ./ml_model:/app
+            - model_data:/app/output
+            - ./shared_modules:/shared
         networks:
             - bdt_network
 
@@ -172,7 +158,7 @@ services:
             - bdt_network
         restart: always
 
-    synthea-loader:
+    synthea-init:
         build:
             context: ./postgres
         depends_on:
@@ -183,10 +169,34 @@ services:
             - DB_NAME=medicalData
             - DB_USER=user
             - DB_PASSWORD=password
-            - GENERATE_INTERVAL=300 # five minutes
+            - INITIAL_PATIENTS=100
+        command: python initial_population.py
+        networks:
+            - bdt_network
+        restart: "no"
+
+    synthea-incremental-loader:
+        build:
+            context: ./postgres
+        depends_on:
+            db:
+                condition: service_healthy
+        environment:
+            - DB_HOST=db
+            - DB_NAME=medicalData
+            - DB_USER=user
+            - DB_PASSWORD=password
+            - GENERATE_INTERVAL=300 # every five minutes
+            - DELAY_STARTUP=true
+        command: python incremental_patient_loader.py
+        networks:
+            - bdt_network
+        volumes:
+            - ./shared_modules:/shared
 
 volumes:
     pgdata:
+    model_data:
 
 networks:
     bdt_network:

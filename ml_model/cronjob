@@ -1,1 +1,0 @@
-0 */6 * * * appuser cd /app && python train_model.py >> /app/output/cron.log 2>&1

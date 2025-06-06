@@ -7,20 +7,15 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY wait-for-postgres.sh /wait-for-postgres.sh
-RUN chmod +x /wait-for-postgres.sh
-
 COPY . .
 
 RUN mkdir -p /app/output && useradd -ms /bin/bash appuser && chown -R appuser /app
 RUN chmod -R u+w /app
 
-USER root
-RUN apt-get update && apt-get install -y cron
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
-
-COPY cronjob /etc/cron.d/train_cron
-RUN chmod 0644 /etc/cron.d/train_cron && crontab /etc/cron.d/train_cron
 
 USER appuser
-CMD ["/wait-for-postgres.sh", "db", "python", "train_model.py"]
+ENTRYPOINT ["/app/entrypoint.sh"]
+CMD ["python", "train_model.py"]
