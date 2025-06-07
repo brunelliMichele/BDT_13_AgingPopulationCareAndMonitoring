@@ -6,7 +6,9 @@ from confluent_kafka import Producer
 from sqlalchemy import create_engine, text
 import time
 import sys
-sys.stdout.reconfigure(line_buffering=True)
+import logging
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 # Kafka producer setup
 producer = Producer({
@@ -15,9 +17,9 @@ producer = Producer({
 
 def delivery_report(err, msg):
     if err is not None:
-        print(f"⚠️ Delivery failed for record {msg.key()}: {err}")
+        logging.error(f"Delivery failed for record {msg.key()}: {err}")
     else:
-        print(f"✅ Record successfully produced to {msg.topic()} [{msg.partition()}] at offset {msg.offset()}")
+        logging.info(f"Record successfully produced to {msg.topic()} [{msg.partition()}] at offset {msg.offset()}")
 
 # Connect to PostgreSQL
 DB_USER = os.environ.get("DB_USER", "user")
@@ -35,12 +37,12 @@ def wait_for_table(engine, table_name):
                     "SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = :t"
                 ), {"t": table_name})
                 if res.fetchone():
-                    print(f"✅ Table '{table_name}' is available.")
+                    logging.info(f"Table '{table_name}' is available.")
                     return
                 else:
-                    print(f"⏳ Waiting for table '{table_name}' to be created...")
+                    logging.info(f"Waiting for table '{table_name}' to be created...")
         except Exception as e:
-            print(f"⚠️ DB connection failed: {e}")
+            logging.warning(f"DB connection failed: {e}")
         time.sleep(5)
 
 wait_for_table(engine, "vital_signs")
@@ -69,12 +71,12 @@ WHERE risk_level > 40;
 
 while True:
     try:
-        print("🔍 Checking for high-risk patients...")
+        logging.info("Checking for high-risk patients...")
         df = pd.read_sql(query, engine)
-        print(f"📋 Retrieved {len(df)} high-risk records")
+        logging.info(f"Retrieved {len(df)} high-risk records")
 
         for _, row in df.iterrows():
-            print(f"📣 Sending alert for patient {row['patient_id']} with risk level {row['risk_level']}")
+            logging.info(f"Sending alert for patient {row['patient_id']} with risk level {row['risk_level']}")
             full_name = " ".join(filter(None, [row["first"], row["middle"], row["last"]]))
             alert = {
                 "patient_id": str(row["patient_id"]),
@@ -91,6 +93,6 @@ while True:
             producer.flush()
 
     except Exception as e:
-        print(f"⚠️ Error while generating alerts: {e}")
+        logging.error(f"Error while generating alerts: {e}")
 
     time.sleep(60)

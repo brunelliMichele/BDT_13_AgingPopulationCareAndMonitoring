@@ -6,15 +6,19 @@ import pandas as pd
 from config import DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
+import logging
 
 # set postgres connection
 def get_db_engine() -> Engine:
-    return create_engine(
+    engine = create_engine(
         f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     )
+    logging.info("Database engine created")
+    return engine
 
 # get all patients from postgres
 def get_all_patients():
+    logging.info("Fetching all patients from the database")
     engine = get_db_engine()
     query = "SELECT id, first, middle, last, city, birthdate, lat, lon FROM patients"
     df = pd.read_sql(query, con=engine)
@@ -52,6 +56,7 @@ def get_city_avg_coords(patients):
 
 # get patient from ID
 def get_patient_by_id(patient_id):
+    logging.info("Fetching patient data for patient_id: %s", patient_id)
     engine = get_db_engine()
     query = """
         SELECT id, birthdate, deathdate, gender, birthplace, address,
@@ -78,6 +83,7 @@ def get_patient_by_id(patient_id):
     return None
     
 def get_risk_level_by_id(patient_id):
+    logging.info("Fetching risk level for patient_id: %s", patient_id)
     engine = get_db_engine()
     query = """
         SELECT risk_level
@@ -90,6 +96,7 @@ def get_risk_level_by_id(patient_id):
     return float(df.iloc[0]["risk_level"]) if not df.empty else None
     
 def get_all_risk_level():
+    logging.info("Fetching all latest risk levels for patients")
     engine = get_db_engine()
     query = """
         SELECT DISTINCT ON (patient_id) patient_id, risk_level
@@ -102,6 +109,7 @@ def get_all_risk_level():
     
 
 def get_risk_trend_by_id(patient_id):
+    logging.info("Fetching risk trend for patient_id: %s", patient_id)
     engine = get_db_engine()
     query = """
         SELECT date, risk_level
@@ -117,8 +125,8 @@ def get_risk_trend_by_id(patient_id):
     }
 
 def get_risk_trend_raw(patient_id):
+    logging.info("Fetching raw vital signs for patient_id: %s", patient_id)
     engine = get_db_engine()
     query = "SELECT date, hr, rr, body_temperature, spo2, gsr, risk_level FROM vital_signs WHERE patient_id = %s ORDER BY date ASC"    
     df = pd.read_sql_query(query, con=engine, params=(patient_id,))
     return df.to_dict(orient="records")
-

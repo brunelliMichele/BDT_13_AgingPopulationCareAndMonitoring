@@ -7,6 +7,8 @@ import pytz
 from confluent_kafka import Producer
 from sqlalchemy import create_engine, text
 import os
+import logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 # === GLOBAL VARIABLES ===
 KAFKA_CONFIG = {"bootstrap.servers": "kafka:9092"}
@@ -37,7 +39,7 @@ def get_patients():
                 patients = {str(row.id): f"{row.first} {row.last}" for row in result}
             return patients            
         except Exception as e:
-            print(f"⏳ Attempt {attempt+1}/20 - Waiting for database... {e}")
+            logging.info(f"Attempt {attempt+1}/20 - Waiting for database... {e}")
             time.sleep(3)
     raise Exception("❌ Database not reachable")
 
@@ -120,9 +122,9 @@ def check_device_duration_alert(device, duration, room, user_id, patient_name, a
 # kafka error handler
 def delivery_report(err, msg):
     if err is not None:
-        print(f"❌ Delivery failed: {err}")
+        logging.error(f"Delivery failed: {err}")
     else:
-        print(f"✅ Message delivered to {msg.topic()} [{msg.partition()}]")
+        logging.info(f"Message delivered to {msg.topic()} [{msg.partition()}]")
 
 # save alert in alerts table on db
 def save_alert_to_db(patient_id, alert_type, room, message, timestamp):
@@ -210,11 +212,11 @@ def simulate_realtime():
                 for alert in alerts:
                     f.write(f"{timestamp} {alert}\n")
             if len(alerts) > max_alerts_per_cycle:
-                print(f"⚠️ Alert count capped at {max_alerts_per_cycle} (original: {len(alerts)})")
-            print(f"[{timestamp}] ALERTS TRIGGERED:\n" + "\n".join(a["message"] for a in alerts))
+                logging.warning(f"Alert count capped at {max_alerts_per_cycle} (original: {len(alerts)})")
+            logging.info(f"[{timestamp}] ALERTS TRIGGERED:\n" + "\n".join(a["message"] for a in alerts))
             producer.produce(KAFKA_TOPIC_ALERT, value=json.dumps(alerts).encode(), callback=delivery_report)
         else:
-            print(f"[{timestamp}] No alerts. System OK.")
+            logging.info(f"[{timestamp}] No alerts. System OK.")
 
         producer.flush()
         time.sleep(10)

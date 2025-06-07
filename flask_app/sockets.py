@@ -7,7 +7,6 @@ from flask_socketio import SocketIO, rooms
 from config import KAFKA_BROKER, SMART_TOPIC, ALERT_TOPIC, RISK_TOPIC
 from app import app
 import time
-
 logging.basicConfig(level=logging.INFO)
 
 def register_sockets(socket_io: SocketIO):
@@ -26,7 +25,7 @@ def register_sockets(socket_io: SocketIO):
                         'auto.offset.reset': 'earliest'
                     })
                     consumer.subscribe([SMART_TOPIC])
-                    print("KafkaConsumer initialized for 'smart_home_data'")
+                    logging.info("KafkaConsumer initialized for 'smart_home_data'")
                     break
                 except Exception as e:
                     logging.warning(f"🔁 Retry smart_data_consumer: {e}")
@@ -76,7 +75,7 @@ def register_sockets(socket_io: SocketIO):
                         'auto.offset.reset': 'earliest'
                     })
                     consumer.subscribe([ALERT_TOPIC])
-                    print("Kafka Consumer initialized for 'alert_topic'")
+                    logging.info("Kafka Consumer initialized for 'alert_topic'")
                 except Exception as e:
                     logging.warning(f"🔁 Retry alert_consumer: {e}")
                     time.sleep(5)
@@ -130,7 +129,7 @@ def register_sockets(socket_io: SocketIO):
                         'auto.offset.reset': 'earliest'
                     })
                     consumer.subscribe([RISK_TOPIC])
-                    print("KafkaConsumer initialized for 'risk_alerts'")
+                    logging.info("KafkaConsumer initialized for 'risk_alerts'")
                     break
                 except Exception as e:
                     logging.warning(f"🔁 Retry risk_alert_consumer: {e}")

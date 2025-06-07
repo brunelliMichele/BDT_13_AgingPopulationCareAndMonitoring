@@ -1,4 +1,5 @@
 # routes.py
+import logging
 from flask import render_template
 from db import get_all_patients, get_city_avg_coords, get_patient_by_id, get_risk_level_by_id, get_all_risk_level, get_risk_trend_by_id, get_risk_trend_raw
 
@@ -9,12 +10,12 @@ def register_routes(app):
         city_coords = get_city_avg_coords(patients=patients)
         cities = sorted(set(p["city"] for p in patients))
         risk_levels = get_all_risk_level()
-        print("➕ Patient IDs:", [p["id"] for p in patients])
-        print("📊 Risk Levels:", risk_levels)
+        logging.info("Patient IDs: %s", [p["id"] for p in patients])
+        logging.info("Risk Levels: %s", risk_levels)
         for patient in patients:
             pid = str(patient["id"])
             patient["risk_level"] = risk_levels.get(pid)
-            print(f"Patient {pid} -> Risk Level: {patient['risk_level']}")
+            logging.info("Patient %s -> Risk Level: %s", pid, patient["risk_level"])
         return render_template("index.html", patients=patients, city_coords=city_coords, cities=cities)
     
     # set route for patient detail page
@@ -32,7 +33,7 @@ def register_routes(app):
                 risk_trend = get_risk_trend_by_id(patient_id)
                 risk_trend_raw = get_risk_trend_raw(patient_id)
             except Exception as e:
-                print(f"⚠️ Errore durante il recupero del risk_level o del trend: {e}")
+                logging.warning("Errore durante il recupero del risk_level o del trend: %s", e)
 
             return render_template("patient.html", patient=patient_data, risk_level=risk_level, risk_trend=risk_trend, risk_trend_raw=risk_trend_raw)
         else:
