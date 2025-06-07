@@ -86,7 +86,7 @@ def evaluate_risk_advanced(row):
     risk_percentage = (risk_score / max_score) * 100
     return round(risk_percentage, 1)
 
-def process_observations(engine, after_date=None, patient_ids=None):
+def process_observations(engine, after_inserted_at=None, patient_ids=None):
     logging.info("📥 process_observations() called")
     query = """
         SELECT date, patient AS patient_id, description, value, category
@@ -94,8 +94,6 @@ def process_observations(engine, after_date=None, patient_ids=None):
         WHERE category IN ('vital-signs', 'survey')
           AND (description ILIKE '%Heart rate%' OR description ILIKE '%Respiratory rate%')
     """
-    if after_date:
-        query += f" AND \"date\" > '{after_date.strftime('%Y-%m-%d %H:%M:%S')}'"
 
     if patient_ids:
         placeholders = ','.join(f"'{pid}'" for pid in patient_ids)

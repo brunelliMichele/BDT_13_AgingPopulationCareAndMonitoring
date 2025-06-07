@@ -48,6 +48,7 @@ def register_sockets(socket_io: SocketIO):
                     try:
                         raw = msg.value().decode("utf-8")
                         data = json.loads(raw)
+                        logging.debug(f"📦 Raw smart data: {json.dumps(data, indent=2)}")
 
                         # Controllo formato
                         if isinstance(data, dict) and any(

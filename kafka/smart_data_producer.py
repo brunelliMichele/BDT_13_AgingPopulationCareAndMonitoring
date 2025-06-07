@@ -31,17 +31,20 @@ def get_db_engine():
 
 # get ids from db
 def get_patients():
-    for attempt in range(20):  # retry 20 times
+    for attempt in range(20):
         try:
             engine = get_db_engine()
             with engine.connect() as conn:
                 result = conn.execute(text("SELECT id, first, last FROM patients;"))
                 patients = {str(row.id): f"{row.first} {row.last}" for row in result}
-            return patients            
+                if patients:
+                    return patients
+                else:
+                    logging.info(f"Attempt {attempt+1}/20 - Waiting for patients to be inserted...")
         except Exception as e:
             logging.info(f"Attempt {attempt+1}/20 - Waiting for database... {e}")
-            time.sleep(3)
-    raise Exception("❌ Database not reachable")
+        time.sleep(3)
+    raise Exception("❌ Database not reachable or patients table is empty")
 
 # data generation
 def get_temperature(room):

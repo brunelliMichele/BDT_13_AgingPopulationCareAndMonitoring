@@ -86,7 +86,7 @@ function renderPatients() {
         }
 
         div.innerHTML = `
-            <h3 class="text-lg font-bold text-teal-700">🧓 ${p.name} ${p.middlename} ${p.surname}</h3>
+            <h3 class="text-lg font-bold text-teal-700">🧓 ${p.name} ${p.middlename ? p.middlename + ' ' : ''}${p.surname}</h3>
             <p class="text-gray-700 text-sm"><strong>ID:</strong> ${p.id}</p>
             <p class="text-gray-700 text-sm"><strong>Age:</strong> ${calculateAge(p.birthdate)} years</p>
             <p class="text-gray-700 text-sm"><strong>City:</strong> ${p.city}</p>

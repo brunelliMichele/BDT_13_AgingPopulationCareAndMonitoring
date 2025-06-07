@@ -85,6 +85,8 @@ def run_incremental_generation():
     subprocess.run(cmd, cwd=SYNTHEA_DIR)
 
     load_csv_to_db("patients.csv", "patients")
+    load_csv_to_db("encounters.csv", "encounters")
+    load_csv_to_db("providers.csv", "providers")
     load_csv_to_db("observations.csv", "observations")
     load_csv_to_db("conditions.csv", "conditions")
 

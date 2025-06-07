@@ -2,57 +2,75 @@ BEGIN;
 
 -- Create tables
 
-CREATE TABLE IF NOT EXISTS PATIENTS (
-    ID UUID PRIMARY KEY,
-    BIRTHDATE DATE NOT NULL,
-    DEATHDATE DATE,
-    SSN VARCHAR NOT NULL,
-    DRIVERS VARCHAR,
-    PASSPORT VARCHAR,
-    PREFIX VARCHAR,
-    FIRST VARCHAR NOT NULL,
-    MIDDLE VARCHAR,
-    LAST VARCHAR NOT NULL,
-    SUFFIX VARCHAR,
-    MAIDEN VARCHAR,
-    MARITAL VARCHAR,
-    RACE VARCHAR NOT NULL,
-    ETHNICITY VARCHAR NOT NULL,
-    GENDER VARCHAR NOT NULL,
-    BIRTHPLACE VARCHAR NOT NULL,
-    ADDRESS VARCHAR NOT NULL,
-    CITY VARCHAR NOT NULL,
-    STATE VARCHAR NOT NULL,
-    COUNTY VARCHAR,
-    FIPS VARCHAR,
-    ZIP VARCHAR,
-    LAT NUMERIC,
-    LON NUMERIC,
-    HEALTHCARE_EXPENSES NUMERIC NOT NULL,
-    HEALTHCARE_COVERAGE NUMERIC NOT NULL,
-    INCOME NUMERIC NOT NULL
+CREATE TABLE IF NOT EXISTS patients (
+    id UUID PRIMARY KEY,
+    birthdate DATE NOT NULL,
+    deathdate DATE,
+    ssn VARCHAR NOT NULL,
+    drivers VARCHAR,
+    passport VARCHAR,
+    prefix VARCHAR,
+    first VARCHAR NOT NULL,
+    middle VARCHAR,
+    last VARCHAR NOT NULL,
+    suffix VARCHAR,
+    maiden VARCHAR,
+    marital VARCHAR,
+    race VARCHAR NOT NULL,
+    ethnicity VARCHAR NOT NULL,
+    gender VARCHAR NOT NULL,
+    birthplace VARCHAR NOT NULL,
+    address VARCHAR NOT NULL,
+    city VARCHAR NOT NULL,
+    state VARCHAR NOT NULL,
+    county VARCHAR,
+    fips VARCHAR,
+    zip VARCHAR,
+    lat NUMERIC,
+    lon NUMERIC,
+    healthcare_expenses NUMERIC NOT NULL,
+    healthcare_coverage NUMERIC NOT NULL,
+    income NUMERIC NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS CONDITIONS (
-    START DATE NOT NULL,
-    STOP DATE,
-    PATIENT UUID NOT NULL REFERENCES PATIENTS(ID),
-    ENCOUNTER UUID NOT NULL,
-    SYSTEM VARCHAR NOT NULL,
-    CODE VARCHAR NOT NULL,
-    DESCRIPTION VARCHAR NOT NULL
+CREATE TABLE IF NOT EXISTS encounters (
+    id UUID PRIMARY KEY,
+    start TIMESTAMP,
+    stop TIMESTAMP,
+    patient UUID,
+    organization UUID,
+    provider UUID,
+    payer UUID,
+    encounterclass TEXT,
+    code TEXT,
+    description TEXT,
+    base_encounter_cost NUMERIC,
+    total_claim_cost NUMERIC,
+    payer_coverage NUMERIC,
+    reasoncode TEXT,
+    reasondescription TEXT
 );
 
-CREATE TABLE IF NOT EXISTS OBSERVATIONS (
-    DATE TIMESTAMP NOT NULL,
-    PATIENT UUID NOT NULL REFERENCES PATIENTS(ID),
-    ENCOUNTER UUID,
-    CATEGORY VARCHAR,
-    CODE VARCHAR NOT NULL,
-    DESCRIPTION VARCHAR NOT NULL,
-    VALUE VARCHAR NOT NULL,
-    UNITS VARCHAR,
-    TYPE VARCHAR NOT NULL
+CREATE TABLE IF NOT EXISTS conditions (
+    start DATE NOT NULL,
+    stop DATE,
+    patient UUID NOT NULL REFERENCES patients(id),
+    encounter UUID NOT NULL REFERENCES encounters(id),
+    system VARCHAR NOT NULL,
+    code VARCHAR NOT NULL,
+    description VARCHAR NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS observations (
+    date TIMESTAMP NOT NULL,
+    patient UUID NOT NULL REFERENCES patients(id),
+    encounter UUID REFERENCES encounters(id),
+    category VARCHAR,
+    code VARCHAR NOT NULL,
+    description VARCHAR NOT NULL,
+    value VARCHAR NOT NULL,
+    units VARCHAR,
+    type VARCHAR NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS alerts (
@@ -81,7 +99,24 @@ CREATE TABLE IF NOT EXISTS vital_signs (
     spo2 FLOAT,
     gsr FLOAT,
     risk_level FLOAT,
+    inserted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (patient_id, date)
+);
+
+CREATE TABLE IF NOT EXISTS providers (
+    id UUID PRIMARY KEY,
+    organization UUID,
+    name TEXT,
+    gender VARCHAR(1),
+    speciality TEXT,
+    address TEXT,
+    city TEXT,
+    state TEXT,
+    zip TEXT,
+    lat DOUBLE PRECISION,
+    lon DOUBLE PRECISION,
+    encounters INTEGER,
+    procedures INTEGER
 );
 
 COMMIT;

@@ -33,7 +33,9 @@
                     <ul class="space-y-3">
                         <li id="patient-id" data-id="{{ patient.id }}"><strong class="text-teal-800">ID:</strong> {{ patient.id }}</li>
                         <li><strong class="text-teal-800">Name:</strong> {{ patient.name }}</li>
+                        {% if patient.middlename %}
                         <li><strong class="text-teal-800">Middle name:</strong> {{ patient.middlename }}</li>
+                        {% endif %}
                         <li><strong class="text-teal-800">Surname:</strong> {{ patient.surname }}</li>
                         <li><strong class="text-teal-800">Date of birth:</strong> {{ patient.birthdate }}</li>
                         <li><strong class="text-teal-800">Date of death:</strong> {{ patient.deathdate }}</li>

@@ -45,13 +45,8 @@ def create_sequences(x, y, window_size=6):
     return np.array(x_seq), np.array(y_seq)
 
 def main():
-    LAST_TRAINING_FILE = Path(OUTPUT_DIR) / "last_training_date.txt"
-    last_training_date = None
-    if LAST_TRAINING_FILE.exists():
-        last_training_date = pd.to_datetime(LAST_TRAINING_FILE.read_text().strip())
-
     engine = get_db_engine()
-    df = process_observations(engine, after_date=last_training_date)
+    df = process_observations(engine)
 
     if df.empty:
         return
@@ -87,19 +82,6 @@ def main():
     df_to_save.columns = [col.lower() if col not in ("patient_id", "date", "risk_level") else col for col in df_to_save.columns]
 
     with engine.begin() as conn:
-        conn.execute(text("""
-            CREATE TABLE IF NOT EXISTS vital_signs (
-                patient_id UUID REFERENCES patients(id),
-                date TIMESTAMP,
-                hr FLOAT,
-                rr FLOAT,
-                body_temperature FLOAT,
-                spo2 FLOAT,
-                gsr FLOAT,
-                risk_level FLOAT,
-                PRIMARY KEY (patient_id, date)
-            );
-        """))
         metadata = MetaData()
         vital_signs = Table("vital_signs", metadata, autoload_with=conn)
         for _, row in df_to_save.iterrows():
@@ -107,9 +89,6 @@ def main():
             stmt = stmt.on_conflict_do_nothing(index_elements=["patient_id", "date"])
             conn.execute(stmt)
 
-    latest_date = df["date"].max()
-    LAST_TRAINING_FILE.write_text(str(latest_date))
-    logging.info(f"✅ Training complete. Last training date saved: {latest_date}")
 
 if __name__ == "__main__":
     main()

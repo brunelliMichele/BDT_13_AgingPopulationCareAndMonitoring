@@ -94,26 +94,6 @@ services:
             - ./kafka:/app
         networks:
             - bdt_network
-
-    dbstream:
-        build:
-            context: ./kafka
-        depends_on:
-            kafka:
-                condition: service_healthy
-            db:
-                condition: service_healthy
-        environment:
-            - DB_HOST=db
-            - DB_NAME=medicalData
-            - DB_USER=user
-            - DB_PASSWORD=password
-            - KAFKA_BROKER=kafka:9092
-        command: python db_to_kafka_stream.py
-        volumes:
-            - ./postgres/data:/app/data
-        networks:
-            - bdt_network
     
     train_model:
         build:
@@ -130,6 +110,22 @@ services:
             - DB_PASSWORD=password
             - KAFKA_BROKER=kafka:9092
             - PYTHONUNBUFFERED=1
+        volumes:
+            - ./ml_model:/app
+            - model_data:/app/output
+            - ./shared_modules:/shared
+        networks:
+            - bdt_network
+
+    trainer_loop:
+        build:
+            context: ./ml_model
+        command: python ml_model/train_loop.py
+        depends_on:
+            db:
+                condition: service_healthy
+            train_model:
+                condition: service_completed_successfully
         volumes:
             - ./ml_model:/app
             - model_data:/app/output
