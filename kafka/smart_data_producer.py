@@ -65,7 +65,7 @@ def get_temperature(room):
 
 def get_humidity(room):
     base_humidity = {
-        "Bathroom": 70,
+        "Bathroom": 60,
         "Kitchen": 60,
         "Living Room": 45,
         "Bedroom": 50,
