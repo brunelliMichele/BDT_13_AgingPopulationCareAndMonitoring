@@ -12,11 +12,11 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 
 RISK_THRESHOLD = 60  # adjust as needed
 
-# Kafka producer setup
+# Kafka producer for sending risk alerts
 producer = Producer({
     'bootstrap.servers': 'kafka:9092'
 })
-
+# kafka consumer to get vital signs data
 consumer = Consumer({
     'bootstrap.servers': 'kafka:9092',
     'group.id': 'risk_evaluator_debug_1',
@@ -25,6 +25,7 @@ consumer = Consumer({
 
 consumer.subscribe(['vital_signs_stream'])
 
+# checks delivery of kafka messages
 def delivery_report(err, msg):
     if err is not None:
         logging.error(f"Delivery failed for record {msg.key()}: {err}")
@@ -39,6 +40,7 @@ DB_NAME = os.environ.get("DB_NAME", "medicalData")
 
 engine = create_engine(f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:5432/{DB_NAME}")
 
+# prevent kafka consumer to start before tha database is ready
 def wait_for_table(engine, table_name):
     while True:
         try:
@@ -57,20 +59,9 @@ def wait_for_table(engine, table_name):
 
 wait_for_table(engine, "vital_signs")
 
-# query = """
-# SELECT DISTINCT ON (vs.patient_id)
-#     vs.patient_id,
-#     p.first,
-#     p.middle,
-#     p.last,
-#     vs.risk_level,
-#     vs.date
-# FROM vital_signs vs
-# JOIN patients p ON vs.patient_id = p.id
-# ORDER BY vs.patient_id, vs.date DESC;
-# """
-
+# === MAIN CONSUMER LOOP ===
 while True:
+    # checks every second for new messages
     msg = consumer.poll(1.0)
     if msg is None:
         logging.info("No message received")
@@ -80,16 +71,17 @@ while True:
         continue
 
     try:
-        # logging.info(f"🟢 Raw message: {msg.value()}")
+        # extract patient infos and risk score
+        # logging.info(f"🟢 Raw message: {msg.value()}") - debug
         data = json.loads(msg.value().decode("utf-8"))
-        # logging.info(f"🟢 Parsed JSON: {data}")
+        # logging.info(f"🟢 Parsed JSON: {data}") - debug
         patient_id = data.get("patient_id")
         observation_date = data.get("date")
         risk_level = data.get("risk_level", 0)
 
         logging.info(f"Received Kafka message: patient_id={patient_id}, date={observation_date}, risk_level={risk_level}")
 
-        # Verify it's the latest for that patient
+        # Verify it's the latest info for that patient
         with engine.connect() as conn:
             res = conn.execute(text("""
                 SELECT date FROM vital_signs
@@ -101,6 +93,7 @@ while True:
 
         logging.info(f"Latest date in DB for patient {patient_id}: {latest}")
 
+        # only generate alert if the risk is above threshold
         obs_dt = datetime.fromisoformat(observation_date)
         if obs_dt == latest and risk_level > RISK_THRESHOLD:
             with engine.connect() as conn:
@@ -113,11 +106,13 @@ while True:
             else:
                 logging.error("Name not found")
 
+            # define risk levels
             category = (
                 "HIGH" if risk_level > 60 else
                 "MEDIUM" if risk_level > 30 else
                 "LOW"
             )
+            # compose alert message
             message = f"🚨 {full_name} - Risk level {risk_level} ({category})"
             alert = {
                 "patient_id": str(patient_id),
@@ -127,6 +122,7 @@ while True:
                 "message": message
             }
             logging.info(f"Producing alert: {json.dumps(alert, indent=2)}")
+            # send alerts to the kafka topic
             producer.produce("risk_alerts", value=json.dumps(alert).encode("utf-8"), callback=delivery_report)
             producer.flush()
 
