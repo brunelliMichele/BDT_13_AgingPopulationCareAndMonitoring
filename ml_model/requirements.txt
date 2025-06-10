@@ -1,7 +1,8 @@
-joblib==1.4.2
-numpy==1.26.4
-pandas==2.2.2
-psycopg2-binary==2.9.9
-scikit-learn==1.4.2
-tensorflow==2.15.0
-sqlalchemy==2.0.30
+joblib>=1.4.2
+numpy>=1.26.4
+pandas>=2.2.2
+psycopg2-binary>=2.9.9
+scikit-learn>=1.4.2
+tensorflow>=2.15.0
+sqlalchemy>=2.0.30
+kafka-python>=2.0.2

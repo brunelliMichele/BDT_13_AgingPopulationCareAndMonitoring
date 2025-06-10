@@ -13,6 +13,13 @@ import joblib
 import os
 import sys
 import logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+from kafka import KafkaProducer
+import json
+import uuid
+from kafka.admin import KafkaAdminClient, NewTopic
+from kafka.errors import TopicAlreadyExistsError
+import time
 sys.path.append("/shared")
 from process_patient_data import process_observations
 
@@ -31,6 +38,39 @@ DB_PORT = int(os.environ.get("DB_PORT", 5432))
 DB_NAME = os.environ.get("DB_NAME", "medicalData")
 DB_USER = os.environ.get("DB_USER", "user")
 DB_PASSWORD = os.environ.get("DB_PASSWORD", "password")
+
+topic_name = "vital_signs_stream"
+
+def ensure_topic_ready(topic, bootstrap_servers="kafka:9092", retries=10, delay=1):
+    admin_client = KafkaAdminClient(bootstrap_servers=bootstrap_servers)
+    try:
+        admin_client.create_topics([NewTopic(name=topic, num_partitions=1, replication_factor=1)])
+        logging.info(f"✅ Kafka topic '{topic}' created.")
+    except TopicAlreadyExistsError:
+        logging.info(f"ℹ️ Kafka topic '{topic}' already exists.")
+    except Exception as e:
+        logging.warning(f"⚠️ Could not create topic '{topic}': {e}")
+
+    # Wait until the topic is available
+    from kafka import KafkaConsumer
+    for _ in range(retries):
+        consumer = KafkaConsumer(bootstrap_servers=bootstrap_servers, group_id="topic_check")
+        if topic in consumer.topics():
+            logging.info(f"✅ Kafka topic '{topic}' is available.")
+            return
+        logging.info(f"⏳ Waiting for topic '{topic}' to become available...")
+        time.sleep(delay)
+    raise RuntimeError(f"❌ Kafka topic '{topic}' is not available after {retries} attempts.")
+
+ensure_topic_ready(topic_name)
+
+producer = KafkaProducer(
+    bootstrap_servers=os.environ.get("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092"),
+    value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+    linger_ms=10,
+    batch_size=32768,
+    retries=5
+)
 
 # === FUNCTIONS ===
 def get_db_engine():
@@ -81,13 +121,32 @@ def main():
     df_to_save = df[["patient_id", "date", "HR", "RR", "body_temperature", "SpO2", "GSR", "risk_level"]]
     df_to_save.columns = [col.lower() if col not in ("patient_id", "date", "risk_level") else col for col in df_to_save.columns]
 
+    logging.info(f"📊 Numero righe da salvare: {len(df_to_save)}")
+    logging.info(f"📊 Esempio dati:\n{df_to_save.head()}")
+
     with engine.begin() as conn:
         metadata = MetaData()
         vital_signs = Table("vital_signs", metadata, autoload_with=conn)
         for _, row in df_to_save.iterrows():
+            logging.info(f"Tentativo di inserimento per: {row.to_dict()}")
             stmt = insert(vital_signs).values(row.to_dict())
             stmt = stmt.on_conflict_do_nothing(index_elements=["patient_id", "date"])
-            conn.execute(stmt)
+            result = conn.execute(stmt)
+            if result.rowcount > 0:
+                try:
+                    record = row.to_dict()
+                    if isinstance(record.get("patient_id"), uuid.UUID):
+                        record["patient_id"] = str(record["patient_id"])
+                    if isinstance(record.get("date"), pd.Timestamp):
+                        record["date"] = record["date"].isoformat()
+                    producer.send("vital_signs_stream", value=record)
+                    logging.info(f"✅ Sent to vital_signs_stream: {record}")
+                except Exception as e:
+                    logging.error(f"❌ Kafka produce failed: {e}")
+            else:
+                logging.info(f"⏩ Dato già presente, non reinserito: {row['patient_id']} - {row['date']}")
+
+    producer.flush()
 
 
 if __name__ == "__main__":

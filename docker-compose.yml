@@ -84,6 +84,8 @@ services:
                 condition: service_healthy
             db:
                 condition: service_healthy
+            train_model:
+                condition: service_completed_successfully
         environment:
             - DB_HOST=db
             - DB_NAME=medicalData
@@ -142,6 +144,8 @@ services:
                 condition: service_healthy
             db:
                 condition: service_healthy
+            train_model:
+                condition: service_completed_successfully
         environment:
             - DB_HOST=db
             - DB_NAME=medicalData
@@ -177,6 +181,8 @@ services:
         depends_on:
             db:
                 condition: service_healthy
+            synthea-init:
+                condition: service_completed_successfully
         environment:
             - DB_HOST=db
             - DB_NAME=medicalData

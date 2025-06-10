@@ -2,18 +2,28 @@ import json
 import os
 import pandas as pd
 import psycopg2
-from confluent_kafka import Producer
+from confluent_kafka import Producer, Consumer
 from sqlalchemy import create_engine, text
+from datetime import datetime
 import time
 import sys
 import logging
-
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+
+RISK_THRESHOLD = 20  # adjust as needed
 
 # Kafka producer setup
 producer = Producer({
     'bootstrap.servers': 'kafka:9092'
 })
+
+consumer = Consumer({
+    'bootstrap.servers': 'kafka:9092',
+    'group.id': 'risk_evaluator_debug_1',
+    'auto.offset.reset': 'earliest'
+})
+
+consumer.subscribe(['vital_signs_stream'])
 
 def delivery_report(err, msg):
     if err is not None:
@@ -47,52 +57,78 @@ def wait_for_table(engine, table_name):
 
 wait_for_table(engine, "vital_signs")
 
-
-# # Fetch high-risk patients from recent data [FOR PRODUCTION]
 # query = """
-# SELECT patient_id, risk_level, date
-# FROM vital_signs
-# WHERE date > NOW() - interval '1 hour' AND risk_level > 60;
+# SELECT DISTINCT ON (vs.patient_id)
+#     vs.patient_id,
+#     p.first,
+#     p.middle,
+#     p.last,
+#     vs.risk_level,
+#     vs.date
+# FROM vital_signs vs
+# JOIN patients p ON vs.patient_id = p.id
+# ORDER BY vs.patient_id, vs.date DESC;
 # """
 
-# Fetch high-risk patients  [DEBUG]
-query = """
-SELECT 
-    vs.patient_id, 
-    vs.risk_level, 
-    vs.date, 
-    p.first,
-    p.middle,
-    p.last
-FROM vital_signs vs
-JOIN patients p ON vs.patient_id = p.id
-WHERE risk_level > 40;
-"""
-
 while True:
-    try:
-        logging.info("Checking for high-risk patients...")
-        df = pd.read_sql(query, engine)
-        logging.info(f"Retrieved {len(df)} high-risk records")
+    msg = consumer.poll(1.0)
+    if msg is None:
+        logging.info("No message received")
+        continue
+    if msg.error():
+        logging.error(f"Consumer error: {msg.error()}")
+        continue
 
-        for _, row in df.iterrows():
-            logging.info(f"Sending alert for patient {row['patient_id']} with risk level {row['risk_level']}")
-            full_name = " ".join(filter(None, [row["first"], row["middle"], row["last"]]))
+    try:
+        # logging.info(f"🟢 Raw message: {msg.value()}")
+        data = json.loads(msg.value().decode("utf-8"))
+        # logging.info(f"🟢 Parsed JSON: {data}")
+        patient_id = data.get("patient_id")
+        observation_date = data.get("date")
+        risk_level = data.get("risk_level", 0)
+
+        logging.info(f"Received Kafka message: patient_id={patient_id}, date={observation_date}, risk_level={risk_level}")
+
+        # Verify it's the latest for that patient
+        with engine.connect() as conn:
+            res = conn.execute(text("""
+                SELECT date FROM vital_signs
+                WHERE patient_id = :pid
+                ORDER BY date DESC
+                LIMIT 1
+            """), {"pid": patient_id})
+            latest = res.scalar()
+
+        logging.info(f"Latest date in DB for patient {patient_id}: {latest}")
+
+        obs_dt = datetime.fromisoformat(observation_date)
+        if obs_dt == latest and risk_level > RISK_THRESHOLD:
+            with engine.connect() as conn:
+                res = conn.execute(
+                    text("""SELECT first, middle, last FROM patients WHERE id = :pid"""),
+                    {"pid": patient_id}
+                ).mappings().first()
+            if res:
+                full_name = " ".join(filter(None, [res["first"], res["middle"], res["last"]]))
+            else:
+                logging.error("Name not found")
+
+            category = (
+                "HIGH" if risk_level > 60 else
+                "MEDIUM" if risk_level > 30 else
+                "LOW"
+            )
+            message = f"🚨 {full_name} - Risk level {risk_level} ({category})"
             alert = {
-                "patient_id": str(row["patient_id"]),
+                "patient_id": str(patient_id),
                 "patient_name": full_name,
-                "risk_level": row["risk_level"],
-                "category": (
-                    "HIGH" if row["risk_level"] > 60 else
-                    "MEDIUM" if row["risk_level"] > 30 else
-                    "LOW"
-                ),
-                "message": f"🚨 {full_name} - Risk level {row['risk_level']} ({'HIGH' if row['risk_level'] > 60 else 'MEDIUM'})"
+                "risk_level": risk_level,
+                "category": category,
+                "message": message
             }
+            logging.info(f"Producing alert: {json.dumps(alert, indent=2)}")
             producer.produce("risk_alerts", value=json.dumps(alert).encode("utf-8"), callback=delivery_report)
             producer.flush()
 
     except Exception as e:
         logging.error(f"Error while generating alerts: {e}")
-
-    time.sleep(60)
