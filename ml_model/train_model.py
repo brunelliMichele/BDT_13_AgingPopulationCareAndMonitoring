@@ -13,7 +13,7 @@ import joblib
 import os
 import sys
 import logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
 from kafka import KafkaProducer
 import json
 import uuid
@@ -86,8 +86,10 @@ def create_sequences(x, y, window_size=6):
 
 def main():
     engine = get_db_engine()
-    df = process_observations(engine)
 
+    # Step 1: Estrazione dati per training
+    df = process_observations(engine, use_model=False)
+    df["risk_level"] = df[["HR", "RR", "body_temperature", "SpO2", "GSR"]].mean(axis=1)
     if df.empty:
         return
 
@@ -114,9 +116,19 @@ def main():
     model.fit(x_train, y_train, epochs=50, batch_size=128, validation_data=(x_test, y_test), callbacks=[EarlyStopping(patience=5, restore_best_weights=True)], verbose=1)
     logging.info("✅ Training completed. Saving model and scalers...")
 
-    model.save(model_path)
+    model.save(model_path, save_format="keras")
     joblib.dump(scaler_x, scaler_x_path)
     joblib.dump(scaler_y, scaler_y_path)
+
+    # Step 2: Predizione con il modello appena salvato
+    if not (os.path.exists(model_path) and os.path.exists(scaler_x_path) and os.path.exists(scaler_y_path)):
+        logging.error("❌ Model or scalers files not found. Cannot proceed to prediction step.")
+        return
+
+    df = process_observations(engine, use_model=True)
+    if df.empty:
+        logging.warning("⚠️ No data returned from process_observations with use_model=True.")
+        return
 
     df_to_save = df[["patient_id", "date", "HR", "RR", "body_temperature", "SpO2", "GSR", "risk_level"]]
     df_to_save.columns = [col.lower() if col not in ("patient_id", "date", "risk_level") else col for col in df_to_save.columns]
@@ -129,12 +141,13 @@ def main():
         vital_signs = Table("vital_signs", metadata, autoload_with=conn)
         for _, row in df_to_save.iterrows():
             logging.info(f"Tentativo di inserimento per: {row.to_dict()}")
-            stmt = insert(vital_signs).values(row.to_dict())
+            record = row.to_dict()
+            record["risk_level"] = round(record["risk_level"], 2)
+            stmt = insert(vital_signs).values(record)
             stmt = stmt.on_conflict_do_nothing(index_elements=["patient_id", "date"])
             result = conn.execute(stmt)
             if result.rowcount > 0:
                 try:
-                    record = row.to_dict()
                     if isinstance(record.get("patient_id"), uuid.UUID):
                         record["patient_id"] = str(record["patient_id"])
                     if isinstance(record.get("date"), pd.Timestamp):
