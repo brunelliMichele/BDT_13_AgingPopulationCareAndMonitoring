@@ -53,8 +53,8 @@ def get_temperature(room):
         "Kitchen": 22,
         "Living Room": 21,
         "Bathroom": 24,
-        "Bedroom": 19,
-        "Laundry Room": 18
+        "Bedroom": 21,
+        "Laundry Room": 21
     }.get(room, 20)
 
     # lowers the temperature at night
