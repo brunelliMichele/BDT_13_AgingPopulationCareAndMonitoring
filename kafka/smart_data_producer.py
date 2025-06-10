@@ -47,6 +47,7 @@ def get_patients():
     raise Exception("❌ Database not reachable or patients table is empty")
 
 # data generation
+# generate the temperature of the rooms
 def get_temperature(room):
     hour = datetime.now(timezone.utc).hour
     base_temp = {
@@ -61,8 +62,10 @@ def get_temperature(room):
     if hour < 6 or hour > 22:
         base_temp -= 2
 
+    # simulate variation
     return round(random.normalvariate(base_temp, 1.2), 1)
 
+# generate the humidity of the rooms
 def get_humidity(room):
     base_humidity = {
         "Bathroom": 60,
@@ -75,6 +78,7 @@ def get_humidity(room):
     variation = random.uniform(-5, 5)
     return round(base_humidity + variation, 1)
 
+# randomly determine if a device is turned on or off
 def get_status(device=None):
     hour = datetime.now(timezone.utc).hour
 
@@ -87,6 +91,7 @@ def get_status(device=None):
     else:
         return random.choices(["On", "Off"], weights=[0.2, 0.8])[0]
 
+# define the object in the rooms
 def device_type(room):
     devices = {
         "Kitchen": ["Fridge", "Microwave", "Oven"],
@@ -97,7 +102,7 @@ def device_type(room):
     }
     return devices.get(room, [])
 
-# alert functions
+# alert functions to check anomalies in temperature, humidity and device usage
 def check_temperature_alert(temp, room, user_id, patient_name):
     if temp > 28.0:
         return f"{patient_name} - HIGH temp in {room}: {temp}°C"
@@ -129,7 +134,7 @@ def delivery_report(err, msg):
     else:
         logging.info(f"Message delivered to {msg.topic()} [{msg.partition()}]")
 
-# save alert in alerts table on db
+# save alert in alerts table on db, for record keeping
 def save_alert_to_db(patient_id, alert_type, room, message, timestamp):
     engine = get_db_engine()
     with engine.connect() as conn:
@@ -139,6 +144,7 @@ def save_alert_to_db(patient_id, alert_type, room, message, timestamp):
         )
 
 # simulate real time data
+# selects a subset of patients, simulates data, records the alerts and sends them to kafka, also saving a log
 def simulate_realtime():
     producer = Producer(KAFKA_CONFIG)
     people_map = get_patients()
@@ -163,7 +169,7 @@ def simulate_realtime():
                 humidity = get_humidity(room)
                 room_appliances = {}
 
-                # Check alerts
+                # Check temperature and humidity alerts for this room
                 for fn in [check_temperature_alert, check_humidity_alert]:
                     alert = fn(temp if fn == check_temperature_alert else humidity, room, user_id, patient_name)
                     if alert:
@@ -173,6 +179,7 @@ def simulate_realtime():
                         })
                         save_alert_to_db(patient_id=pid, alert_type="temperature" if fn == check_temperature_alert else "humidity", room=room, message=alert, timestamp=timestamp)
 
+                # Check all devices in this room for alerts and update their status/duration
                 for device in appliances:
                     prev = device_states[pid].get(device, {"Status": "Off", "Duration": 0})
                     status = get_status()
@@ -201,22 +208,24 @@ def simulate_realtime():
                 "timestamp": timestamp_str,
                 "data": person_data
             }
-
+        # saves all current events to a JSON - just for debugging
         with open("house_data.json", "w") as f:
             json.dump(snapshot, f, indent=4)
-
+        # send data to kafka
         producer.produce(KAFKA_TOPIC_SMART, value=json.dumps(snapshot).encode(), callback=delivery_report)
 
         if alerts:
             max_alerts_per_cycle = 10
             alerts = alerts[:max_alerts_per_cycle]
 
+            # save alerts in a log file
             with open("alerts.log", "a") as f:
                 for alert in alerts:
                     f.write(f"{timestamp} {alert}\n")
             if len(alerts) > max_alerts_per_cycle:
                 logging.warning(f"Alert count capped at {max_alerts_per_cycle} (original: {len(alerts)})")
             logging.info(f"[{timestamp}] ALERTS TRIGGERED:\n" + "\n".join(a["message"] for a in alerts))
+            # send alerts to kafka
             producer.produce(KAFKA_TOPIC_ALERT, value=json.dumps(alerts).encode(), callback=delivery_report)
         else:
             logging.info(f"[{timestamp}] No alerts. System OK.")
