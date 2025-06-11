@@ -10,8 +10,7 @@ import sys
 import logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-# minimum threshold to trigger an alert
-RISK_THRESHOLD = 20  # adjust as needed
+RISK_THRESHOLD = 60  # adjust as needed
 
 # Kafka producer for sending risk alerts
 producer = Producer({
