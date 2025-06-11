@@ -10,20 +10,83 @@ XXX
 ## Technologies used
 - **PostgreSQL:** RDMS used to implement databases to store the raw and processed medical data and smart home sensors data;
 - **Apache Kafka:** Used to implement publish/subscribe model, specifying the topic within the data pipeline and connecting the different components of the system;
-- **Apache Spark:** Used to process real-time data and trigger potential alerts related to smart home sensors and/or medical conditions of patients;
 - **Docker + Docker Compose:** Multiple containers singularly developed in Docker are orchestrated and managed together in Docker Compose
 - **Flask:** Python framework used to develop User Interface. The subject can see in real-time the activities of sensors and the current and past clinical conditions of the elderly patient, along with potential alerts and the actual health risk.
 
 ![System Architecture](images/system_architecture.png)
 
 ## Project Structure
-XXX
+The repository is organized as follows:
+
+```
+.
+├── docker-compose.yml
+├── flask_app
+│   ├── app.py
+│   ├── config.py
+│   ├── db.py
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   ├── routes.py
+│   ├── sockets.py
+│   ├── static
+│   │   ├── css
+│   │   │   └── style.css
+│   │   ├── favicon.ico
+│   │   └── js
+│   │       ├── alerts.js
+│   │       ├── main.js
+│   │       ├── map.js
+│   │       ├── patient_chart.js
+│   │       ├── patient_main.js
+│   │       ├── ui.js
+│   │       └── utils.js
+│   └── templates
+│       ├── index.html
+│       └── patient.html
+├── images
+│   ├── system_architecture.drawio
+│   ├── system_architecture.drawio.svg
+│   ├── system_architecture.png
+│   ├── WireFrame.drawio
+│   └── WireFrame.png
+├── kafka
+│   ├── Dockerfile
+│   ├── house_data.json
+│   ├── requirements.txt
+│   ├── risk_level_producer.py
+│   └── smart_data_producer.py
+├── ml_model
+│   ├── Dockerfile
+│   ├── entrypoint.sh
+│   ├── output
+│   │   ├── model.keras
+│   │   ├── scaler_x.pkl
+│   │   └── scaler_y.pkl
+│   ├── requirements.txt
+│   ├── train_loop.py
+│   └── train_model.py
+├── postgres
+│   ├── Dockerfile
+│   ├── incremental_patient_loader.py
+│   ├── init
+│   │   └── 01_init.sql
+│   ├── initial_population.py
+│   ├── ReadMe.md
+│   ├── requirements.txt
+│   └── synthea-with-dependencies.jar
+├── project_structure.txt
+├── ProjectIdeas.md
+├── README.md
+└── shared_modules
+    └── process_patient_data.py
+```
 
 ## Setup & Configuration
-XXX
-### Configuration File
+
 ### Docker Setup
 
+The project uses Docker to manage and run services. It includes a Docker Compose file docker-compose.yml which sets up PostgreSQL, Kafka, Flask and other servicies for generate and process the data. 
 
 ### 📦 Large File Support
 
@@ -64,8 +127,6 @@ XXX
 ## Kafka
 XXX
 ## Flask
-XXX
-## Spark
 XXX
 
 ## Data Sources:
