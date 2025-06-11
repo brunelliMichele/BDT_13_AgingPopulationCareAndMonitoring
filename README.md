@@ -5,7 +5,7 @@ This repository contains the Caregiver Assistance and Remote Elderly Supervision
 
 ## Abstract
 The system enables monitoring of environmental and vital parameters, ideally collected from sensors installed in the homes of elderly people (note on data collection below). The data flow passes through a multi-component pipeline, which processes real-time data, stores it in a relational database implemented in postgres, generates alerts, and makes them available through a Kafka pubisher/subscriber to web dashboard. A machine learning model is trained on the data generated at the start, which helps to evaluete the risk level for the healt of the patients starting from the real-time sensor data. All components are orchestrated using Docker Compose for easy deployment and testing.
-Note on the data: unfortunately, we did not find a way to get meaningful real data from real patients, mainly because of privacy-related issues. Hence, we decided to generate the data ourself. At the start of the building of th containers, a bash script calls Synthea to generate an initial population of simulate patients and their history; we then use a various set of functions to simulate in real time the collection of sensor data
+Note on the data: unfortunately, we did not find a way to get meaningful real data from real patients, mainly because of privacy-related issues. Hence, we decided to generate the data ourself. At the start of the building of the containers, a bash script calls Synthea to generate an initial population of simulate patients and their history; we then use a set of functions to simulate in real time the collection of sensor data.
 
 ## Technologies used
 
