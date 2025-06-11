@@ -40,7 +40,7 @@ function handleIncomingAlert(type, data) {
             type
         }];
 
-    const old = JSON.parse(sessionStorage.getItem("alerts") || "[]").map(a => ({ ...a, isNew: false }));
+    const old = JSON.parse(sessionStorage.getItem("alerts") || "[]");
 
     const newAlerts = alerts.map(({ message, patient_id, isNew, type }) => {
         const timestamp = new Date().toLocaleTimeString();
@@ -72,6 +72,24 @@ function renderAlertList() {
     }
 
     alertList.innerHTML = "";
+    // Add "Mark all as read" button
+    if (saved.some(a => a.isNew)) {
+        const markReadBtn = document.createElement("button");
+        markReadBtn.textContent = "✓ Mark all as read";
+        markReadBtn.className = `
+            ml-auto mb-1 mr-1 px-3 py-1 
+            bg-white border border-gray-300 
+            rounded shadow-sm text-xs font-medium 
+            text-gray-600 hover:text-black 
+            hover:border-gray-400 transition
+        `;
+        markReadBtn.addEventListener("click", () => {
+            const updated = saved.map(a => ({ ...a, isNew: false }));
+            sessionStorage.setItem("alerts", JSON.stringify(updated));
+            renderAlertList();
+        });
+        alertList.appendChild(markReadBtn);
+    }
     saved.forEach(({ timestamp, message, isNew, type, patientId }) => {
         const li = document.createElement("li");
         const baseClass = "px-2 py-1 rounded text-xs leading-tight break-words flex justify-between items-center gap-2";
@@ -82,6 +100,14 @@ function renderAlertList() {
         if (patientId) {
             li.classList.add("cursor-pointer");
             li.addEventListener("click", () => {
+                const saved = JSON.parse(sessionStorage.getItem("alerts") || "[]");
+                const updated = saved.map(a =>
+                    a.timestamp === timestamp && a.message === message
+                        ? { ...a, isNew: false }
+                        : a
+                );
+                sessionStorage.setItem("alerts", JSON.stringify(updated));
+                renderAlertList();
                 window.location.href = `/patient/${patientId}`;
             });
         }
