@@ -1,10 +1,14 @@
 // patient_main.js
 
+// This script handles real-time updates for smart home sensor data on the patient detail page.
+// It listens for incoming WebSocket messages and updates the DOM accordingly.
+
 import { io } from "https://cdn.socket.io/4.5.4/socket.io.esm.min.js";
 import { setupAlertHandling } from "./alerts.js";
 
 const socket = io("/");
 
+// Sets up a WebSocket listener for smart home data and updates the DOM with sensor and appliance information
 function setupSensorUpdates() {
     const userId = document.getElementById("patient-id")?.dataset.id;
     if (!userId) return;
@@ -25,6 +29,7 @@ function setupSensorUpdates() {
             const container = document.getElementById("sensor-rooms");
             container.innerHTML = "";
 
+            // Display message if no room data is available
             if (!rooms || Object.keys(rooms).length === 0) {
                 container.innerHTML = "<p class='italic text-gray-500'>No room data available.</p>";
                 return;
@@ -32,6 +37,7 @@ function setupSensorUpdates() {
 
             for (const room in rooms) {
                 const r = rooms[room];
+                // Filter and format active appliances
                 const appliances = Object.entries(r.appliances || {})
                     .filter(([_, info]) => info.Status === "On")
                     .map(([name, info]) => `⚙️ ${name} (${info["Duration (min)"]} min)`)
@@ -51,6 +57,7 @@ function setupSensorUpdates() {
     });
 }
 
+// Initialize real-time updates and table sorting once the page has fully loaded
 document.addEventListener("DOMContentLoaded", () => {
     setupSensorUpdates();
     setupAlertHandling(socket);

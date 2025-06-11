@@ -1,13 +1,16 @@
 // map.js
 
-import { calculateAge } from "./utils.js";
+// This module manages the interactive Leaflet map, including marker rendering for patients
+// and real-time updates to risk levels via WebSocket.
+
+import { calculateAge } from "./utils.js"; // load calculateAge function 
 
 let map;
 let currentMarkers = [];
 
 export const socket = io();
 
-// function for initializing the map
+// Initializes the Leaflet map and sets up a WebSocket listener for risk level updates.
 export function initMap() {
     map = L.map("map-container").setView([42.4072, -71.3824], 8); // Massachusetts
 
@@ -15,14 +18,15 @@ export function initMap() {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // Fixa le dimensioni su mobile
+    // Fix mobile dimensions
     setTimeout(() => {
         map.invalidateSize();
     }, 300);
 
+    // Listen for real-time updates and update patient markers accordingly
     socket.on("risk_level_update", (data) => {
         const updatedPatient = JSON.parse(data);
-        // Trova il paziente nella lista corrente e aggiorna il suo livello di rischio
+        // Find the patient in the current list and update his risk level
         const index = window.patients.findIndex(p => p.id === updatedPatient.id);
         if (index !== -1) {
             window.patients[index].risk_level = updatedPatient.risk_level;
@@ -31,7 +35,8 @@ export function initMap() {
     });
 }
 
-// map marker update function
+// Clears existing markers and adds new ones based on patient data and optional city filter.
+// Markers are color-coded based on the patient's risk level.
 export function updateMapMarkers(patients, cityFilter = "", cityCoords = {}) {
     currentMarkers.forEach(marker => map.removeLayer(marker));
     currentMarkers = [];
@@ -40,6 +45,7 @@ export function updateMapMarkers(patients, cityFilter = "", cityCoords = {}) {
 
     filtered.forEach(p => {
         if (p.lat && p.lon) {
+            // Choose marker color based on risk level
             const riskLevel = p.risk_level || 0;
             const iconColor = riskLevel > 60 ? 'red' : riskLevel > 30 ? 'orange' : 'green';
             const markerIcon = L.icon({
@@ -51,6 +57,7 @@ export function updateMapMarkers(patients, cityFilter = "", cityCoords = {}) {
                 shadowSize: [41, 41]
             });
 
+            // Create a custom popup with patient info
             const marker = L.marker([p.lat, p.lon], { icon: markerIcon })
                 .addTo(map)
                 .bindPopup(`

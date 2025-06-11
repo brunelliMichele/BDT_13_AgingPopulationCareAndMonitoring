@@ -1,22 +1,26 @@
 // ui.js
 
+// This script manages the user interface for listing patients,
+// including search, pagination, and integration with the map.
+
 import { updateMapMarkers } from './map.js';
 import { calculateAge } from './utils.js';
 
+// Global variables for patient data and pagination
 let patientsData = [];
 let cityCoords = {};
 let filteredPatients = [];
 let currentPage = 1;
 const patientsPerPage = 6;
 
-// DOM refs
+// References to DOM elements used in the UI
 const container = document.getElementById("patientsContainer");
 const searchInput = document.getElementById("searchInput");
 const prevBtn = document.getElementById("prevPage");
 const nextBtn = document.getElementById("nextPage");
 const pageInfo = document.getElementById("pageInfo");
 
-// event handling function
+// Initializes UI event listeners for search input, city filter, and pagination controls
 export function setupUIEvents() {
     searchInput.addEventListener("input", updateUI);
     document.getElementById("city-select").addEventListener("change", updateUI);
@@ -36,7 +40,7 @@ export function setupUIEvents() {
     });
 }
 
-// function to update the graphical interface
+// Updates the UI with filtered patient data and refreshes the map markers
 export function updateUI() {
     if (patientsData.length === 0) {
         const jsonEl = document.getElementById("patientsJson");
@@ -61,7 +65,7 @@ export function updateUI() {
     updateMapMarkers(filteredPatients, selectedCity, cityCoords);
 }
 
-// patients rendering function
+// Renders the list of patients on the current page, showing key info and risk levels
 function renderPatients() {
     container.innerHTML = "";
     const start = (currentPage - 1) * patientsPerPage;
@@ -72,6 +76,7 @@ function renderPatients() {
         const div = document.createElement("div");
         div.className = "bg-teal-50 border border-teal-200 p-4 rounded-lg shadow-md";
 
+        // Display risk level with color based on severity, or a placeholder if missing
         let riskLevelDisplay = '';
         if (p.risk_level !== undefined && p.risk_level !== null) {
             let riskColor = 'text-green-600';

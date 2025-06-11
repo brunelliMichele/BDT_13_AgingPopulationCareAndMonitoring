@@ -1,6 +1,9 @@
 // utils.js
 
-// function to calculate the age of patients
+// This module provides utility functions used across the application.
+
+// Calculates the age of a patient based on their birthdate string.
+// Returns "N/A" if no valid birthdate is provided.
 export function calculateAge(birthdateStr) {
     if (!birthdateStr) return "N/A";
     const birthdate = new Date(birthdateStr);

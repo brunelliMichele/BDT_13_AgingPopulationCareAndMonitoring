@@ -1,5 +1,9 @@
-// alerts.js 
+// alert.js
 
+// This script handles the client-side logic for displaying and managing real-time alerts.
+// It includes WebSocket handling, alert rendering, toast notifications, and local session storage usage.
+
+ // Initializes alert handling by binding socket listeners and UI close buttons
 export function setupAlertHandling(socket) {
     const closeBtn = document.getElementById("close-alert-box");
     const alertBox = document.getElementById("alert-box");
@@ -21,6 +25,7 @@ export function setupAlertHandling(socket) {
     renderAlertList();
 }
 
+// Processes incoming alerts (single or array), sets them as new, and stores them in sessionStorage
 function handleIncomingAlert(type, data) {
     const alerts = Array.isArray(data)
         ? data.map((msg) => {
@@ -54,6 +59,7 @@ function handleIncomingAlert(type, data) {
     renderAlertList();
 }
 
+// Saves a manually created alert into sessionStorage with optional patient reference
 function saveAlert(message, timestamp, type = "default", patientId = null, isNew = true) {
     const stored = JSON.parse(sessionStorage.getItem("alerts") || "[]");
     const newAlert = { timestamp, message, isNew, type, patientId };
@@ -61,6 +67,7 @@ function saveAlert(message, timestamp, type = "default", patientId = null, isNew
     sessionStorage.setItem("alerts", JSON.stringify(updated.slice(0, 50)));
 }
 
+// Renders the list of alerts in the DOM, highlights new ones, and handles read marking and navigation
 function renderAlertList() {
     const alertList = document.getElementById("alert-list");
     if (!alertList) return;
@@ -72,7 +79,8 @@ function renderAlertList() {
     }
 
     alertList.innerHTML = "";
-    // Add "Mark all as read" button
+
+    // If any alerts are new, show a button to mark all as read
     if (saved.some(a => a.isNew)) {
         const markReadBtn = document.createElement("button");
         markReadBtn.textContent = "✓ Mark all as read";
@@ -120,6 +128,7 @@ function renderAlertList() {
     });
 }
 
+// Shows a temporary toast alert in the corner of the screen with optional click navigation
 export function showToastAlert(message, timestamp = "", messageData = {}) {
     let container = document.getElementById("alert-container");
     let wrapper = document.getElementById("alert-wrapper");
@@ -179,7 +188,7 @@ export function showToastAlert(message, timestamp = "", messageData = {}) {
     observer.observe(container, { childList: true });
 }
 
-// Dynamically create and insert the "Close all" button when there are alerts
+// Displays a "Close all" button above the alert list if any toasts are visible
 function showCloseAllButton() {
     let wrapper = document.getElementById("alert-wrapper");
     let container = document.getElementById("alert-container");
@@ -205,6 +214,7 @@ function showCloseAllButton() {
             container.innerHTML = "";
             showCloseAllButton();
         });
+
         // Insert button at the top of the wrapper
         wrapper.insertBefore(closeAllBtn, wrapper.firstChild);
     }

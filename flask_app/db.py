@@ -1,4 +1,8 @@
 # db.py
+
+# This module handles database access and queries related to patient information,
+# vital signs, and risk levels using SQLAlchemy and pandas.
+
 import os
 from collections import defaultdict
 import numpy as np
@@ -8,7 +12,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 import logging
 
-# set postgres connection
+# Create and return a SQLAlchemy database engine using credentials from config
 def get_db_engine() -> Engine:
     engine = create_engine(
         f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
@@ -16,7 +20,7 @@ def get_db_engine() -> Engine:
     logging.info("Database engine created")
     return engine
 
-# get all patients from postgres
+# Retrieve all patients with basic information and construct URL links for UI
 def get_all_patients():
     logging.info("Fetching all patients from the database")
     engine = get_db_engine()
@@ -37,7 +41,7 @@ def get_all_patients():
         for _, row in df.iterrows()
     ]
 
-# get all city with coordinates
+# Calculate average latitude and longitude for each city based on patient locations
 def get_city_avg_coords(patients):
     city_coords = defaultdict(list)
     for p in patients:
@@ -54,7 +58,7 @@ def get_city_avg_coords(patients):
         for city, coords in city_coords.items()
     }
 
-# get patient from ID
+# Fetch detailed patient information by ID
 def get_patient_by_id(patient_id):
     logging.info("Fetching patient data for patient_id: %s", patient_id)
     engine = get_db_engine()
@@ -81,7 +85,7 @@ def get_patient_by_id(patient_id):
             "surname": patient["last"]
         }
     return None
-    
+# Get the latest risk level for a specific patient
 def get_risk_level_by_id(patient_id):
     logging.info("Fetching risk level for patient_id: %s", patient_id)
     engine = get_db_engine()
@@ -94,7 +98,7 @@ def get_risk_level_by_id(patient_id):
     """
     df = pd.read_sql(query, con=engine, params=(patient_id,))
     return float(df.iloc[0]["risk_level"]) if not df.empty else None
-    
+# Retrieve the most recent risk levels for all patients
 def get_all_risk_level():
     logging.info("Fetching all latest risk levels for patients")
     engine = get_db_engine()
@@ -106,8 +110,8 @@ def get_all_risk_level():
     """
     df = pd.read_sql(query, con=engine)
     return {str(row["patient_id"]): float(row["risk_level"]) for _, row in df.iterrows()}
-    
 
+# Get chronological trend of risk levels for a specific patient
 def get_risk_trend_by_id(patient_id):
     logging.info("Fetching risk trend for patient_id: %s", patient_id)
     engine = get_db_engine()
@@ -124,6 +128,7 @@ def get_risk_trend_by_id(patient_id):
         "values": df["risk_level"].tolist()
     }
 
+# Fetch raw vital sign data over time for a given patient
 def get_risk_trend_raw(patient_id):
     logging.info("Fetching raw vital signs for patient_id: %s", patient_id)
     engine = get_db_engine()
