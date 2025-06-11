@@ -15,10 +15,11 @@ DB_USER = os.getenv("DB_USER", "user")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "password")
 DB_URL = f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
-
+# initialize the database engine
 engine = create_engine(DB_URL)
 
 # === FUNCTIONS ===
+# load a csv in a specific db table
 def load_csv_to_db(filename, table_name):
     path = os.path.join(SYNTHEA_DIR, "output", "csv", filename)
     if not os.path.exists(path):
@@ -32,6 +33,7 @@ def load_csv_to_db(filename, table_name):
     df.to_sql(table_name, con=engine, if_exists="append", index=False)
     logging.info(f"✅ Loaded {len(df)} rows into '{table_name}' table.")
 
+# run synthea to generate patients, then load th csv in the db
 def run_synthea():
     cmd = [
         "java", "-jar", "synthea-with-dependencies.jar",
