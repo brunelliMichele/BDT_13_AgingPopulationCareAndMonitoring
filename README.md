@@ -58,10 +58,6 @@ The repository is organized as follows:
 ├── ml_model
 │   ├── Dockerfile
 │   ├── entrypoint.sh
-│   ├── output
-│   │   ├── model.keras
-│   │   ├── scaler_x.pkl
-│   │   └── scaler_y.pkl
 │   ├── requirements.txt
 │   ├── train_loop.py
 │   └── train_model.py

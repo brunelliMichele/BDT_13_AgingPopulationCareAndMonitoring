@@ -137,12 +137,15 @@ def delivery_report(err, msg):
 # save alert in alerts table on db, for record keeping
 def save_alert_to_db(patient_id, alert_type, room, message, timestamp):
     engine = get_db_engine()
-    with engine.connect() as conn:
-        conn.execute(
-            text("INSERT INTO alerts (patient_id, alert_type, room, message, timestamp) VALUES (:pid, :atype, :room, :msg, :ts)"),
-            {"pid": patient_id, "atype": alert_type, "room": room, "msg": message, "ts": timestamp}
-        )
-
+    try:
+        with engine.begin() as conn:
+            conn.execute(
+                text("INSERT INTO alerts (patient_id, alert_type, room, message, timestamp) VALUES (:pid, :atype, :room, :msg, :ts)"),
+                {"pid": patient_id, "atype": alert_type, "room": room, "msg": message, "ts": timestamp}
+            )
+    except Exception as e:
+        logging.error(f"❌ Failed db insert")
+        
 # simulate real time data
 # selects a subset of patients, simulates data, records the alerts and sends them to kafka, also saving a log
 def simulate_realtime():
@@ -153,85 +156,90 @@ def simulate_realtime():
     device_states = {pid: {} for pid in people}
 
     while True:
-        timestamp = datetime.now(timezone.utc).replace(microsecond=0, tzinfo=pytz.UTC)
-        active_people = random.sample(people, k = int(len(people) * 0.7)) # 70% active people
-        snapshot = {}
-        alerts = []
+        try:
+            timestamp = datetime.now(timezone.utc).replace(microsecond=0, tzinfo=pytz.UTC)
+            active_people = random.sample(people, k = int(len(people) * 0.7)) # 70% active people
+            snapshot = {}
+            alerts = []
 
-        for pid in active_people:
-            user_id = str(pid)
-            patient_name = people_map[pid]
-            person_data = {"rooms": {}}
+            for pid in active_people:
+                user_id = str(pid)
+                patient_name = people_map[pid]
+                person_data = {"rooms": {}}
 
-            for room in ROOMS:
-                appliances = device_type(room)
-                temp = get_temperature(room)
-                humidity = get_humidity(room)
-                room_appliances = {}
+                for room in ROOMS:
+                    appliances = device_type(room)
+                    temp = get_temperature(room)
+                    humidity = get_humidity(room)
+                    room_appliances = {}
 
-                # Check temperature and humidity alerts for this room
-                for fn in [check_temperature_alert, check_humidity_alert]:
-                    alert = fn(temp if fn == check_temperature_alert else humidity, room, user_id, patient_name)
-                    if alert:
-                        alerts.append({
-                            "message": alert,
-                            "patient_id": str(pid)
-                        })
-                        save_alert_to_db(patient_id=pid, alert_type="temperature" if fn == check_temperature_alert else "humidity", room=room, message=alert, timestamp=timestamp)
+                    # Check temperature and humidity alerts for this room
+                    for fn in [check_temperature_alert, check_humidity_alert]:
+                        alert = fn(temp if fn == check_temperature_alert else humidity, room, user_id, patient_name)
+                        if alert:
+                            alerts.append({
+                                "message": alert,
+                                "patient_id": str(pid)
+                            })
+                            save_alert_to_db(patient_id=pid, alert_type="temperature" if fn == check_temperature_alert else "humidity", room=room, message=alert, timestamp=timestamp)
 
-                # Check all devices in this room for alerts and update their status/duration
-                for device in appliances:
-                    prev = device_states[pid].get(device, {"Status": "Off", "Duration": 0})
-                    status = get_status()
-                    duration = prev["Duration"] + 1 if prev["Status"] == "On" and status == "On" else (1 if status == "On" else 0)
-                    device_states[pid][device] = {"Status": status, "Duration": duration}
+                    # Check all devices in this room for alerts and update their status/duration
+                    for device in appliances:
+                        prev = device_states[pid].get(device, {"Status": "Off", "Duration": 0})
+                        status = get_status()
+                        duration = prev["Duration"] + 1 if prev["Status"] == "On" and status == "On" else (1 if status == "On" else 0)
+                        device_states[pid][device] = {"Status": status, "Duration": duration}
 
-                    alert = check_device_duration_alert(device, duration, room, user_id, patient_name, alerted_devices)
-                    if alert:
-                        alerts.append({
-                            "message": alert,
-                            "patient_id": str(pid)
-                        })
-                        save_alert_to_db(patient_id=pid, alert_type="duration", room=room, message=alert, timestamp=timestamp)
+                        alert = check_device_duration_alert(device, duration, room, user_id, patient_name, alerted_devices)
+                        if alert:
+                            alerts.append({
+                                "message": alert,
+                                "patient_id": str(pid)
+                            })
+                            save_alert_to_db(patient_id=pid, alert_type="duration", room=room, message=alert, timestamp=timestamp)
 
-                    room_appliances[device] = {"Status": status, "Duration (min)": duration}
+                        room_appliances[device] = {"Status": status, "Duration (min)": duration}
 
-                person_data["rooms"][room] = {
-                    "temperature": temp,
-                    "humidity": humidity,
-                    "appliances": room_appliances
+                    person_data["rooms"][room] = {
+                        "temperature": temp,
+                        "humidity": humidity,
+                        "appliances": room_appliances
+                    }
+                timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
+                snapshot[user_id] = {
+                    "patient_id": user_id,
+                    "patient_name": patient_name,
+                    "timestamp": timestamp_str,
+                    "data": person_data
                 }
-            timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
-            snapshot[user_id] = {
-                "patient_id": user_id,
-                "patient_name": patient_name,
-                "timestamp": timestamp_str,
-                "data": person_data
-            }
-        # saves all current events to a JSON - just for debugging
-        with open("house_data.json", "w") as f:
-            json.dump(snapshot, f, indent=4)
-        # send data to kafka
-        producer.produce(KAFKA_TOPIC_SMART, value=json.dumps(snapshot).encode(), callback=delivery_report)
+            # saves all current events to a JSON - just for debugging
+            with open("house_data.json", "w") as f:
+                json.dump(snapshot, f, indent=4)
+            # send data to kafka
+            producer.produce(KAFKA_TOPIC_SMART, value=json.dumps(snapshot).encode(), callback=delivery_report)
 
-        if alerts:
-            max_alerts_per_cycle = 10
-            alerts = alerts[:max_alerts_per_cycle]
+            if alerts:
+                max_alerts_per_cycle = 10
+                alerts = alerts[:max_alerts_per_cycle]
 
-            # save alerts in a log file
-            with open("alerts.log", "a") as f:
-                for alert in alerts:
-                    f.write(f"{timestamp} {alert}\n")
-            if len(alerts) > max_alerts_per_cycle:
-                logging.warning(f"Alert count capped at {max_alerts_per_cycle} (original: {len(alerts)})")
-            logging.info(f"[{timestamp}] ALERTS TRIGGERED:\n" + "\n".join(a["message"] for a in alerts))
-            # send alerts to kafka
-            producer.produce(KAFKA_TOPIC_ALERT, value=json.dumps(alerts).encode(), callback=delivery_report)
-        else:
-            logging.info(f"[{timestamp}] No alerts. System OK.")
+                # save alerts in a log file
+                with open("alerts.log", "a") as f:
+                    for alert in alerts:
+                        f.write(f"{timestamp} {alert}\n")
+                if len(alerts) > max_alerts_per_cycle:
+                    logging.warning(f"Alert count capped at {max_alerts_per_cycle} (original: {len(alerts)})")
+                logging.info(f"[{timestamp}] ALERTS TRIGGERED:\n" + "\n".join(a["message"] for a in alerts))
+                # send alerts to kafka
+                producer.produce(KAFKA_TOPIC_ALERT, value=json.dumps(alerts).encode(), callback=delivery_report)
+            else:
+                logging.info(f"[{timestamp}] No alerts. System OK.")
 
-        producer.flush()
-        time.sleep(10)
+            producer.flush()
+            time.sleep(10)
+
+        except Exception as e:
+            logging.error(f"❌ Unexpected error in simulate_realtime: {e}", exc_info=True)
+            time.sleep(5)
 
 
 # === MAIN ===
