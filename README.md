@@ -29,11 +29,11 @@ XXX
 
 This project uses [Git LFS](https://git-lfs.github.com/) for managing large files (e.g., model weights).
 
-**Before cloning or pulling:**
+1. **Before cloning or pulling:**
     ```sh
     git lfs install
     ```
-    If you already cloned the repo without LFS, run:
+2. **If you already cloned the repo without LFS, run:**
     ```sh
     git lfs pull
     ```
