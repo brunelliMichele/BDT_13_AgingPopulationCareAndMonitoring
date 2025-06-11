@@ -1,3 +1,8 @@
+# incremental_patient_loader.py
+
+# This script periodically generates new patient data using Synthea, loads it into a PostgreSQL database,
+# and computes vital signs and risk levels for each patient using a shared ML pipeline.
+
 import subprocess
 import os
 import logging
@@ -7,16 +12,13 @@ import pandas as pd
 from sqlalchemy import create_engine, text, Table, MetaData
 from sqlalchemy.dialects.postgresql import insert
 import sys
-
-# add '/shared' directory to allow importing shared modules
 sys.path.append("/shared")
 from process_patient_data import process_observations
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 # wait two minutes to start if set to 'true'
 if os.getenv("DELAY_STARTUP", "false").lower() == "true":
-    time.sleep(120)  # delay 2 minutes
+    time.sleep(120)
 
 # === CONFIG VARIABLES ===
 SYNTHEA_DIR = "/app"
@@ -29,18 +31,18 @@ DB_USER = os.getenv("DB_USER", "user")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "password")
 DB_URL = f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
-# create SQLAlchemy database engine
 engine = create_engine(DB_URL)
 
 # === FUNCTIONS ===
-# return the time range for the current hour to tag patient generation sessions.
+
+# Get the current UTC hour's start and end time for tagging patient data.
 def today_range():
     now = datetime.now(timezone.utc)
     start = now.replace(minute=0, second=0, microsecond=0)
     stop = start + timedelta(hours=1)
     return start.isoformat(), stop.isoformat()
 
-# load a synthea generated csv into a table in the db
+# Load a Synthea-generated CSV into the database under the specified table name.
 def load_csv_to_db(filename, table_name):
     path = os.path.join(SYNTHEA_DIR, "output", "csv", filename)
     if not os.path.exists(path):
@@ -51,7 +53,7 @@ def load_csv_to_db(filename, table_name):
         return
     df.to_sql(table_name, con=engine, if_exists="append", index=False)
 
-# get the last generated patients
+# Extract a list of unique patient IDs from the latest generated patients CSV.
 def get_new_patient_ids():
     path = os.path.join(SYNTHEA_DIR, "output", "csv", "patients.csv")
     if os.path.exists(path):
@@ -60,7 +62,7 @@ def get_new_patient_ids():
             return df["id"].dropna().unique().tolist()
     return []
 
-# add vital signs records to the db
+# Insert new rows of vital signs into the database, avoiding duplicates.
 def insert_vital_signs(df):
     if df.empty:
         return
@@ -78,13 +80,12 @@ def insert_vital_signs(df):
             result = conn.execute(stmt)
             if result.rowcount == 1:
                 rows_inserted += 1
-    logging.info(f"✅ Inserted {rows_inserted} new rows into vital_signs.")
 
-# generate new patients with synthea, load the csv in the db, extract IDs to populate vital signs df
+# Run Synthea to generate new patient data, load into the database, process it, and insert computed vitals.
 def run_incremental_generation():
     start_time, stop_time = today_range()
-    logging.info(f"✚ Generate {PATIENTS} new patients from {start_time} to {stop_time}")
-    cmd = cmd = [
+    logging.debug(f"✚ Generate {PATIENTS} new patients from {start_time} to {stop_time}")
+    cmd = [
         "java", "-jar", "synthea-with-dependencies.jar",
         "-p", str(PATIENTS),
         "Massachusetts",
@@ -94,8 +95,6 @@ def run_incremental_generation():
     subprocess.run(cmd, cwd=SYNTHEA_DIR)
 
     load_csv_to_db("patients.csv", "patients")
-    load_csv_to_db("encounters.csv", "encounters")
-    load_csv_to_db("providers.csv", "providers")
     load_csv_to_db("observations.csv", "observations")
     load_csv_to_db("conditions.csv", "conditions")
 
@@ -103,10 +102,9 @@ def run_incremental_generation():
     df = process_observations(engine, patient_ids=patient_ids)
     insert_vital_signs(df)
 
-# === MAIN ===
+# Continuously run patient generation and processing at fixed intervals.
 if __name__ == "__main__":
-    # generate patients continuously at regular intervals
     while True:
         run_incremental_generation()
-        logging.info(f"⏱️ Sleeping {INTERVAL} seconds before next patient...")
+        logging.debug(f"⏱️ Sleeping {INTERVAL} seconds before next patient...")
         time.sleep(INTERVAL)
