@@ -23,17 +23,37 @@ XXX
 XXX
 ### Configuration File
 ### Docker Setup
-### How to Run
-1. **Clean the environment**:
+
+
+### 📦 Large File Support
+
+This project uses [Git LFS](https://git-lfs.github.com/) for managing large files (e.g., model weights).
+
+**Before cloning or pulling:**
     ```sh
-   docker-compose down --remove-orphans    
-   ```
-2. **Start Docker**:
+    git lfs install
+    ```
+    If you already cloned the repo without LFS, run:
     ```sh
-    docker-compose up --build
+    git lfs pull
     ```
 
-Access the dashboard at `http://127.0.0.1:[OUR_PORT]`.
+### How to Run
+
+1. **Start Docker:**
+    ```sh
+    docker-compose up --build [-d]
+    ```
+2. **Access to the dashboard:**
+    Open a browser and go to `http://localhost:8000`.
+
+3. **To restart the project:**
+    Clean up with:
+    ```sh
+    docker-compose down -v --remove-orphans
+    ```
+    So rebuild and relaunch (1)
+
 
 ## Components Description
 ### UI
