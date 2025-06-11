@@ -18,8 +18,6 @@ XXX
 - **JavaScript (Vanilla JS, Chart.js, Leaflet):** Used to build a responsive frontend interface, visualize patient data over time (Chart.js), and display geographical information such as patient or alert locations (Leaflet);
 - **Tailwind CSS:** Utility-first CSS framework used to design a clean, responsive, and customizable user interface for the dashboard and alert visualization.
 
-## System Architecture
-
 ![System Architecture](images/system_architecture.png)
 
 ## Project Structure
@@ -74,7 +72,6 @@ The repository is organized as follows:
 │   ├── init
 │   │   └── 01_init.sql
 │   ├── initial_population.py
-│   ├── ReadMe.md
 │   ├── requirements.txt
 │   └── synthea-with-dependencies.jar
 ├── project_structure.txt
@@ -121,7 +118,39 @@ This project uses [Git LFS](https://git-lfs.github.com/) for managing large file
 
 
 ## Components Description
-### UI
+
+### User Interface (UI)
+
+- **Files:**
+
+  - **app.py:** Initializes the Flask application and sets up the Socket.IO server for real-time communication.
+
+  - **routes.py:** Defines the HTTP routes and handles rendering of the main views such as the homepage and patient detail page.
+
+  - **sockets.py:** Manages WebSocket communication with Kafka consumers, emitting real-time alerts and data updates to connected clients.
+
+  - **db.py:** Provides helper functions to interact with the PostgreSQL database (e.g., retrieving patients, vitals, and alerts).
+
+  - **config.py:** Stores configuration variables for database connections, Kafka topics, and other environment settings.
+
+  - **templates/**
+    - **index.html:** Main dashboard template displaying active patients, maps, and summary alerts.
+    - **patient.html:** Detailed view of a specific patient’s health data, charts, and vital sign history.
+
+  - **static/**
+    - **css/**
+      - **style.css:** Custom CSS for styling the frontend components with Tailwind CSS utility classes.
+
+    - **js/**
+      - **alert.js:** Handles rendering and state management of incoming alert banners and their interaction logic.
+      - **main.js:** Controls main page behavior, including map loading and patient list updates.
+      - **map.js:** Initializes and manages the Leaflet.js map displaying patient locations.
+      - **patient_chart.js:** Renders time-series health data charts using Chart.js on the patient detail view.
+      - **patient_main.js:** Controls interactions and data loading specific to the patient detail page.
+      - **ui.js:** Utility functions for rendering UI components like modals, loaders, or notifications.
+      - **utils.js:** Common helper functions used across multiple scripts (e.g., data formatting, AJAX helpers).
+
+
 ![UI-WireFrame](images/WireFrame.png)
 
 ## Database
