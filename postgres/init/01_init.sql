@@ -33,29 +33,11 @@ CREATE TABLE IF NOT EXISTS patients (
     income NUMERIC NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS encounters (
-    id UUID PRIMARY KEY,
-    start TIMESTAMP,
-    stop TIMESTAMP,
-    patient UUID,
-    organization UUID,
-    provider UUID,
-    payer UUID,
-    encounterclass TEXT,
-    code TEXT,
-    description TEXT,
-    base_encounter_cost NUMERIC,
-    total_claim_cost NUMERIC,
-    payer_coverage NUMERIC,
-    reasoncode TEXT,
-    reasondescription TEXT
-);
-
 CREATE TABLE IF NOT EXISTS conditions (
     start DATE NOT NULL,
     stop DATE,
     patient UUID NOT NULL REFERENCES patients(id),
-    encounter UUID NOT NULL REFERENCES encounters(id),
+    encounter UUID NOT NULL,
     system VARCHAR NOT NULL,
     code VARCHAR NOT NULL,
     description VARCHAR NOT NULL
@@ -64,7 +46,7 @@ CREATE TABLE IF NOT EXISTS conditions (
 CREATE TABLE IF NOT EXISTS observations (
     date TIMESTAMP NOT NULL,
     patient UUID NOT NULL REFERENCES patients(id),
-    encounter UUID REFERENCES encounters(id),
+    encounter UUID,
     category VARCHAR,
     code VARCHAR NOT NULL,
     description VARCHAR NOT NULL,
@@ -82,14 +64,6 @@ CREATE TABLE IF NOT EXISTS alerts (
     timestamp TIMESTAMP NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS ecg (
-    id SERIAL PRIMARY KEY,
-    patient_id UUID REFERENCES patients(id),
-    timestamp TIMESTAMP NOT NULL,
-    lead TEXT NOT NULL,
-    voltage DOUBLE PRECISION NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS vital_signs (
     patient_id UUID REFERENCES patients(id),
     date TIMESTAMP,
@@ -101,22 +75,6 @@ CREATE TABLE IF NOT EXISTS vital_signs (
     risk_level FLOAT,
     inserted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (patient_id, date)
-);
-
-CREATE TABLE IF NOT EXISTS providers (
-    id UUID PRIMARY KEY,
-    organization UUID,
-    name TEXT,
-    gender VARCHAR(1),
-    speciality TEXT,
-    address TEXT,
-    city TEXT,
-    state TEXT,
-    zip TEXT,
-    lat DOUBLE PRECISION,
-    lon DOUBLE PRECISION,
-    encounters INTEGER,
-    procedures INTEGER
 );
 
 COMMIT;

@@ -1,7 +1,5 @@
-# ToDo RightNow
+# CARES (Caregiver Assistance and Remote Elderly Supervision)
 
-
-# Project Requirements
 ## Description 
 This repository contains the Caregiver Assistance and Remote Elderly Supervision (CARES) System developed by group 13. The project aims to assist caregivers and healthcare providers in supporting the elderly, by collecting data from smart home sensors, medical records and wearable health monitors. Real-time analytics are constantly sift through LSTM model to detect changes in daily routines and health indicators, triggering alerts for potential emergencies. 
 
@@ -74,8 +72,6 @@ The repository is organized as follows:
 │   ├── initial_population.py
 │   ├── requirements.txt
 │   └── synthea-with-dependencies.jar
-├── project_structure.txt
-├── ProjectIdeas.md
 ├── README.md
 └── shared_modules
     └── process_patient_data.py
@@ -119,7 +115,7 @@ This project uses [Git LFS](https://git-lfs.github.com/) for managing large file
 
 ## Components Description
 
-### User Interface (UI)
+### User Interface (UI) - FLASK
 
 - **Files:**
 
@@ -129,7 +125,7 @@ This project uses [Git LFS](https://git-lfs.github.com/) for managing large file
 
   - **sockets.py:** Manages WebSocket communication with Kafka consumers, emitting real-time alerts and data updates to connected clients.
 
-  - **db.py:** Provides helper functions to interact with the PostgreSQL database (e.g., retrieving patients, vitals, and alerts).
+  - **db.py:** Provides helper functions to interact with the PostgreSQL database.
 
   - **config.py:** Stores configuration variables for database connections, Kafka topics, and other environment settings.
 
@@ -148,17 +144,47 @@ This project uses [Git LFS](https://git-lfs.github.com/) for managing large file
       - **patient_chart.js:** Renders time-series health data charts using Chart.js on the patient detail view.
       - **patient_main.js:** Controls interactions and data loading specific to the patient detail page.
       - **ui.js:** Utility functions for rendering UI components like modals, loaders, or notifications.
-      - **utils.js:** Common helper functions used across multiple scripts (e.g., data formatting, AJAX helpers).
+      - **utils.js:** Common helper functions used across multiple scripts.
 
 
 ![UI-WireFrame](images/WireFrame.png)
 
 ## Database
-XXX
+
+- **Files:**
+
+  - **initial_population.py:** Generates an initial set of synthetic patients (100) using Synthea, and loads the resulting CSV files into the PostgreSQL database.
+
+  - **incremental_patient_loader.py:** Periodically generates new patients at fixed intervals and loads them into the database.
+
+  - **synthea-with-dependencies.jar:** Java application used to simulate realistic synthetic patient data including demographics, conditions, encounters, and observations.
+
+  - **init/**
+    - **01_init.sql:** SQL script that initializes the PostgreSQL schema and creates all necessary tables for the project.
+
 ## Kafka
-XXX
-## Flask
-XXX
+
+- **Files:**
+
+  - **smart_data_producer.py:** Continuously generates smart home sensor data for every patient and publishes it to the `smart_home_data` Kafka topic for real-time UI updates.
+
+  - **risk_level_producer.py:** Reads patient vital signs and associated risk levels from the database and publishes them to the `risk_alerts` Kafka topic, triggering alerts in the UI when necessary.
+
+## ML Model
+
+- **Files:**
+
+  - **train_model.py:** Main script that processes patient observation data, trains a regression model to estimate patient health risk, and calculates individual risk levels for each patient. It stores both the trained model and scalers for future use, and inserts the resulting risk scores into the `vital_signs` table of the database.
+
+  - **train_loop.py:** Script that repeatedly checks for new patient data at fixed intervals. If new patients are detected, it retrains the model to ensure predictions remain up-to-date.
+
+  - **entrypoint.sh:** Shell script used to initialize the training container, it removes all the files in the output folder.
+
+  - **process_patient_data.py:** Extracts and processes raw clinical observation data from the database, simulates missing features (e.g., body temperature, SpO2, GSR), and optionally applies a trained ML model to predict individual patient health risk scores. Returns a cleaned and enriched dataset ready for storage or further analysis.
+
+
+
+
 
 ## Data Sources:
 [Synthetic Patient Population Simulator](https://github.com/synthetichealth/synthea)
