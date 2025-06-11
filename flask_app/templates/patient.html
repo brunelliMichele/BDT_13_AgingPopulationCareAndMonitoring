@@ -155,7 +155,7 @@
                         <td class="px-4 py-2 {% if row.hr < 60 or row.hr > 100 %}bg-red-100 text-red-700 font-bold{% endif %}">{{ row.hr }}</td>
                         <td class="px-4 py-2 {% if row.rr < 12 or row.rr > 20 %}bg-red-100 text-red-700 font-bold{% endif %}">{{ row.rr }}</td>
                         <td class="px-4 py-2 {% if row.body_temperature < 36.0 or row.body_temperature > 38.0 %}bg-red-100 text-red-700 font-bold{% endif %}">{{ row.body_temperature }}</td>
-                        <td class="px-4 py-2 {% if row.spo2 < 95 %}bg-red-100 text-red-700 font-bold{% endif %}">{{ row.spo2 }}</td>
+                        <td class="px-4 py-2 {% if row.spo2 >= 95 %}bg-red-100 text-red-700 font-bold{% endif %}">{{ row.spo2 }}</td>
                         <td class="px-4 py-2 {% if row.gsr < 1.5 or row.gsr > 5.5 %}bg-red-100 text-red-700 font-bold{% endif %}">{{ row.gsr }}</td>
                         <td class="px-4 py-2">{{ row.risk_level }}</td>
                         </tr>
