@@ -7,11 +7,14 @@ import pandas as pd
 from sqlalchemy import create_engine, text, Table, MetaData
 from sqlalchemy.dialects.postgresql import insert
 import sys
+
+# add '/shared' directory to allow importing shared modules
 sys.path.append("/shared")
 from process_patient_data import process_observations
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
+# wait two minutes to start if set to 'true'
 if os.getenv("DELAY_STARTUP", "false").lower() == "true":
     time.sleep(120)  # delay 2 minutes
 
@@ -26,15 +29,18 @@ DB_USER = os.getenv("DB_USER", "user")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "password")
 DB_URL = f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
+# create SQLAlchemy database engine
 engine = create_engine(DB_URL)
 
 # === FUNCTIONS ===
+# return the time range for the current hour to tag patient generation sessions.
 def today_range():
     now = datetime.now(timezone.utc)
     start = now.replace(minute=0, second=0, microsecond=0)
     stop = start + timedelta(hours=1)
     return start.isoformat(), stop.isoformat()
 
+# load a synthea generated csv into a table in the db
 def load_csv_to_db(filename, table_name):
     path = os.path.join(SYNTHEA_DIR, "output", "csv", filename)
     if not os.path.exists(path):
@@ -45,6 +51,7 @@ def load_csv_to_db(filename, table_name):
         return
     df.to_sql(table_name, con=engine, if_exists="append", index=False)
 
+# get the last generated patients
 def get_new_patient_ids():
     path = os.path.join(SYNTHEA_DIR, "output", "csv", "patients.csv")
     if os.path.exists(path):
@@ -53,6 +60,7 @@ def get_new_patient_ids():
             return df["id"].dropna().unique().tolist()
     return []
 
+# add vital signs records to the db
 def insert_vital_signs(df):
     if df.empty:
         return
@@ -72,6 +80,7 @@ def insert_vital_signs(df):
                 rows_inserted += 1
     logging.info(f"✅ Inserted {rows_inserted} new rows into vital_signs.")
 
+# generate new patients with synthea, load the csv in the db, extract IDs to populate vital signs df
 def run_incremental_generation():
     start_time, stop_time = today_range()
     logging.info(f"✚ Generate {PATIENTS} new patients from {start_time} to {stop_time}")
@@ -96,6 +105,7 @@ def run_incremental_generation():
 
 # === MAIN ===
 if __name__ == "__main__":
+    # generate patients continuously at regular intervals
     while True:
         run_incremental_generation()
         logging.info(f"⏱️ Sleeping {INTERVAL} seconds before next patient...")
