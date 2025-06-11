@@ -112,6 +112,14 @@ This project uses [Git LFS](https://git-lfs.github.com/) for managing large file
     ```
     So rebuild and relaunch (1)
 
+## Data Sources:
+[Synthetic Patient Population Simulator](https://github.com/synthetichealth/synthea)
+- Open-source tool simulating *virtual patient lifespans* (birth to death) using clinical guidelines. 
+- Outputs structured data (FHIR, CSV) with demographics, diagnoses (ICD-10), meds (RxNorm), labs (LOINC), encounters, and social determinants.  
+- Generates massive datasets (millions of synthetic patients) for ML/AI training (e.g., predictive models, EHR interoperability testing) without privacy constraints
+- Customizable modules simulate diseases, regional trends, or rare conditions.  
+- Use API or export scripts to stream FHIR/JSON data directly into pipelines (e.g., Kafka, Flink) or cloud platforms (AWS Kinesis, GCP Pub/Sub). Enables real-time analytics, synthetic EHR testing, or digital twin simulations.  
+- Freely downloadable (GitHub)
 
 ## Components Description
 
@@ -147,7 +155,21 @@ This project uses [Git LFS](https://git-lfs.github.com/) for managing large file
       - **utils.js:** Common helper functions used across multiple scripts.
 
 
-![UI-WireFrame](images/WireFrame.png)
+![Home - Map and alerts list](images/map_and_alerts_list.png)
+*Figure 1: Dashboard home page showing map and alert notification history.*
+
+![Home - Patient list](images/patient_list.png)
+*Figure 2: Dashboard home page with patient list.*
+
+![Patient - Patient detail cards](images/patient_detail_cards.png)
+*Figure 3: Patient details page in the dashboard showing the selected patient details and the patient's smart home sensor data.*
+
+![Patient - Risk level graph](images/risk_level_chart.png)
+*Figure 4: Patient details page in the dashboard showing the risk level graph of the selected patient.*
+
+![Patient - Vital signs table](images/vital_signs_table.png)
+*Figure 5: Patient details page in the dashboard showing the vital signs table of the selected patient.*
+
 
 ## Database
 
@@ -184,19 +206,7 @@ This project uses [Git LFS](https://git-lfs.github.com/) for managing large file
 
 
 
-
-
-## Data Sources:
-[Synthetic Patient Population Simulator](https://github.com/synthetichealth/synthea)
-- Open-source tool simulating *virtual patient lifespans* (birth to death) using clinical guidelines. 
-- Outputs structured data (FHIR, CSV) with demographics, diagnoses (ICD-10), meds (RxNorm), labs (LOINC), encounters, and social determinants.  
-- Generates massive datasets (millions of synthetic patients) for ML/AI training (e.g., predictive models, EHR interoperability testing) without privacy constraints
-- Customizable modules simulate diseases, regional trends, or rare conditions.  
-- Use API or export scripts to stream FHIR/JSON data directly into pipelines (e.g., Kafka, Flink) or cloud platforms (AWS Kinesis, GCP Pub/Sub). Enables real-time analytics, synthetic EHR testing, or digital twin simulations.  
-- Freely downloadable (GitHub)
-
-
-### Authors
+## Authors
 This project was created by group 13, consisting of:
  - Luca Frank - [@Luca-Frank](https://github.com/Luca-Frank)
  - Antonio Mazzarello - [@Mazza00](https://github.com/Mazza00)
