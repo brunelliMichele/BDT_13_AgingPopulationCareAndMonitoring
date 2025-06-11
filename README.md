@@ -4,18 +4,26 @@
 # Project Requirements
 ## Description 
 This repository contains the Caregiver Assistance and Remote Elderly Supervision (CARES) System developed by group 13. The project aims to assist caregivers and healthcare providers in supporting the elderly, by collecting data from smart home sensors, medical records and wearable health monitors. Real-time analytics are constantly sift through LSTM model to detect changes in daily routines and health indicators, triggering alerts for potential emergencies. 
+
 ## Abstract
 XXX
 
 ## Technologies used
+
 - **PostgreSQL:** RDMS used to implement databases to store the raw and processed medical data and smart home sensors data;
 - **Apache Kafka:** Used to implement publish/subscribe model, specifying the topic within the data pipeline and connecting the different components of the system;
-- **Docker + Docker Compose:** Multiple containers singularly developed in Docker are orchestrated and managed together in Docker Compose
-- **Flask:** Python framework used to develop User Interface. The subject can see in real-time the activities of sensors and the current and past clinical conditions of the elderly patient, along with potential alerts and the actual health risk.
+- **Docker + Docker Compose:** Multiple containers singularly developed in Docker are orchestrated and managed together in Docker Compose;
+- **Flask:** Python framework used to develop the backend and API for the User Interface. The subject can see in real-time the activities of sensors and the current and past clinical conditions of the elderly patient, along with potential alerts and the actual health risk;
+- **WebSocket (via Flask-SocketIO):** Enables real-time communication between backend and frontend for immediate delivery of alerts and live sensor updates.
+- **JavaScript (Vanilla JS, Chart.js, Leaflet):** Used to build a responsive frontend interface, visualize patient data over time (Chart.js), and display geographical information such as patient or alert locations (Leaflet);
+- **Tailwind CSS:** Utility-first CSS framework used to design a clean, responsive, and customizable user interface for the dashboard and alert visualization.
+
+## System Architecture
 
 ![System Architecture](images/system_architecture.png)
 
 ## Project Structure
+
 The repository is organized as follows:
 
 ```
@@ -44,12 +52,6 @@ The repository is organized as follows:
 │   └── templates
 │       ├── index.html
 │       └── patient.html
-├── images
-│   ├── system_architecture.drawio
-│   ├── system_architecture.drawio.svg
-│   ├── system_architecture.png
-│   ├── WireFrame.drawio
-│   └── WireFrame.png
 ├── kafka
 │   ├── Dockerfile
 │   ├── house_data.json
