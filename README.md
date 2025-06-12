@@ -201,6 +201,10 @@ This project uses [Git LFS](https://git-lfs.github.com/) for managing large file
 
   - **process_patient_data.py:** Extracts and processes raw clinical observation data from the database, simulates missing features (e.g., body temperature, SpO2, GSR), and optionally applies a trained ML model to predict individual patient health risk scores. Returns a cleaned and enriched dataset ready for storage or further analysis.
 
+## PostGres
+- **Files:**
+  - **incremental_patient_loader.py:** It periodically generates new patient data using Synthea. Then such data are loaded into a PostgreSQL database, and following vital signs and risk levels for each patient are calculated using a shared ML pipeline.
+  - **initial_population.py:** Script to run Synthea for generating synthetic patient data and load it into a PostgreSQL database. Configured parameters are used to populate the following tables: patients, observations, and conditions
 
 
 ## Authors
